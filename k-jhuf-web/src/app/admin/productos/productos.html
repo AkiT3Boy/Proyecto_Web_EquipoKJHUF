@@ -1,0 +1,57 @@
+<div class="container mt-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>Panel Admin - Productos</h3>
+    <button class="btn btn-success" (click)="mostrarForm = !mostrarForm">
+      + Agregar Producto
+    </button>
+  </div>
+
+  <!-- FORMULARIO -->
+  <form *ngIf="mostrarForm" (ngSubmit)="guardar()" class="card card-body mb-4">
+
+    <div class="mb-3">
+      <label>Nombre</label>
+      <input class="form-control" [(ngModel)]="producto.nombre" name="nombre" required>
+    </div>
+
+    <div class="mb-3">
+      <label>Descripción</label>
+      <textarea class="form-control" [(ngModel)]="producto.descripcion" name="descripcion"></textarea>
+    </div>
+
+    <div class="mb-3">
+      <label>Precio</label>
+      <input type="number" class="form-control" [(ngModel)]="producto.precio" name="precio">
+    </div>
+
+    <button class="btn btn-primary w-100">Guardar</button>
+
+  </form>
+
+  <!-- TABLA -->
+  <table class="table table-bordered table-hover">
+    <thead class="table-dark">
+      <tr>
+        <th>Nombre</th>
+        <th>Descripción</th>
+        <th>Precio</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let p of lista">
+        <td>{{ p.nombre }}</td>
+        <td>{{ p.descripcion }}</td>
+        <td>${{ p.precio }}</td>
+        <td>
+          <button class="btn btn-danger btn-sm" (click)="eliminar(p._id)">
+            Eliminar
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>

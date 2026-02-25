@@ -1,0 +1,32 @@
+<div class="container mt-4">
+  <h3>Nuevo Producto</h3>
+
+  <form (ngSubmit)="guardar()">
+
+    <div class="mb-3">
+      <label>Nombre</label>
+      <input class="form-control"
+             [(ngModel)]="producto.nombre"
+             name="nombre"
+             required>
+    </div>
+
+    <div class="mb-3">
+      <label>Descripción</label>
+      <textarea class="form-control"
+                [(ngModel)]="producto.descripcion"
+                name="descripcion"></textarea>
+    </div>
+
+    <div class="mb-3">
+      <label>Precio</label>
+      <input type="number"
+             class="form-control"
+             [(ngModel)]="producto.precio"
+             name="precio">
+    </div>
+
+    <button class="btn btn-primary w-100">Guardar</button>
+
+  </form>
+</div>
