@@ -7,32 +7,49 @@
     </button>
   </div>
 
-  <!-- FORMULARIO -->
   <form *ngIf="mostrarForm" (ngSubmit)="guardar()" class="card card-body mb-4">
 
     <div class="mb-3">
       <label>Nombre</label>
-      <input class="form-control" [(ngModel)]="producto.nombre" name="nombre" required>
+      <input class="form-control"
+             [(ngModel)]="producto.nombre"
+             name="nombre"
+             required>
     </div>
 
     <div class="mb-3">
       <label>Descripción</label>
-      <textarea class="form-control" [(ngModel)]="producto.descripcion" name="descripcion"></textarea>
+      <textarea class="form-control"
+                [(ngModel)]="producto.descripcion"
+                name="descripcion">
+      </textarea>
     </div>
 
     <div class="mb-3">
       <label>Precio</label>
-      <input type="number" class="form-control" [(ngModel)]="producto.precio" name="precio">
+      <input type="number"
+             class="form-control"
+             [(ngModel)]="producto.precio"
+             name="precio">
     </div>
 
-    <button class="btn btn-primary w-100">Guardar</button>
+    <div class="mb-3">
+      <label>Imagen (URL)</label>
+      <input class="form-control"
+             [(ngModel)]="producto.imagen"
+             name="imagen">
+    </div>
+
+    <button class="btn btn-primary w-100">
+      Guardar
+    </button>
 
   </form>
 
-  <!-- TABLA -->
   <table class="table table-bordered table-hover">
     <thead class="table-dark">
       <tr>
+        <th>Imagen</th>
         <th>Nombre</th>
         <th>Descripción</th>
         <th>Precio</th>
@@ -41,16 +58,34 @@
     </thead>
 
     <tbody>
+
       <tr *ngFor="let p of lista">
-        <td>{{ p.nombre }}</td>
-        <td>{{ p.descripcion }}</td>
-        <td>${{ p.precio }}</td>
+
         <td>
-          <button class="btn btn-danger btn-sm" (click)="eliminar(p._id)">
-            Eliminar
-          </button>
+          <img [src]="p.imagen || 'https://via.placeholder.com/100'"
+               width="80">
         </td>
+
+        <td>{{ p.nombre }}</td>
+
+        <td>{{ p.descripcion }}</td>
+
+        <td>${{ p.precio }}</td>
+
+        <td>
+       <button class="btn btn-warning btn-sm me-2"
+        (click)="editar(p)">
+        Editar
+       </button>
+
+        <button class="btn btn-danger btn-sm"
+        (click)="eliminar(p._id)">
+        Eliminar
+       </button>
+        </td>
+
       </tr>
+
     </tbody>
   </table>
 

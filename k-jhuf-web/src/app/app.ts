@@ -1,7 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+
 import { Navbar } from './shared/navbar/navbar';
 import { Footer } from './shared/footer/footer';
+
+import { ProductosService } from './services/productos';
 
 @Component({
   selector: 'app-root',
@@ -14,4 +17,13 @@ import { Footer } from './shared/footer/footer';
   templateUrl: './app.html',
   styleUrls: ['./app.css']
 })
-export class AppComponent { }
+export class AppComponent implements OnInit {
+
+  constructor(private productosService: ProductosService){}
+
+  ngOnInit(){
+    // precargar productos para que la navegación sea rápida
+    this.productosService.getProductos().subscribe();
+  }
+
+}

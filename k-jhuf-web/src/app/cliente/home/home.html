@@ -1,1 +1,135 @@
-<p>home works!</p>
+<!-- SKELETON -->
+
+<div *ngIf="loading" class="skeleton-container">
+
+<div class="skeleton-card" *ngFor="let s of [1,2,3,4,5,6,7,8]"></div>
+
+</div>
+
+
+<div *ngIf="!loading">
+
+
+<!-- BANNER -->
+
+<div class="banner">
+
+<img
+[src]="banner"
+class="banner-img">
+
+<div class="banner-content">
+
+<h1>K-JHUF STORE</h1>
+
+<h2>Las mejores ofertas en tecnología</h2>
+
+</div>
+
+</div>
+
+
+<div class="container main-home">
+
+
+<!-- PROMOCIONES + POPULARES -->
+
+<div class="row">
+
+
+<div class="col-md-6">
+
+<h3>🔥 Ofertas con promoción</h3>
+
+<div class="products-small">
+
+<div
+class="card-product"
+*ngFor="let p of promociones; trackBy:trackById">
+
+<img [src]="p.imagen" loading="lazy">
+
+<h6>{{p.nombre}}</h6>
+
+<span class="old-price">${{p.precio}}</span>
+
+<h5 class="discount">${{precioFinal(p)}}</h5>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<div class="col-md-6">
+
+<h3>⭐ Productos populares</h3>
+
+<div class="products-small">
+
+<div
+class="card-product"
+*ngFor="let p of populares; trackBy:trackById">
+
+<img [src]="p.imagen" loading="lazy">
+
+<h6>{{p.nombre}}</h6>
+
+<h5 *ngIf="!p.promocion">${{p.precio}}</h5>
+
+<h5 class="discount" *ngIf="p.promocion">
+
+${{precioFinal(p)}}
+
+</h5>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<h3 class="title-section">
+Seguro que te gusta
+</h3>
+
+
+<div class="products-grid">
+
+<div
+class="card-product"
+*ngFor="let p of productos; trackBy:trackById">
+
+<img [src]="p.imagen" loading="lazy">
+
+<h6>{{p.nombre}}</h6>
+
+
+<h5 *ngIf="!p.promocion">
+${{p.precio}}
+</h5>
+
+
+<div *ngIf="p.promocion">
+
+<span class="old-price">
+${{p.precio}}
+</span>
+
+<h5 class="discount">
+${{precioFinal(p)}}
+</h5>
+
+</div>
+
+</div>
+
+
+
+</div>

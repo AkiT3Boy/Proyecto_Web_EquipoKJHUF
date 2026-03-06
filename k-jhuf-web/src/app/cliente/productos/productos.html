@@ -1,32 +1,85 @@
 <div class="container mt-4">
-  <h3>Nuevo Producto</h3>
 
-  <form (ngSubmit)="guardar()">
+<h2 class="text-center mb-4">Catálogo de Productos</h2>
 
-    <div class="mb-3">
-      <label>Nombre</label>
-      <input class="form-control"
-             [(ngModel)]="producto.nombre"
-             name="nombre"
-             required>
-    </div>
+<div class="row">
 
-    <div class="mb-3">
-      <label>Descripción</label>
-      <textarea class="form-control"
-                [(ngModel)]="producto.descripcion"
-                name="descripcion"></textarea>
-    </div>
+<div class="col-md-4 mb-4" *ngFor="let p of productos">
 
-    <div class="mb-3">
-      <label>Precio</label>
-      <input type="number"
-             class="form-control"
-             [(ngModel)]="producto.precio"
-             name="precio">
-    </div>
+<div class="card h-100">
 
-    <button class="btn btn-primary w-100">Guardar</button>
+<img [src]="p.imagen || 'https://via.placeholder.com/300'"
+class="card-img-top">
 
-  </form>
+<div class="card-body">
+
+<h5 class="card-title">
+{{p.nombre}}
+</h5>
+
+<p class="card-text">
+{{p.descripcion}}
+</p>
+
+<!-- PRECIO NORMAL -->
+<h4 class="text-success" *ngIf="!p.promocion">
+${{p.precio}}
+</h4>
+
+<!-- PRECIO CON PROMOCION -->
+
+<div *ngIf="p.promocion">
+
+<span style="text-decoration: line-through; color: gray;">
+${{p.precio}}
+</span>
+
+<h4 class="text-danger">
+${{precioFinal(p)}}
+</h4>
+
+</div>
+
+<!-- ETIQUETAS DE PROMOCION -->
+
+<span class="badge bg-danger"
+*ngIf="p.promocion?.tipo=='porcentaje'">
+
+{{p.promocion.valor}}% OFF
+
+</span>
+
+<span class="badge bg-success"
+*ngIf="p.promocion?.tipo=='precio'">
+
+Precio especial
+
+</span>
+
+<span class="badge bg-warning"
+*ngIf="p.promocion?.tipo=='2x1'">
+
+2x1
+
+</span>
+
+<span class="badge bg-primary"
+*ngIf="p.promocion?.tipo=='combo'">
+
+Combo
+
+</span>
+
+<button class="btn btn-primary w-100 mt-2">
+Comprar
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
 </div>

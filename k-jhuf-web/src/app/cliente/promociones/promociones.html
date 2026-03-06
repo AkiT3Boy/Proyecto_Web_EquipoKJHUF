@@ -1,1 +1,44 @@
-<p>promociones works!</p>
+<div class="container mt-4">
+
+<h2 class="text-center mb-4">
+Promociones
+</h2>
+
+<div class="row">
+
+<div class="col-md-4 mb-4"
+*ngFor="let p of promociones">
+
+<div class="card text-center p-3">
+
+<h4>
+{{p.titulo}}
+</h4>
+
+<p>
+{{p.descripcion}}
+</p>
+
+<h3 class="text-danger" *ngIf="p.tipo=='porcentaje'">
+{{p.valor}}% OFF
+</h3>
+
+<h3 class="text-success" *ngIf="p.tipo=='precio'">
+Precio especial ${{p.valor}}
+</h3>
+
+<h3 class="text-warning" *ngIf="p.tipo=='2x1'">
+Promoción 2x1
+</h3>
+
+<h3 class="text-primary" *ngIf="p.tipo=='combo'">
+Promoción Combo
+</h3>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
