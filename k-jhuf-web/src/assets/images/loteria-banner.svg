@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" width="1200" height="600">
+  <defs>
+    <!-- Gradientes para colores vibrantes -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#f7931e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ff4757;stop-opacity:1" />
+    </linearGradient>
+
+    <linearGradient id="cardGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.95" />
+      <stop offset="100%" style="stop-color:#f8f9fa;stop-opacity:0.9" />
+    </linearGradient>
+
+    <!-- Sombras -->
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="rgba(0,0,0,0.3)"/>
+    </filter>
+  </defs>
+
+  <!-- Fondo con gradiente -->
+  <rect width="1200" height="600" fill="url(#bgGradient)"/>
+
+  <!-- Patrón de puntos decorativos -->
+  <g opacity="0.1">
+    <circle cx="100" cy="100" r="3" fill="white"/>
+    <circle cx="300" cy="150" r="2" fill="white"/>
+    <circle cx="500" cy="80" r="4" fill="white"/>
+    <circle cx="700" cy="120" r="2" fill="white"/>
+    <circle cx="900" cy="90" r="3" fill="white"/>
+    <circle cx="1100" cy="160" r="2" fill="white"/>
+  </g>
+
+  <!-- Elementos principales -->
+  <g transform="translate(100, 150)">
+    <!-- Carta de lotería grande -->
+    <rect x="0" y="0" width="200" height="280" rx="20" ry="20" fill="url(#cardGradient)" filter="url(#shadow)" stroke="#e74c3c" stroke-width="3"/>
+
+    <!-- Imagen de la carta (El Gallo) -->
+    <circle cx="100" cy="80" r="35" fill="#e74c3c"/>
+    <text x="100" y="88" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="24" font-weight="bold">🐔</text>
+    <text x="100" y="130" text-anchor="middle" fill="#2c3e50" font-family="Arial, sans-serif" font-size="14" font-weight="bold">EL GALLO</text>
+
+    <!-- Elementos decorativos de la carta -->
+    <rect x="20" y="150" width="160" height="2" fill="#e74c3c"/>
+    <rect x="20" y="170" width="120" height="2" fill="#f39c12"/>
+    <rect x="20" y="190" width="140" height="2" fill="#e74c3c"/>
+    <rect x="20" y="210" width="100" height="2" fill="#f39c12"/>
+    <rect x="20" y="230" width="130" height="2" fill="#e74c3c"/>
+  </g>
+
+  <!-- Snacks tradicionales -->
+  <g transform="translate(400, 200)">
+    <!-- Tacos -->
+    <g transform="translate(0, 0)">
+      <ellipse cx="30" cy="40" rx="25" ry="8" fill="#8B4513"/>
+      <rect x="10" y="35" width="40" height="15" rx="2" fill="#228B22"/>
+      <rect x="15" y="30" width="30" height="8" rx="1" fill="#FF6347"/>
+      <text x="30" y="75" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">TACOS</text>
+    </g>
+
+    <!-- Quesadillas -->
+    <g transform="translate(100, 0)">
+      <ellipse cx="30" cy="40" rx="25" ry="6" fill="#F4A460"/>
+      <rect x="10" y="35" width="40" height="12" rx="2" fill="#FFD700"/>
+      <rect x="15" y="30" width="30" height="6" rx="1" fill="#228B22"/>
+      <text x="30" y="75" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">QUESADILLAS</text>
+    </g>
+
+    <!-- Tamales -->
+    <g transform="translate(200, 0)">
+      <rect x="15" y="35" width="30" height="20" rx="2" fill="#8B4513"/>
+      <rect x="10" y="30" width="40" height="8" rx="2" fill="#228B22"/>
+      <text x="30" y="75" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">TAMALES</text>
+    </g>
+
+    <!-- Enchiladas -->
+    <g transform="translate(300, 0)">
+      <ellipse cx="30" cy="40" rx="25" ry="8" fill="#DC143C"/>
+      <rect x="10" y="35" width="40" height="15" rx="2" fill="#228B22"/>
+      <rect x="15" y="30" width="30" height="8" rx="1" fill="#FFD700"/>
+      <text x="30" y="75" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">ENCHILADAS</text>
+    </g>
+  </g>
+
+  <!-- Texto principal -->
+  <g transform="translate(600, 250)">
+    <text x="0" y="0" fill="white" font-family="Arial, sans-serif" font-size="48" font-weight="bold" text-anchor="middle">
+      K-JHUF
+    </text>
+    <text x="0" y="60" fill="white" font-family="Arial, sans-serif" font-size="24" font-weight="300" text-anchor="middle">
+      Snacks Tradicionales
+    </text>
+    <text x="0" y="100" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="300" text-anchor="middle">
+      Sabor Auténtico Mexicano
+    </text>
+  </g>
+
+  <!-- Elementos decorativos adicionales -->
+  <g transform="translate(900, 100)">
+    <!-- Carta pequeña -->
+    <rect x="0" y="0" width="80" height="100" rx="8" ry="8" fill="url(#cardGradient)" filter="url(#shadow)" stroke="#e74c3c" stroke-width="2"/>
+    <circle cx="40" cy="35" r="15" fill="#f39c12"/>
+    <text x="40" y="42" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">🌶️</text>
+    <text x="40" y="70" text-anchor="middle" fill="#2c3e50" font-family="Arial, sans-serif" font-size="8" font-weight="bold">CHILE</text>
+  </g>
+
+  <!-- Patrones decorativos -->
+  <g opacity="0.3">
+    <path d="M50,500 Q150,450 250,500 T450,500" stroke="white" stroke-width="2" fill="none"/>
+    <path d="M750,500 Q850,450 950,500 T1150,500" stroke="white" stroke-width="2" fill="none"/>
+  </g>
+</svg>

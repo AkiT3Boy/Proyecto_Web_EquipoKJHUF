@@ -1,85 +1,50 @@
-<div class="container mt-4">
+<div class="container">
 
-<h2 class="text-center mb-4">Catálogo de Productos</h2>
+  <h1 class="page-title">🍽️ Catálogo de Productos</h1>
 
-<div class="row">
+  <div class="products-grid">
 
-<div class="col-md-4 mb-4" *ngFor="let p of productos">
+    <div class="card h-100" *ngFor="let p of productos; trackBy: trackById">
 
-<div class="card h-100">
+      <img [src]="p.imagen || 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=400'"
+           class="card-img-top"
+           [alt]="p.nombre">
 
-<img [src]="p.imagen || 'https://via.placeholder.com/300'"
-class="card-img-top">
+      <!-- Promotion Badge -->
+      <div class="promotion-badge" *ngIf="p.promocion">
+        <span *ngIf="p.promocion?.tipo=='porcentaje'">{{p.promocion.valor}}% OFF</span>
+        <span *ngIf="p.promocion?.tipo=='precio'">Precio Especial</span>
+        <span *ngIf="p.promocion?.tipo=='2x1'">2x1</span>
+        <span *ngIf="p.promocion?.tipo=='combo'">Combo</span>
+      </div>
 
-<div class="card-body">
+      <div class="card-body">
 
-<h5 class="card-title">
-{{p.nombre}}
-</h5>
+        <h5 class="card-title">{{p.nombre}}</h5>
 
-<p class="card-text">
-{{p.descripcion}}
-</p>
+        <p class="card-text">{{p.descripcion}}</p>
 
-<!-- PRECIO NORMAL -->
-<h4 class="text-success" *ngIf="!p.promocion">
-${{p.precio}}
-</h4>
+        <div class="price-section">
+          <!-- PRECIO NORMAL -->
+          <div *ngIf="!p.promocion">
+            <h4 class="price-regular">${{p.precio}}</h4>
+          </div>
 
-<!-- PRECIO CON PROMOCION -->
+          <!-- PRECIO CON PROMOCION -->
+          <div *ngIf="p.promocion">
+            <div class="price-discount">${{precioFinal(p)}}</div>
+            <div class="price-old">${{p.precio}}</div>
+          </div>
+        </div>
 
-<div *ngIf="p.promocion">
+        <button class="btn btn-primary">
+          🛒 Agregar al Carrito
+        </button>
 
-<span style="text-decoration: line-through; color: gray;">
-${{p.precio}}
-</span>
+      </div>
 
-<h4 class="text-danger">
-${{precioFinal(p)}}
-</h4>
+    </div>
 
-</div>
-
-<!-- ETIQUETAS DE PROMOCION -->
-
-<span class="badge bg-danger"
-*ngIf="p.promocion?.tipo=='porcentaje'">
-
-{{p.promocion.valor}}% OFF
-
-</span>
-
-<span class="badge bg-success"
-*ngIf="p.promocion?.tipo=='precio'">
-
-Precio especial
-
-</span>
-
-<span class="badge bg-warning"
-*ngIf="p.promocion?.tipo=='2x1'">
-
-2x1
-
-</span>
-
-<span class="badge bg-primary"
-*ngIf="p.promocion?.tipo=='combo'">
-
-Combo
-
-</span>
-
-<button class="btn btn-primary w-100 mt-2">
-Comprar
-</button>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
+  </div>
 
 </div>

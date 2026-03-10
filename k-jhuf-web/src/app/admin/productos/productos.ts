@@ -1,16 +1,21 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ProductosService } from '../../services/productos';
+import { Auth } from '../../services/auth';
+import { ChangePasswordComponent } from '../change-password/change-password';
 
 @Component({
   selector: 'app-admin-productos',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ChangePasswordComponent],
   templateUrl: './productos.html',
   styleUrls: ['./productos.css']
 })
 export class AdminProductos implements OnInit {
+
+  @ViewChild(ChangePasswordComponent) changePasswordModal!: ChangePasswordComponent;
 
   lista: any[] = [];
   mostrarForm = false;
@@ -23,7 +28,11 @@ export class AdminProductos implements OnInit {
     imagen: ''
   };
 
-  constructor(private productosService: ProductosService) {}
+  constructor(
+    private productosService: ProductosService,
+    private authService: Auth,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.cargarProductos();
@@ -34,6 +43,17 @@ export class AdminProductos implements OnInit {
       next: data => this.lista = data,
       error: err => console.error(err)
     });
+  }
+
+  openChangePasswordModal(): void {
+    this.changePasswordModal.open();
+  }
+
+  logout(): void {
+    if (confirm('¿Estás seguro que deseas cerrar sesión?')) {
+      this.authService.logout();
+      this.router.navigate(['/admin/login']);
+    }
   }
 
  guardar(){
@@ -123,6 +143,10 @@ export class AdminProductos implements OnInit {
 
     }
 
+  }
+
+  trackById(index: number, item: any): any {
+    return item._id;
   }
 
 }

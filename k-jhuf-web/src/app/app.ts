@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { HttpClientModule } from '@angular/common/http';
 
 import { Navbar } from './shared/navbar/navbar';
 import { Footer } from './shared/footer/footer';
@@ -11,6 +12,7 @@ import { ProductosService } from './services/productos';
   standalone: true,
   imports: [
     RouterOutlet,
+    HttpClientModule,
     Navbar,
     Footer
   ],

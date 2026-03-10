@@ -83,4 +83,8 @@ export class Productos implements OnInit {
 
   }
 
+  trackById(index: number, item: any): any {
+    return item._id;
+  }
+
 }

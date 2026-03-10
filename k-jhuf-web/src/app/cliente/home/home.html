@@ -1,135 +1,191 @@
-<!-- SKELETON -->
-
+<!-- Loading Skeleton -->
 <div *ngIf="loading" class="skeleton-container">
-
-<div class="skeleton-card" *ngFor="let s of [1,2,3,4,5,6,7,8]"></div>
-
+  <div class="skeleton-hero"></div>
+  <div class="container">
+    <div class="skeleton-section">
+      <div class="skeleton-title"></div>
+      <div class="skeleton-grid">
+        <div class="skeleton-card" *ngFor="let c of [1,2,3,4]"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
+<!-- Main Content -->
+<div *ngIf="!loading" class="home-page">
 
-<div *ngIf="!loading">
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-background">
+      <img [src]="banner" alt="K-JHUF Snacks - Tradición Mexicana" class="hero-image" loading="eager">
+      <div class="hero-overlay"></div>
+    </div>
+    <div class="hero-content">
+      <div class="container">
+        <div class="hero-text">
+          <h1 class="hero-title animate-slide-up">
+            <span class="brand-highlight">K-JHUF</span>
+            <span class="brand-subtitle">Snacks</span>
+          </h1>
+          <p class="hero-description animate-slide-up">
+            El menú completo de antojitos mexicanos tradicionales
+          </p>
+          <div class="hero-actions animate-slide-up">
+            <a routerLink="/cliente/productos" class="btn btn-primary btn-lg">
+              <i class="fas fa-utensils"></i>
+              Ver Menú Completo
+            </a>
+            <a routerLink="/cliente/contacto" class="btn btn-outline-primary btn-lg">
+              <i class="fas fa-map-marker-alt"></i>
+              Ubicación
+            </a>
+          </div>
+        </div>
+        <div class="hero-stats animate-slide-right">
+          <div class="stat-item">
+            <div class="stat-number">27+</div>
+            <div class="stat-label">Productos</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">100%</div>
+            <div class="stat-label">Mexicano</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">24/7</div>
+            <div class="stat-label">Disponible</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
+  <!-- Features Section -->
+  <section class="features-section">
+    <div class="container">
+      <div class="section-header text-center">
+        <h2 class="section-title">¿Por qué elegir K-JHUF?</h2>
+        <p class="section-subtitle">Tradición, calidad y sabor en cada bocado</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card animate-fade-in">
+          <div class="feature-icon">
+            <i class="fas fa-leaf"></i>
+          </div>
+          <h3>Ingredientes Frescos</h3>
+          <p>Utilizamos solo los mejores ingredientes frescos y tradicionales</p>
+        </div>
+        <div class="feature-card animate-fade-in">
+          <div class="feature-icon">
+            <i class="fas fa-clock"></i>
+          </div>
+          <h3>Rápido y Caliente</h3>
+          <p>Preparados al momento para mantener el sabor auténtico</p>
+        </div>
+        <div class="feature-card animate-fade-in">
+          <div class="feature-icon">
+            <i class="fas fa-heart"></i>
+          </div>
+          <h3>Hecho con Amor</h3>
+          <p>Cada platillo es preparado con pasión y dedicación</p>
+        </div>
+        <div class="feature-card animate-fade-in">
+          <div class="feature-icon">
+            <i class="fas fa-star"></i>
+          </div>
+          <h3>Calidad Premium</h3>
+          <p>Estándares altos en cada paso del proceso</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-<!-- BANNER -->
+  <!-- Promociones Section -->
+  <section class="products-section" *ngIf="promociones.length > 0">
+    <div class="container">
+      <div class="section-header text-center">
+        <h2 class="section-title">Ofertas Especiales</h2>
+        <p class="section-subtitle">¡Aprovecha nuestros descuentos!</p>
+      </div>
+      <div class="products-grid-full">
+        <div class="product-card animate-slide-left"
+             *ngFor="let p of promociones; trackBy:trackById">
+          <div class="product-image">
+            <img [src]="p.imagen" [alt]="p.nombre" loading="lazy">
+            <div class="product-badge">
+              <i class="fas fa-fire"></i>
+              Oferta
+            </div>
+          </div>
+          <div class="product-content">
+            <h4 class="product-title">{{p.nombre}}</h4>
+            <p class="product-description">{{ p.descripcion || 'Producto de calidad' }}</p>
+            <div class="product-pricing">
+              <span class="original-price">${{p.precio}}</span>
+              <span class="discount-price">${{precioFinal(p)}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-<div class="banner">
+  <!-- Todos los Productos -->
+  <section class="all-products-section">
+    <div class="container">
+      <div class="section-header text-center">
+        <h2 class="section-title">Nuestro Menú Completo</h2>
+        <p class="section-subtitle">Todos nuestros deliciosos productos</p>
+      </div>
+      <div class="products-grid-full">
+        <div class="product-card animate-fade-in"
+             *ngFor="let p of populares; trackBy:trackById">
+          <div class="product-image">
+            <img [src]="p.imagen" [alt]="p.nombre" loading="lazy">
+            <div class="product-badge popular" *ngIf="!p.promocion">
+              <i class="fas fa-star"></i>
+              Destacado
+            </div>
+            <div class="product-badge discount" *ngIf="p.promocion">
+              <i class="fas fa-fire"></i>
+              En Oferta
+            </div>
+          </div>
+          <div class="product-content">
+            <h4 class="product-title">{{p.nombre}}</h4>
+            <p class="product-description">{{ p.descripcion || 'Producto auténtico' }}</p>
+            <div class="product-pricing">
+              <span class="current-price" [class.discount-price]="p.promocion">
+                ${{precioFinal(p)}}
+              </span>
+              <span class="original-price" *ngIf="p.promocion">${{p.precio}}</span>
+            </div>
+            <button class="btn btn-sm btn-primary" style="width: 100%; margin-top: 0.5rem;">
+              <i class="fas fa-shopping-cart"></i> Agregar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-<img
-[src]="banner"
-class="banner-img">
-
-<div class="banner-content">
-
-<h1>K-JHUF STORE</h1>
-
-<h2>Las mejores ofertas en tecnología</h2>
-
-</div>
-
-</div>
-
-
-<div class="container main-home">
-
-
-<!-- PROMOCIONES + POPULARES -->
-
-<div class="row">
-
-
-<div class="col-md-6">
-
-<h3>🔥 Ofertas con promoción</h3>
-
-<div class="products-small">
-
-<div
-class="card-product"
-*ngFor="let p of promociones; trackBy:trackById">
-
-<img [src]="p.imagen" loading="lazy">
-
-<h6>{{p.nombre}}</h6>
-
-<span class="old-price">${{p.precio}}</span>
-
-<h5 class="discount">${{precioFinal(p)}}</h5>
-
-</div>
-
-</div>
-
-</div>
-
-
-
-<div class="col-md-6">
-
-<h3>⭐ Productos populares</h3>
-
-<div class="products-small">
-
-<div
-class="card-product"
-*ngFor="let p of populares; trackBy:trackById">
-
-<img [src]="p.imagen" loading="lazy">
-
-<h6>{{p.nombre}}</h6>
-
-<h5 *ngIf="!p.promocion">${{p.precio}}</h5>
-
-<h5 class="discount" *ngIf="p.promocion">
-
-${{precioFinal(p)}}
-
-</h5>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-
-
-<h3 class="title-section">
-Seguro que te gusta
-</h3>
-
-
-<div class="products-grid">
-
-<div
-class="card-product"
-*ngFor="let p of productos; trackBy:trackById">
-
-<img [src]="p.imagen" loading="lazy">
-
-<h6>{{p.nombre}}</h6>
-
-
-<h5 *ngIf="!p.promocion">
-${{p.precio}}
-</h5>
-
-
-<div *ngIf="p.promocion">
-
-<span class="old-price">
-${{p.precio}}
-</span>
-
-<h5 class="discount">
-${{precioFinal(p)}}
-</h5>
-
-</div>
-
-</div>
-
-
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-content">
+        <h2>¿Listo para probar lo mejor de México?</h2>
+        <p>Ven y descubre por qué somos los favoritos de la ciudad</p>
+        <div class="cta-actions">
+          <a routerLink="/cliente/contacto" class="btn btn-primary btn-lg">
+            <i class="fas fa-phone"></i>
+            Contáctanos
+          </a>
+          <a href="tel:+525512345678" class="btn btn-outline-primary btn-lg">
+            <i class="fas fa-mobile-alt"></i>
+            Llamar Ahora
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
 
 </div>
