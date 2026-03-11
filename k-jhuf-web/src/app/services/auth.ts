@@ -2,13 +2,15 @@ import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
+import { environment } from '../../environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class Auth {
 
-  private apiUrl = 'http://localhost:3000/api/admin';
+  // API URL from environment configuration
+  private apiUrl = `${environment.apiUrl}/api/admin`;
   private authenticatedSubject = new BehaviorSubject<boolean>(false);
   public authenticated$ = this.authenticatedSubject.asObservable();
 
@@ -47,6 +49,11 @@ export class Auth {
 
   // Obtener estado de autenticación
   isAuthenticated(): boolean {
+    if (isPlatformBrowser(this.platformId)) {
+      const authenticated = localStorage.getItem('adminAuthenticated') === 'true';
+      this.authenticatedSubject.next(authenticated);
+      return authenticated;
+    }
     return this.authenticatedSubject.value;
   }
 

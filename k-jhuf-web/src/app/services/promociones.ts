@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, shareReplay } from 'rxjs';
+import { environment } from '../../environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PromocionesService {
 
-  private API = "http://localhost:3000/api/promociones";
+  private API = `${environment.apiUrl}/api/promociones`;
 
   private cachePromos$!: Observable<any[]>;
 

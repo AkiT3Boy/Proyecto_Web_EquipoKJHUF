@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Auth } from '../../services/auth';
+import { ModalService } from '../../services/modal';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-admin-login',
@@ -11,7 +13,7 @@ import { Auth } from '../../services/auth';
   templateUrl: './login.html',
   styleUrls: ['./login.css']
 })
-export class AdminLogin implements OnInit {
+export class AdminLogin implements OnInit, OnDestroy {
 
   password = '';
   confirmPassword = '';
@@ -20,14 +22,26 @@ export class AdminLogin implements OnInit {
   loading = false;
   error = '';
   success = '';
+  isModalVisible = false;
+  private subscription: Subscription = new Subscription();
 
   constructor(
     private authService: Auth,
-    private router: Router
+    private router: Router,
+    @Inject(ModalService) private modalService: ModalService
   ) {}
 
   ngOnInit(): void {
     this.checkPasswordConfigured();
+    
+    // Suscribirse a los cambios de visibilidad del modal
+    this.subscription = this.modalService.loginModalVisible$.subscribe(
+      (visible: boolean) => this.isModalVisible = visible
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 
   checkPasswordConfigured(): void {
@@ -38,6 +52,14 @@ export class AdminLogin implements OnInit {
       },
       error: (err) => console.error(err)
     });
+  }
+
+  closeModal(): void {
+    this.modalService.closeLoginModal();
+    this.error = '';
+    this.success = '';
+    this.password = '';
+    this.confirmPassword = '';
   }
 
   setupPassword(): void {
@@ -76,7 +98,11 @@ export class AdminLogin implements OnInit {
       },
       error: (err) => {
         this.loading = false;
-        this.error = err.error?.error || 'Error al configurar contraseña';
+        if (err.status === 0) {
+          this.error = 'Error de conexión con el servidor; verifica que el backend esté activo';
+        } else {
+          this.error = err.error?.error || 'Error al configurar contraseña';
+        }
       }
     });
   }
@@ -97,14 +123,20 @@ export class AdminLogin implements OnInit {
         this.loading = false;
         this.authService.setAuthenticated(true);
         this.success = '¡Bienvenido al panel de administración!';
+        this.password = '';
         
         setTimeout(() => {
-          this.router.navigate(['/admin']);
-        }, 1000);
+          this.closeModal();
+          this.router.navigate(['/admin/dashboard']);
+        }, 1500);
       },
       error: (err) => {
         this.loading = false;
-        this.error = err.error?.error || 'Contraseña incorrecta';
+        if (err.status === 0) {
+          this.error = 'Error de conexión con el servidor; verifica que el backend esté activo';
+        } else {
+          this.error = err.error?.error || 'Contraseña inválida';
+        }
       }
     });
   }
