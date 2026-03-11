@@ -1,37 +1,30 @@
-<div class="container mt-4">
+<section class="contacto-layout">
+  <article class="contacto-card contacto-card--primary">
+    <p class="label">Contacto</p>
+    <h1>Visitanos en Poza Rica</h1>
+    <p>
+      Si quieres visitarnos o pedir ubicacion, aqui te dejamos la direccion, el telefono y el mapa
+      para que llegues facil.
+    </p>
 
-<h2>Contacto</h2>
+    <div class="contacto-list">
+      <div class="contacto-item" *ngFor="let dato of datos">
+        <span>{{ dato.titulo }}</span>
+        <strong>{{ dato.valor }}</strong>
+      </div>
+    </div>
+  </article>
 
-<form>
-
-<div class="mb-3">
-
-<label>Nombre</label>
-
-<input class="form-control">
-
-</div>
-
-<div class="mb-3">
-
-<label>Email</label>
-
-<input class="form-control">
-
-</div>
-
-<div class="mb-3">
-
-<label>Mensaje</label>
-
-<textarea class="form-control"></textarea>
-
-</div>
-
-<button class="btn btn-primary">
-Enviar
-</button>
-
-</form>
-
-</div>
+  <article class="contacto-card contacto-card--map">
+    <iframe
+      [src]="mapaUrl"
+      width="100%"
+      height="100%"
+      style="border: 0"
+      loading="lazy"
+      allowfullscreen
+      referrerpolicy="no-referrer-when-downgrade"
+      title="Mapa de K-JHUF Snacks"
+    ></iframe>
+  </article>
+</section>

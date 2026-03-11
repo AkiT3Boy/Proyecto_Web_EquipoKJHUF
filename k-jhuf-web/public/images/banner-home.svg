@@ -1,0 +1,22 @@
+<svg width="1200" height="760" viewBox="0 0 1200 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="760" rx="48" fill="#F4D9DC"/>
+  <circle cx="936" cy="165" r="108" fill="#F8B39F" fill-opacity="0.62"/>
+  <circle cx="1088" cy="274" r="72" fill="#F39C7F" fill-opacity="0.48"/>
+  <circle cx="841" cy="571" r="118" fill="#F2C25B" fill-opacity="0.3"/>
+  <path d="M781 150C781 129.013 798.013 112 819 112H1124C1144.99 112 1162 129.013 1162 150V610C1162 630.987 1144.99 648 1124 648H819C798.013 648 781 630.987 781 610V150Z" fill="#F7E8EA"/>
+  <path d="M844 469C844 450.222 859.222 435 878 435H1064C1082.78 435 1098 450.222 1098 469V587C1098 605.778 1082.78 621 1064 621H878C859.222 621 844 605.778 844 587V469Z" fill="#7F6A6E"/>
+  <path d="M879 520C879 506.193 890.193 495 904 495H1040C1053.81 495 1065 506.193 1065 520V548C1065 561.807 1053.81 573 1040 573H904C890.193 573 879 561.807 879 548V520Z" fill="#F58B2B"/>
+  <text x="874" y="486" fill="#FFF7F1" font-family="Arial, Helvetica, sans-serif" font-size="32">preparado al momento</text>
+  <text x="873" y="549" fill="white" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700">Agregar al carrito</text>
+  <text x="881" y="415" fill="#FFF7F1" font-family="Georgia, serif" font-size="72" font-weight="700">$32</text>
+  <text x="883" y="362" fill="#FFF7F1" font-family="Arial, Helvetica, sans-serif" font-size="30">elotes</text>
+  <ellipse cx="934" cy="284" rx="112" ry="87" fill="#F4C55E"/>
+  <ellipse cx="934" cy="282" rx="93" ry="64" fill="#F7E0A9"/>
+  <circle cx="885" cy="257" r="16" fill="#F8B39F"/>
+  <circle cx="938" cy="244" r="15" fill="#E8D28E"/>
+  <circle cx="985" cy="271" r="14" fill="#F8B39F"/>
+  <circle cx="903" cy="304" r="15" fill="#E6A34F"/>
+  <circle cx="965" cy="311" r="16" fill="#D55241"/>
+  <circle cx="1012" cy="289" r="11" fill="#E9C65A"/>
+  <circle cx="860" cy="286" r="11" fill="#F0DCA0"/>
+</svg>

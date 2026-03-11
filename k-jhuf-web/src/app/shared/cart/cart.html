@@ -1,0 +1,63 @@
+<div class="cart-backdrop" *ngIf="abierto" (click)="cerrar()"></div>
+
+<aside class="cart-panel" [class.cart-panel--open]="abierto">
+  <div class="cart-panel__head">
+    <div>
+      <p class="cart-panel__label">Carrito</p>
+      <h2>Tu pedido</h2>
+    </div>
+    <button type="button" (click)="cerrar()">Cerrar</button>
+  </div>
+
+  <div class="cart-panel__body" *ngIf="items.length; else emptyTpl">
+    <article class="cart-item" *ngFor="let item of items">
+      <img [src]="item.imagen_url" [alt]="item.nombre" />
+      <div class="cart-item__info">
+        <strong>{{ item.nombre }}</strong>
+        <small>{{ item.promoResumen }}</small>
+        <div class="cart-item__controls">
+          <input
+            type="number"
+            min="1"
+            [ngModel]="item.cantidad"
+            (ngModelChange)="cambiarCantidad(item.producto_id, $event)"
+          />
+          <span>${{ item.precio | number: '1.0-0' }}</span>
+          <button type="button" (click)="eliminar(item.producto_id)">Quitar</button>
+        </div>
+      </div>
+    </article>
+
+    <div class="cart-form">
+      <label>
+        <span>Nombre</span>
+        <input [(ngModel)]="cliente" name="cliente" />
+      </label>
+
+      <label>
+        <span>Telefono</span>
+        <input [(ngModel)]="telefono" name="telefono" />
+      </label>
+
+      <label>
+        <span>Notas</span>
+        <textarea [(ngModel)]="notas" name="notas" rows="3"></textarea>
+      </label>
+    </div>
+  </div>
+
+  <div class="cart-panel__footer">
+    <strong>Total: ${{ total | number: '1.0-0' }}</strong>
+    <p class="cart-panel__message" *ngIf="mensaje">{{ mensaje }}</p>
+    <button type="button" [disabled]="!items.length || enviando" (click)="enviarPedido()">
+      {{ enviando ? 'Enviando...' : 'Confirmar pedido' }}
+    </button>
+  </div>
+</aside>
+
+<ng-template #emptyTpl>
+  <div class="cart-empty">
+    <strong>Tu carrito esta vacio.</strong>
+    <p>Agrega productos desde el menu o desde las ofertas del inicio.</p>
+  </div>
+</ng-template>

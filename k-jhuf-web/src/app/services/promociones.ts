@@ -1,49 +1,57 @@
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, shareReplay } from 'rxjs';
-import { environment } from '../../environment';
+import { Injectable } from '@angular/core';
+import { Observable, shareReplay, tap } from 'rxjs';
+import { Auth } from './auth';
+
+export type Promocion = {
+  _id?: string;
+  titulo: string;
+  descripcion: string;
+  tipo: 'porcentaje' | 'precio' | '2x1' | 'combo';
+  valor: number;
+  producto_ids: string[];
+  activo?: boolean;
+};
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
-export class PromocionesService {
+export class Promociones {
+  private readonly api = 'http://localhost:3000/api/promociones';
+  private promociones$?: Observable<Promocion[]>;
 
-  private API = `${environment.apiUrl}/api/promociones`;
+  constructor(
+    private readonly http: HttpClient,
+    private readonly auth: Auth,
+  ) {}
 
-  private cachePromos$!: Observable<any[]>;
-
-  constructor(private http: HttpClient) {}
-
-  // OBTENER PROMOCIONES (CACHE)
-  getPromociones(): Observable<any[]> {
-
-    if(!this.cachePromos$){
-
-      this.cachePromos$ = this.http
-        .get<any[]>(this.API)
-        .pipe(
-          shareReplay(1)
-        );
-
+  getPromociones(forceRefresh = false): Observable<Promocion[]> {
+    if (forceRefresh || !this.promociones$) {
+      this.promociones$ = this.http.get<Promocion[]>(this.api).pipe(shareReplay(1));
     }
 
-    return this.cachePromos$;
+    return this.promociones$;
   }
 
-  // CREAR PROMOCION
-  crearPromocion(data:any): Observable<any>{
-
-    this.cachePromos$ = undefined as any;
-
-    return this.http.post(this.API, data);
+  crearPromocion(data: Promocion): Observable<{ msg: string; _id: string }> {
+    return this.http.post<{ msg: string; _id: string }>(this.api, data, {
+      headers: this.auth.getAuthHeaders(),
+    }).pipe(tap(() => this.invalidateCache()));
   }
 
-  // ELIMINAR PROMOCION
-  eliminarPromocion(id:string): Observable<any>{
-
-    this.cachePromos$ = undefined as any;
-
-    return this.http.delete(`${this.API}/${id}`);
+  actualizarPromocion(id: string, data: Promocion): Observable<{ msg: string }> {
+    return this.http.put<{ msg: string }>(`${this.api}/${id}`, data, {
+      headers: this.auth.getAuthHeaders(),
+    }).pipe(tap(() => this.invalidateCache()));
   }
 
+  eliminarPromocion(id: string): Observable<{ msg: string }> {
+    return this.http.delete<{ msg: string }>(`${this.api}/${id}`, {
+      headers: this.auth.getAuthHeaders(),
+    }).pipe(tap(() => this.invalidateCache()));
+  }
+
+  private invalidateCache(): void {
+    this.promociones$ = undefined;
+  }
 }

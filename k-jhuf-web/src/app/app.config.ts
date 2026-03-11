@@ -1,20 +1,15 @@
-import { ApplicationConfig, isDevMode } from '@angular/core';
-import { provideRouter, withPreloading, PreloadAllModules } from '@angular/router';
+import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
-import { provideServiceWorker } from '@angular/service-worker';
+import { provideRouter } from '@angular/router';
+import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideRouter(
-      routes,
-      withPreloading(PreloadAllModules)
-    ),
+    provideBrowserGlobalErrorListeners(),
+    provideRouter(routes),
     provideHttpClient(),
-    provideServiceWorker('ngsw-worker.js', {
-      enabled: !isDevMode(),
-      registrationStrategy: 'registerWhenStable:30000'
-    })
-  ]
+    provideClientHydration(withEventReplay()),
+  ],
 };

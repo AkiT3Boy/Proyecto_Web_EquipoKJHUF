@@ -1,175 +1,38 @@
-<nav class="navbar" [class.scrolled]="isScrolled" [class.loading]="isLoading" [class.admin-authenticated]="isAdminAuthenticated" [class.collapsed]="navbarCollapsed">
-  <div class="navbar-container">
-    <!-- Logo -->
-    <div class="navbar-brand">
-      <a routerLink="/" class="brand-link">
-        <div class="brand-icon-wrapper">
-          <i class="fas fa-utensils brand-icon"></i>
-          <div class="brand-glow"></div>
-        </div>
-        <div class="brand-text-wrapper">
-          <span class="brand-text">K-JHUF</span>
-          <span class="brand-tagline">Snacks</span>
-        </div>
-        <div class="brand-sparkle">
-          <i class="fas fa-star"></i>
-        </div>
-      </a>
-    </div>
+<aside class="sidebar" [class.sidebar--open]="menuAbierto">
+  <button class="sidebar__toggle" type="button" (click)="toggleMenu()" aria-label="Abrir menu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
 
-    <!-- Desktop Menu -->
-    <div class="navbar-menu">
-      <ul class="navbar-nav">
-        <li class="nav-item">
-          <a routerLink="/" class="nav-link" routerLinkActive="active">
-            <i class="fas fa-home"></i>
-            <span>Inicio</span>
-            <div class="nav-indicator"></div>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a routerLink="/productos" class="nav-link" routerLinkActive="active">
-            <i class="fas fa-utensils"></i>
-            <span>Productos</span>
-            <div class="nav-indicator"></div>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a routerLink="/promociones" class="nav-link" routerLinkActive="active">
-            <i class="fas fa-fire"></i>
-            <span>Promociones</span>
-            <div class="nav-indicator"></div>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a routerLink="/contacto" class="nav-link" routerLinkActive="active">
-            <i class="fas fa-envelope"></i>
-            <span>Contacto</span>
-            <div class="nav-indicator"></div>
-          </a>
-        </li>
-        <!-- Show admin login link when not authenticated -->
-        <li class="nav-item" *ngIf="!isAdminAuthenticated">
-          <a routerLink="/admin/login" class="nav-link" routerLinkActive="active">
-            <i class="fas fa-shield-alt"></i>
-            <span>Admin</span>
-            <div class="nav-indicator"></div>
-          </a>
-        </li>
-      </ul>
+  <div class="sidebar__brand">
+    <span class="sidebar__dot"></span>
+    <div>
+      <a class="sidebar__title" routerLink="/" (click)="cerrarMenu()">K-JHUF</a>
+      <p class="sidebar__subtitle">Snacks premium</p>
     </div>
-
-    <!-- Admin Section -->
-    <div class="navbar-admin" *ngIf="isAdminAuthenticated">
-      <div class="admin-dropdown">
-        <button class="admin-btn" type="button" (click)="toggleAdminMenu()" [class.active]="adminMenuOpen">
-          <div class="admin-icon-wrapper">
-            <i class="fas fa-shield-alt"></i>
-            <div class="admin-pulse"></div>
-          </div>
-          <span>Admin</span>
-          <i class="fas fa-chevron-down" [class.rotated]="adminMenuOpen"></i>
-        </button>
-        <ul class="admin-menu" [class.show]="adminMenuOpen">
-          <li>
-            <a routerLink="/admin/dashboard" class="admin-link" (click)="closeAdminMenu()">
-              <i class="fas fa-tachometer-alt"></i>
-              <span>Dashboard</span>
-              <i class="fas fa-arrow-right link-arrow"></i>
-            </a>
-          </li>
-          <li>
-            <a routerLink="/admin/productos" class="admin-link" (click)="closeAdminMenu()">
-              <i class="fas fa-boxes"></i>
-              <span>Gestión Productos</span>
-              <i class="fas fa-arrow-right link-arrow"></i>
-            </a>
-          </li>
-          <li>
-            <a routerLink="/admin/promociones" class="admin-link" (click)="closeAdminMenu()">
-              <i class="fas fa-tags"></i>
-              <span>Gestión Promociones</span>
-              <i class="fas fa-arrow-right link-arrow"></i>
-            </a>
-          </li>
-          <li class="divider"></li>
-          <li>
-            <button class="admin-link logout-btn" (click)="logout()" [disabled]="isLoading">
-              <i class="fas fa-sign-out-alt"></i>
-              <span>{{ isLoading ? 'Cerrando...' : 'Cerrar Sesión' }}</span>
-              <i class="fas fa-arrow-right link-arrow"></i>
-            </button>
-          </li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- Mobile/Desktop Toggle -->
-    <button class="navbar-toggle" type="button" (click)="toggleNavbar()" [class.active]="mobileMenuOpen || navbarCollapsed">
-      <span class="toggle-line"></span>
-      <span class="toggle-line"></span>
-      <span class="toggle-line"></span>
-    </button>
   </div>
 
-  <!-- Mobile Menu -->
-  <div class="mobile-menu" [class.open]="mobileMenuOpen">
-    <ul class="mobile-nav">
-      <li class="mobile-nav-item">
-        <a routerLink="/" class="mobile-nav-link" routerLinkActive="active" (click)="closeMobileMenu()">
-          <i class="fas fa-home"></i>
-          <span>Inicio</span>
-        </a>
-      </li>
-      <li class="mobile-nav-item">
-        <a routerLink="/productos" class="mobile-nav-link" routerLinkActive="active" (click)="closeMobileMenu()">
-          <i class="fas fa-utensils"></i>
-          <span>Productos</span>
-        </a>
-      </li>
-      <li class="mobile-nav-item">
-        <a routerLink="/promociones" class="mobile-nav-link" routerLinkActive="active" (click)="closeMobileMenu()">
-          <i class="fas fa-fire"></i>
-          <span>Promociones</span>
-        </a>
-      </li>
-      <li class="mobile-nav-item">
-        <a routerLink="/contacto" class="mobile-nav-link" routerLinkActive="active" (click)="closeMobileMenu()">
-          <i class="fas fa-envelope"></i>
-          <span>Contacto</span>
-        </a>
-      </li>
-      <li class="mobile-nav-item" *ngIf="!isAdminAuthenticated">
-        <a routerLink="/admin/login" class="mobile-nav-link" routerLinkActive="active" (click)="closeMobileMenu()">
-          <i class="fas fa-shield-alt"></i>
-          <span>Admin</span>
-        </a>
-      </li>
-      <li class="mobile-nav-divider" *ngIf="isAdminAuthenticated"></li>
-      <li class="mobile-nav-item" *ngIf="isAdminAuthenticated">
-        <a routerLink="/admin/dashboard" class="mobile-nav-link admin-link" (click)="closeMobileMenu()">
-          <i class="fas fa-tachometer-alt"></i>
-          <span>Dashboard</span>
-        </a>
-      </li>
-      <li class="mobile-nav-item" *ngIf="isAdminAuthenticated">
-        <a routerLink="/admin/productos" class="mobile-nav-link admin-link" (click)="closeMobileMenu()">
-          <i class="fas fa-boxes"></i>
-          <span>Gestión Productos</span>
-        </a>
-      </li>
-      <li class="mobile-nav-item" *ngIf="isAdminAuthenticated">
-        <a routerLink="/admin/promociones" class="mobile-nav-link admin-link" (click)="closeMobileMenu()">
-          <i class="fas fa-tags"></i>
-          <span>Gestión Promociones</span>
-        </a>
-      </li>
-      <li class="mobile-nav-item" *ngIf="isAdminAuthenticated">
-        <button class="mobile-nav-link logout-btn" (click)="logout()" [disabled]="isLoading">
-          <i class="fas fa-sign-out-alt"></i>
-          <span>{{ isLoading ? 'Cerrando...' : 'Cerrar Sesión' }}</span>
-        </button>
-      </li>
-    </ul>
-  </div>
-</nav>
+  <nav class="sidebar__nav">
+    <a
+      *ngFor="let enlace of enlaces"
+      class="sidebar__link"
+      [routerLink]="enlace.ruta"
+      routerLinkActive="sidebar__link--active"
+      [routerLinkActiveOptions]="{ exact: enlace.ruta === '/' }"
+      (click)="cerrarMenu()"
+    >
+      {{ enlace.label }}
+    </a>
+  </nav>
+
+  <button class="sidebar__cart" type="button" (click)="abrirCarrito()">
+    Carrito
+    <span *ngIf="totalItems">{{ totalItems }}</span>
+  </button>
+
+  <a class="sidebar__admin" routerLink="/admin" routerLinkActive="sidebar__admin--active" (click)="cerrarMenu()">
+    <span class="sidebar__dot sidebar__dot--admin"></span>
+    Admin
+  </a>
+</aside>

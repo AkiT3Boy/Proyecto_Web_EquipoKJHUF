@@ -1,90 +1,83 @@
-import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ProductosService } from '../../services/productos';
-import { PromocionesService } from '../../services/promociones';
+import { Component, OnInit } from '@angular/core';
+import { catchError, forkJoin, of } from 'rxjs';
+import { ProductoVista, mapearProductosConPromociones } from '../../services/catalogo';
+import { Carrito } from '../../services/carrito';
+import { Producto, ProductosService } from '../../services/productos';
+import { Promocion, Promociones as PromocionesService } from '../../services/promociones';
+import { mezclarProductos, mezclarPromociones, PRODUCTOS_SEED, PROMOCIONES_SEED } from '../../services/seed-data';
+
+type CategoriaGrupo = {
+  nombre: string;
+  productos: ProductoVista[];
+};
 
 @Component({
   selector: 'app-productos',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './productos.html',
-  styleUrls: ['./productos.css']
+  styleUrls: ['./productos.css'],
 })
 export class Productos implements OnInit {
+  productos: ProductoVista[] = [];
+  categorias: CategoriaGrupo[] = [];
+  cargando = true;
 
-  productos: any[] = [];
-  promociones: any[] = [];
+  private readonly respaldo: Producto[] = PRODUCTOS_SEED;
+  private readonly promocionesRespaldo: Promocion[] = PROMOCIONES_SEED;
 
   constructor(
-    private productosService: ProductosService,
-    private promocionesService: PromocionesService
+    private readonly productosService: ProductosService,
+    private readonly promocionesService: PromocionesService,
+    private readonly carrito: Carrito,
   ) {}
 
   ngOnInit(): void {
-    this.cargarDatos();
-  }
-
-  cargarDatos() {
-
-    this.productosService.getProductos().subscribe({
-
-      next: (prods:any) => {
-
-        this.promocionesService.getPromociones().subscribe({
-
-          next: (promos:any) => {
-
-            this.productos = prods;
-            this.promociones = promos;
-
-            this.aplicarPromociones();
-
-          }
-
-        });
-
-      }
-
+    forkJoin({
+      productos: this.productosService.getProductos().pipe(catchError(() => of(this.respaldo))),
+      promociones: this.promocionesService
+        .getPromociones()
+        .pipe(catchError(() => of(this.promocionesRespaldo))),
+    }).subscribe(({ productos, promociones }) => {
+      const base = mezclarProductos(productos.length ? productos : this.respaldo);
+      const promos = mezclarPromociones(promociones.length ? promociones : this.promocionesRespaldo);
+      this.productos = mapearProductosConPromociones(base, promos);
+      this.categorias = this.agruparPorCategoria(this.productos);
+      this.cargando = false;
     });
-
   }
 
-  aplicarPromociones() {
-
-    this.productos.forEach(p => {
-
-      const promo = this.promociones.find(
-        pr => pr.producto_id == p._id
-      );
-
-      if(promo){
-        p.promocion = promo;
-      }
-
-    });
-
+  trackById(_: number, producto: ProductoVista): string {
+    return producto._id || producto.nombre;
   }
 
-  precioFinal(p:any){
+  agregarAlCarrito(producto: ProductoVista): void {
+    this.carrito.add(producto);
+  }
 
-    if(!p.promocion){
-      return p.precio;
+  onImageError(event: Event): void {
+    const target = event.target as HTMLImageElement | null;
+    if (!target) {
+      return;
     }
 
-    if(p.promocion.tipo === 'porcentaje'){
-      return p.precio - (p.precio * p.promocion.valor / 100);
-    }
-
-    if(p.promocion.tipo === 'precio'){
-      return p.promocion.valor;
-    }
-
-    return p.precio;
-
+    target.style.display = 'none';
   }
 
-  trackById(index: number, item: any): any {
-    return item._id;
-  }
+  private agruparPorCategoria(productos: ProductoVista[]): CategoriaGrupo[] {
+    const grupos = new Map<string, ProductoVista[]>();
 
+    for (const producto of productos) {
+      const categoria = producto.categoria || 'General';
+      const existentes = grupos.get(categoria) || [];
+      existentes.push(producto);
+      grupos.set(categoria, existentes);
+    }
+
+    return Array.from(grupos.entries()).map(([nombre, items]) => ({
+      nombre,
+      productos: items,
+    }));
+  }
 }

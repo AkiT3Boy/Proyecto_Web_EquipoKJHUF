@@ -1,44 +1,22 @@
-<div class="container mt-4">
+<section class="promo-hero">
+  <div>
+    <p class="label">Promociones</p>
+    <h1>Ofertas activas y aplicadas al menu.</h1>
+    <p>
+      Aqui ves las promociones que estan corriendo ahorita, cuanto bajan el precio y en que
+      productos aplican.
+    </p>
+  </div>
+</section>
 
-<h2 class="text-center mb-4">
-Promociones
-</h2>
-
-<div class="row">
-
-<div class="col-md-4 mb-4"
-*ngFor="let p of promociones">
-
-<div class="card text-center p-3">
-
-<h4>
-{{p.titulo}}
-</h4>
-
-<p>
-{{p.descripcion}}
-</p>
-
-<h3 class="text-danger" *ngIf="p.tipo=='porcentaje'">
-{{p.valor}}% OFF
-</h3>
-
-<h3 class="text-success" *ngIf="p.tipo=='precio'">
-Precio especial ${{p.valor}}
-</h3>
-
-<h3 class="text-warning" *ngIf="p.tipo=='2x1'">
-Promoción 2x1
-</h3>
-
-<h3 class="text-primary" *ngIf="p.tipo=='combo'">
-Promoción Combo
-</h3>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
+<section class="promo-grid">
+  <article class="promo-card" *ngFor="let promo of promociones">
+    <p class="promo-card__type">{{ promo.tipo }}</p>
+    <h2>{{ promo.titulo }}</h2>
+    <p>{{ promo.descripcion }}</p>
+    <strong>{{ promo.etiquetaValor }}</strong>
+    <small *ngIf="promo.productosRelacionados.length">
+      Aplica a: {{ promo.productosRelacionados.join(', ') }}
+    </small>
+  </article>
+</section>

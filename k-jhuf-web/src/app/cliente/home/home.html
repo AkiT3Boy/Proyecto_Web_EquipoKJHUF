@@ -1,191 +1,117 @@
-<!-- Loading Skeleton -->
-<div *ngIf="loading" class="skeleton-container">
-  <div class="skeleton-hero"></div>
-  <div class="container">
-    <div class="skeleton-section">
-      <div class="skeleton-title"></div>
-      <div class="skeleton-grid">
-        <div class="skeleton-card" *ngFor="let c of [1,2,3,4]"></div>
-      </div>
+<section class="promo-banner" *ngIf="productoPrincipal as hero">
+  <div class="promo-banner__copy">
+    <p class="promo-banner__eyebrow">Bienvenido a K-JHUF</p>
+    <h1>Snacks con ofertas reales y fotos de tu base de datos</h1>
+    <p class="promo-banner__phrase">{{ fraseActual }}</p>
+    <p class="promo-banner__desc">
+      Aqui te mostramos lo mas pedido del dia, con fotos y promociones reales. {{ hero.nombre }}
+      lleva {{ resumenIngredientes(hero) }} y se prepara asi: {{ hero.descripcion }}
+    </p>
+
+    <div class="promo-banner__codes">
+      <article class="promo-code" *ngFor="let producto of ofertas.slice(0, 3)">
+        <strong>{{ producto.resumenPromo }}</strong>
+        <span>{{ producto.nombre }}</span>
+        <small>Lleva {{ resumenIngredientes(producto, 2) }}</small>
+        <small>Detalle: {{ resumenDetalles(producto, 1) }}</small>
+      </article>
     </div>
   </div>
-</div>
 
-<!-- Main Content -->
-<div *ngIf="!loading" class="home-page">
-
-  <!-- Hero Section -->
-  <section class="hero-section">
-    <div class="hero-background">
-      <img [src]="banner" alt="K-JHUF Snacks - Tradición Mexicana" class="hero-image" loading="eager">
-      <div class="hero-overlay"></div>
+  <div class="promo-banner__hero">
+    <img class="promo-banner__backdrop" [src]="imagenBanner" alt="Banner de K-JHUF Snacks" />
+    <img
+      *ngIf="hero.imagenMostrada"
+      class="promo-banner__product"
+      [src]="hero.imagenMostrada"
+      [alt]="hero.nombre"
+      (error)="onImageError($event)"
+    />
+    <div class="promo-banner__floating">
+      <strong>{{ hero.nombre }}</strong>
+      <span>{{ hero.descripcion }}</span>
+      <small>Lleva: {{ resumenIngredientes(hero, 4) }}</small>
+      <small>Detalle: {{ resumenDetalles(hero, 2) }}</small>
     </div>
-    <div class="hero-content">
-      <div class="container">
-        <div class="hero-text">
-          <h1 class="hero-title animate-slide-up">
-            <span class="brand-highlight">K-JHUF</span>
-            <span class="brand-subtitle">Snacks</span>
-          </h1>
-          <p class="hero-description animate-slide-up">
-            El menú completo de antojitos mexicanos tradicionales
-          </p>
-          <div class="hero-actions animate-slide-up">
-            <a routerLink="/cliente/productos" class="btn btn-primary btn-lg">
-              <i class="fas fa-utensils"></i>
-              Ver Menú Completo
-            </a>
-            <a routerLink="/cliente/contacto" class="btn btn-outline-primary btn-lg">
-              <i class="fas fa-map-marker-alt"></i>
-              Ubicación
-            </a>
-          </div>
-        </div>
-        <div class="hero-stats animate-slide-right">
-          <div class="stat-item">
-            <div class="stat-number">27+</div>
-            <div class="stat-label">Productos</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-number">100%</div>
-            <div class="stat-label">Mexicano</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-number">24/7</div>
-            <div class="stat-label">Disponible</div>
-          </div>
-        </div>
-      </div>
+    <div class="promo-banner__price">
+      <span>{{ hero.categoria }}</span>
+      <strong>${{ hero.precioFinal | number: '1.0-0' }}</strong>
+      <button type="button" (click)="agregarAlCarrito(hero)">Agregar al carrito</button>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- Features Section -->
-  <section class="features-section">
-    <div class="container">
-      <div class="section-header text-center">
-        <h2 class="section-title">¿Por qué elegir K-JHUF?</h2>
-        <p class="section-subtitle">Tradición, calidad y sabor en cada bocado</p>
-      </div>
-      <div class="features-grid">
-        <div class="feature-card animate-fade-in">
-          <div class="feature-icon">
-            <i class="fas fa-leaf"></i>
+<section class="benefits-strip">
+  <article *ngFor="let metrica of metricas">
+    <strong>{{ metrica.valor }}</strong>
+    <span>{{ metrica.etiqueta }}</span>
+  </article>
+</section>
+
+<section class="offers-section">
+  <div class="section-head">
+    <p class="section-label">Ofertas de hoy</p>
+    <h2>Productos con promo aplicada</h2>
+  </div>
+
+  <div class="offers-grid" *ngIf="ofertas.length; else noOffersTpl">
+    <article class="offer-card" *ngFor="let producto of ofertas">
+      <img
+        *ngIf="producto.imagenMostrada"
+        [src]="producto.imagenMostrada"
+        [alt]="producto.nombre"
+        (error)="onImageError($event)"
+      />
+      <div class="offer-card__body">
+        <p class="offer-card__category">{{ producto.categoria }}</p>
+        <h3>{{ producto.nombre }}</h3>
+        <p>{{ producto.descripcion }}</p>
+        <small class="offer-card__ingredients">Lleva: {{ resumenIngredientes(producto, 4) }}</small>
+        <small class="offer-card__ingredients">Detalle: {{ resumenDetalles(producto, 2) }}</small>
+        <div class="offer-card__footer">
+          <div>
+            <span *ngIf="producto.promocionesAplicadas.length">${{ producto.precio }}</span>
+            <strong>${{ producto.precioFinal | number: '1.0-0' }}</strong>
           </div>
-          <h3>Ingredientes Frescos</h3>
-          <p>Utilizamos solo los mejores ingredientes frescos y tradicionales</p>
-        </div>
-        <div class="feature-card animate-fade-in">
-          <div class="feature-icon">
-            <i class="fas fa-clock"></i>
-          </div>
-          <h3>Rápido y Caliente</h3>
-          <p>Preparados al momento para mantener el sabor auténtico</p>
-        </div>
-        <div class="feature-card animate-fade-in">
-          <div class="feature-icon">
-            <i class="fas fa-heart"></i>
-          </div>
-          <h3>Hecho con Amor</h3>
-          <p>Cada platillo es preparado con pasión y dedicación</p>
-        </div>
-        <div class="feature-card animate-fade-in">
-          <div class="feature-icon">
-            <i class="fas fa-star"></i>
-          </div>
-          <h3>Calidad Premium</h3>
-          <p>Estándares altos en cada paso del proceso</p>
+          <button type="button" (click)="agregarAlCarrito(producto)">Agregar</button>
         </div>
       </div>
+    </article>
+  </div>
+</section>
+
+<section class="section-head">
+  <p class="section-label">Seguro que te gusta</p>
+  <h2>Productos destacados</h2>
+</section>
+
+<section class="recomendados-grid">
+  <article class="recomendado-card" *ngFor="let producto of recomendados">
+    <img
+      *ngIf="producto.imagenMostrada"
+      [src]="producto.imagenMostrada"
+      [alt]="producto.nombre"
+      (error)="onImageError($event)"
+    />
+    <div class="recomendado-card__body">
+      <p class="recomendado-card__category">{{ producto.categoria }}</p>
+      <h3>{{ producto.nombre }}</h3>
+      <p class="recomendado-card__desc">{{ producto.descripcion }}</p>
+      <small class="recomendado-card__ingredients">Lleva: {{ resumenIngredientes(producto, 4) }}</small>
+      <small class="recomendado-card__ingredients">Detalle: {{ resumenDetalles(producto, 2) }}</small>
+      <div class="recomendado-card__rating">5/5 <span>{{ producto.detalles.length || 1 }} detalle(s)</span></div>
+      <div class="recomendado-card__price">
+        <strong>${{ producto.precioFinal | number: '1.0-0' }}</strong>
+        <span *ngIf="producto.promocionesAplicadas.length">${{ producto.precio }}</span>
+      </div>
+      <button type="button" (click)="agregarAlCarrito(producto)">Agregar al carrito</button>
     </div>
-  </section>
+  </article>
+</section>
 
-  <!-- Promociones Section -->
-  <section class="products-section" *ngIf="promociones.length > 0">
-    <div class="container">
-      <div class="section-header text-center">
-        <h2 class="section-title">Ofertas Especiales</h2>
-        <p class="section-subtitle">¡Aprovecha nuestros descuentos!</p>
-      </div>
-      <div class="products-grid-full">
-        <div class="product-card animate-slide-left"
-             *ngFor="let p of promociones; trackBy:trackById">
-          <div class="product-image">
-            <img [src]="p.imagen" [alt]="p.nombre" loading="lazy">
-            <div class="product-badge">
-              <i class="fas fa-fire"></i>
-              Oferta
-            </div>
-          </div>
-          <div class="product-content">
-            <h4 class="product-title">{{p.nombre}}</h4>
-            <p class="product-description">{{ p.descripcion || 'Producto de calidad' }}</p>
-            <div class="product-pricing">
-              <span class="original-price">${{p.precio}}</span>
-              <span class="discount-price">${{precioFinal(p)}}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Todos los Productos -->
-  <section class="all-products-section">
-    <div class="container">
-      <div class="section-header text-center">
-        <h2 class="section-title">Nuestro Menú Completo</h2>
-        <p class="section-subtitle">Todos nuestros deliciosos productos</p>
-      </div>
-      <div class="products-grid-full">
-        <div class="product-card animate-fade-in"
-             *ngFor="let p of populares; trackBy:trackById">
-          <div class="product-image">
-            <img [src]="p.imagen" [alt]="p.nombre" loading="lazy">
-            <div class="product-badge popular" *ngIf="!p.promocion">
-              <i class="fas fa-star"></i>
-              Destacado
-            </div>
-            <div class="product-badge discount" *ngIf="p.promocion">
-              <i class="fas fa-fire"></i>
-              En Oferta
-            </div>
-          </div>
-          <div class="product-content">
-            <h4 class="product-title">{{p.nombre}}</h4>
-            <p class="product-description">{{ p.descripcion || 'Producto auténtico' }}</p>
-            <div class="product-pricing">
-              <span class="current-price" [class.discount-price]="p.promocion">
-                ${{precioFinal(p)}}
-              </span>
-              <span class="original-price" *ngIf="p.promocion">${{p.precio}}</span>
-            </div>
-            <button class="btn btn-sm btn-primary" style="width: 100%; margin-top: 0.5rem;">
-              <i class="fas fa-shopping-cart"></i> Agregar
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA Section -->
-  <section class="cta-section">
-    <div class="container">
-      <div class="cta-content">
-        <h2>¿Listo para probar lo mejor de México?</h2>
-        <p>Ven y descubre por qué somos los favoritos de la ciudad</p>
-        <div class="cta-actions">
-          <a routerLink="/cliente/contacto" class="btn btn-primary btn-lg">
-            <i class="fas fa-phone"></i>
-            Contáctanos
-          </a>
-          <a href="tel:+525512345678" class="btn btn-outline-primary btn-lg">
-            <i class="fas fa-mobile-alt"></i>
-            Llamar Ahora
-          </a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-</div>
+<ng-template #noOffersTpl>
+  <div class="home-empty">
+    <strong>Hoy no hay promos activas, pero el menu sigue disponible.</strong>
+    <p>En cuanto cargues una promocion, aqui se va a mostrar automaticamente.</p>
+  </div>
+</ng-template>

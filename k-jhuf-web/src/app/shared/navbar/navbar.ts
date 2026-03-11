@@ -1,131 +1,44 @@
-import { Component, HostListener, OnInit, OnDestroy } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { Auth } from '../../services/auth';
-import { Subscription } from 'rxjs';
+import { Component, DestroyRef, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Carrito } from '../../services/carrito';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, CommonModule],
+  imports: [CommonModule, RouterLink, RouterLinkActive],
   templateUrl: './navbar.html',
   styleUrls: ['./navbar.css'],
 })
-export class Navbar implements OnInit, OnDestroy {
-  mobileMenuOpen = false;
-  navbarCollapsed = false; // collapse sidebar on desktop
-  isLoading = false;
-  isAdminAuthenticated = false;
-  adminMenuOpen = false;
-  isScrolled = false;
-  showAdminMenu = false;
-  private authSubscription?: Subscription;
+export class Navbar {
+  menuAbierto = false;
+  totalItems = 0;
+  private readonly destroyRef = inject(DestroyRef);
 
-  constructor(private authService: Auth) {}
+  readonly enlaces = [
+    { label: 'Inicio', ruta: '/' },
+    { label: 'Productos', ruta: '/productos' },
+    { label: 'Promociones', ruta: '/promociones' },
+    { label: 'Contacto', ruta: '/contacto' },
+  ];
 
-  ngOnInit(): void {
-    // Check initial authentication state
-    this.checkAdminAuthentication();
-
-    // Subscribe to authentication changes
-    this.authSubscription = this.authService.authenticated$.subscribe(() => {
-      this.checkAdminAuthentication();
+  constructor(private readonly carrito: Carrito) {
+    this.carrito.items.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.totalItems = this.carrito.getCount();
     });
   }
 
-  ngOnDestroy(): void {
-    if (this.authSubscription) {
-      this.authSubscription.unsubscribe();
-    }
+  toggleMenu(): void {
+    this.menuAbierto = !this.menuAbierto;
   }
 
-  private checkAdminAuthentication(): void {
-    // Check if user is authenticated (assuming admin role)
-    this.isAdminAuthenticated = this.authService.isAuthenticated();
+  cerrarMenu(): void {
+    this.menuAbierto = false;
   }
 
-  toggleMobileMenu(): void {
-    // mobile menu only on small screens
-    this.mobileMenuOpen = !this.mobileMenuOpen;
-    if (this.mobileMenuOpen) {
-      this.adminMenuOpen = false; // Close admin menu when mobile menu opens
-    }
-  }
-
-  toggleNavbar(): void {
-    if (window.innerWidth >= 768) {
-      // collapse/expand sidebar on desktop
-      this.navbarCollapsed = !this.navbarCollapsed;
-      // ensure menus hide when collapsing
-      if (this.navbarCollapsed) {
-        this.mobileMenuOpen = false;
-        this.adminMenuOpen = false;
-        this.showAdminMenu = false;
-      }
-    } else {
-      this.toggleMobileMenu();
-    }
-  }
-
-  closeMobileMenu(): void {
-    this.mobileMenuOpen = false;
-  }
-
-  toggleAdminMenu(): void {
-    this.adminMenuOpen = !this.adminMenuOpen;
-    this.showAdminMenu = this.adminMenuOpen;
-    if (this.adminMenuOpen) {
-      this.mobileMenuOpen = false; // Close mobile menu when admin menu opens
-    }
-  }
-
-  closeAdminMenu(): void {
-    this.adminMenuOpen = false;
-    this.showAdminMenu = false;
-  }
-
-  logout(): void {
-    this.isLoading = true;
-    this.authService.logout();
-    this.isLoading = false;
-    this.closeAdminMenu();
-    this.closeMobileMenu();
-  }
-
-  @HostListener('window:scroll', [])
-  onWindowScroll(): void {
-    this.isScrolled = window.pageYOffset > 50;
-  }
-
-  @HostListener('window:resize', ['$event'])
-  onResize(event: any): void {
-    if (event.target.innerWidth > 768) {
-      this.mobileMenuOpen = false;
-      this.adminMenuOpen = false;
-      this.showAdminMenu = false;
-    }
-    // if resizing to desktop and sidebar collapsed, keep collapse
-    if (event.target.innerWidth < 768) {
-      this.navbarCollapsed = false;
-    }
-  }
-
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: Event): void {
-    const target = event.target as HTMLElement;
-    const navbar = target.closest('.navbar');
-    const toggle = target.closest('.navbar-toggle');
-    const adminBtn = target.closest('.admin-btn');
-
-    if (!navbar) {
-      this.mobileMenuOpen = false;
-      this.adminMenuOpen = false;
-      this.showAdminMenu = false;
-    } else if (!toggle && !adminBtn && this.mobileMenuOpen) {
-      this.mobileMenuOpen = false;
-    } else if (!adminBtn && (this.adminMenuOpen || this.showAdminMenu)) {
-      this.adminMenuOpen = false;
-      this.showAdminMenu = false;
-    }
+  abrirCarrito(): void {
+    this.carrito.open();
+    this.cerrarMenu();
   }
 }
