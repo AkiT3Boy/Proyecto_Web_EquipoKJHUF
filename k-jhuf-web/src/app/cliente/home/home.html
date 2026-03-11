@@ -1,1 +1,117 @@
-<p>home works!</p>
+<section class="promo-banner" *ngIf="productoPrincipal as hero">
+  <div class="promo-banner__copy">
+    <p class="promo-banner__eyebrow">Bienvenido a K-JHUF</p>
+    <h1>Snacks con ofertas reales y fotos de tu base de datos</h1>
+    <p class="promo-banner__phrase">{{ fraseActual }}</p>
+    <p class="promo-banner__desc">
+      Aqui te mostramos lo mas pedido del dia, con fotos y promociones reales. {{ hero.nombre }}
+      lleva {{ resumenIngredientes(hero) }} y se prepara asi: {{ hero.descripcion }}
+    </p>
+
+    <div class="promo-banner__codes">
+      <article class="promo-code" *ngFor="let producto of ofertas.slice(0, 3)">
+        <strong>{{ producto.resumenPromo }}</strong>
+        <span>{{ producto.nombre }}</span>
+        <small>Lleva {{ resumenIngredientes(producto, 2) }}</small>
+        <small>Detalle: {{ resumenDetalles(producto, 1) }}</small>
+      </article>
+    </div>
+  </div>
+
+  <div class="promo-banner__hero">
+    <img class="promo-banner__backdrop" [src]="imagenBanner" alt="Banner de K-JHUF Snacks" />
+    <img
+      *ngIf="hero.imagenMostrada"
+      class="promo-banner__product"
+      [src]="hero.imagenMostrada"
+      [alt]="hero.nombre"
+      (error)="onImageError($event)"
+    />
+    <div class="promo-banner__floating">
+      <strong>{{ hero.nombre }}</strong>
+      <span>{{ hero.descripcion }}</span>
+      <small>Lleva: {{ resumenIngredientes(hero, 4) }}</small>
+      <small>Detalle: {{ resumenDetalles(hero, 2) }}</small>
+    </div>
+    <div class="promo-banner__price">
+      <span>{{ hero.categoria }}</span>
+      <strong>${{ hero.precioFinal | number: '1.0-0' }}</strong>
+      <button type="button" (click)="agregarAlCarrito(hero)">Agregar al carrito</button>
+    </div>
+  </div>
+</section>
+
+<section class="benefits-strip">
+  <article *ngFor="let metrica of metricas">
+    <strong>{{ metrica.valor }}</strong>
+    <span>{{ metrica.etiqueta }}</span>
+  </article>
+</section>
+
+<section class="offers-section">
+  <div class="section-head">
+    <p class="section-label">Ofertas de hoy</p>
+    <h2>Productos con promo aplicada</h2>
+  </div>
+
+  <div class="offers-grid" *ngIf="ofertas.length; else noOffersTpl">
+    <article class="offer-card" *ngFor="let producto of ofertas">
+      <img
+        *ngIf="producto.imagenMostrada"
+        [src]="producto.imagenMostrada"
+        [alt]="producto.nombre"
+        (error)="onImageError($event)"
+      />
+      <div class="offer-card__body">
+        <p class="offer-card__category">{{ producto.categoria }}</p>
+        <h3>{{ producto.nombre }}</h3>
+        <p>{{ producto.descripcion }}</p>
+        <small class="offer-card__ingredients">Lleva: {{ resumenIngredientes(producto, 4) }}</small>
+        <small class="offer-card__ingredients">Detalle: {{ resumenDetalles(producto, 2) }}</small>
+        <div class="offer-card__footer">
+          <div>
+            <span *ngIf="producto.promocionesAplicadas.length">${{ producto.precio }}</span>
+            <strong>${{ producto.precioFinal | number: '1.0-0' }}</strong>
+          </div>
+          <button type="button" (click)="agregarAlCarrito(producto)">Agregar</button>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="section-head">
+  <p class="section-label">Seguro que te gusta</p>
+  <h2>Productos destacados</h2>
+</section>
+
+<section class="recomendados-grid">
+  <article class="recomendado-card" *ngFor="let producto of recomendados">
+    <img
+      *ngIf="producto.imagenMostrada"
+      [src]="producto.imagenMostrada"
+      [alt]="producto.nombre"
+      (error)="onImageError($event)"
+    />
+    <div class="recomendado-card__body">
+      <p class="recomendado-card__category">{{ producto.categoria }}</p>
+      <h3>{{ producto.nombre }}</h3>
+      <p class="recomendado-card__desc">{{ producto.descripcion }}</p>
+      <small class="recomendado-card__ingredients">Lleva: {{ resumenIngredientes(producto, 4) }}</small>
+      <small class="recomendado-card__ingredients">Detalle: {{ resumenDetalles(producto, 2) }}</small>
+      <div class="recomendado-card__rating">5/5 <span>{{ producto.detalles.length || 1 }} detalle(s)</span></div>
+      <div class="recomendado-card__price">
+        <strong>${{ producto.precioFinal | number: '1.0-0' }}</strong>
+        <span *ngIf="producto.promocionesAplicadas.length">${{ producto.precio }}</span>
+      </div>
+      <button type="button" (click)="agregarAlCarrito(producto)">Agregar al carrito</button>
+    </div>
+  </article>
+</section>
+
+<ng-template #noOffersTpl>
+  <div class="home-empty">
+    <strong>Hoy no hay promos activas, pero el menu sigue disponible.</strong>
+    <p>En cuanto cargues una promocion, aqui se va a mostrar automaticamente.</p>
+  </div>
+</ng-template>

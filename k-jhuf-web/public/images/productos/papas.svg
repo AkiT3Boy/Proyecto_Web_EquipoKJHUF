@@ -1,0 +1,12 @@
+<svg width="640" height="480" viewBox="0 0 640 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="640" height="480" rx="40" fill="#F4DCCB"/>
+  <rect x="235" y="150" width="170" height="200" rx="28" fill="#E15641"/>
+  <path d="M265 150H375L355 360H285L265 150Z" fill="#F1694F"/>
+  <rect x="275" y="120" width="90" height="50" rx="20" fill="#FFF4E8"/>
+  <path d="M254 170L210 118" stroke="#FFCB5F" stroke-width="18" stroke-linecap="round"/>
+  <path d="M294 150L262 92" stroke="#FFCB5F" stroke-width="18" stroke-linecap="round"/>
+  <path d="M334 150L330 80" stroke="#FFCB5F" stroke-width="18" stroke-linecap="round"/>
+  <path d="M372 150L396 94" stroke="#FFCB5F" stroke-width="18" stroke-linecap="round"/>
+  <path d="M402 170L440 124" stroke="#FFCB5F" stroke-width="18" stroke-linecap="round"/>
+  <text x="320" y="410" text-anchor="middle" fill="#A84A3A" font-family="Georgia, serif" font-size="40" font-weight="700">Papas Locas</text>
+</svg>

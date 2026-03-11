@@ -1,57 +1,326 @@
-<div class="container mt-4">
+<section class="admin-page">
+  <div class="admin-header">
+    <div>
+      <p class="label">Admin</p>
+      <h1>Panel de control</h1>
+      <p>Dashboard, productos destacados, promociones y pedidos entrando en tiempo real por sondeo.</p>
+    </div>
 
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h3>Panel Admin - Productos</h3>
-    <button class="btn btn-success" (click)="mostrarForm = !mostrarForm">
-      + Agregar Producto
+    <button *ngIf="autenticado" class="logout-button" type="button" (click)="cerrarSesion()">
+      Cerrar sesion
     </button>
   </div>
 
-  <!-- FORMULARIO -->
-  <form *ngIf="mostrarForm" (ngSubmit)="guardar()" class="card card-body mb-4">
+  <p class="page-error" *ngIf="autenticado && authError">{{ authError }}</p>
+  <p class="page-notice" *ngIf="autenticado && notificacionPedido">{{ notificacionPedido }}</p>
 
-    <div class="mb-3">
-      <label>Nombre</label>
-      <input class="form-control" [(ngModel)]="producto.nombre" name="nombre" required>
+  <div class="admin-overlay" *ngIf="adminListo && !autenticado">
+    <div class="auth-modal">
+      <div class="auth-modal__head">
+        <p class="label">{{ modoAuth === 'setup' ? 'Primer acceso' : 'Acceso admin' }}</p>
+        <button class="auth-close" type="button" (click)="cerrarModalAuth()" aria-label="Cerrar modal">
+          ×
+        </button>
+      </div>
+      <h2>{{ modoAuth === 'setup' ? 'Crea tu contrasena de admin' : 'Inicia sesion' }}</h2>
+      <p>
+        {{
+          modoAuth === 'setup'
+            ? 'La primera vez se guarda la contrasena en MongoDB y despues solo iniciaras sesion.'
+            : 'Ingresa la contrasena creada para editar productos, promociones y revisar pedidos.'
+        }}
+      </p>
+
+      <label>
+        <span>Contrasena</span>
+        <input [(ngModel)]="authPassword" name="authPassword" type="password" />
+      </label>
+
+      <label *ngIf="modoAuth === 'setup'">
+        <span>Confirmar contrasena</span>
+        <input [(ngModel)]="authConfirm" name="authConfirm" type="password" />
+      </label>
+
+      <p class="auth-error" *ngIf="authError">{{ authError }}</p>
+      <button type="button" (click)="iniciarSesion()">
+        {{ modoAuth === 'setup' ? 'Crear contrasena' : 'Entrar al panel' }}
+      </button>
     </div>
+  </div>
 
-    <div class="mb-3">
-      <label>Descripción</label>
-      <textarea class="form-control" [(ngModel)]="producto.descripcion" name="descripcion"></textarea>
-    </div>
+  <div class="admin-grid" [class.admin-grid--locked]="!autenticado">
+    <section class="panel panel--full" *ngIf="dashboard as stats">
+      <div class="panel__head">
+        <div>
+          <p class="label">Dashboard</p>
+          <h2>Resumen general</h2>
+        </div>
+      </div>
 
-    <div class="mb-3">
-      <label>Precio</label>
-      <input type="number" class="form-control" [(ngModel)]="producto.precio" name="precio">
-    </div>
+      <div class="stats-grid">
+        <article class="stat-card">
+          <strong>{{ stats.metrics.productos_activos }}</strong>
+          <span>Productos activos</span>
+        </article>
+        <article class="stat-card">
+          <strong>{{ stats.metrics.promociones_activas }}</strong>
+          <span>Promociones activas</span>
+        </article>
+        <article class="stat-card">
+          <strong>{{ stats.metrics.pedidos_pendientes }}</strong>
+          <span>Pedidos pendientes</span>
+        </article>
+        <article class="stat-card">
+          <strong>${{ stats.metrics.ingresos_estimados | number: '1.0-0' }}</strong>
+          <span>Ingresos estimados</span>
+        </article>
+      </div>
 
-    <button class="btn btn-primary w-100">Guardar</button>
+      <div class="top-grid">
+        <article class="subpanel">
+          <p class="label">Mas seleccionados</p>
+          <div class="mini-list" *ngIf="stats.top_productos.length; else topVacioTpl">
+            <div class="mini-row" *ngFor="let top of stats.top_productos">
+              <strong>{{ top.nombre }}</strong>
+              <span>{{ top.cantidad }} pedidos</span>
+            </div>
+          </div>
+        </article>
 
-  </form>
+        <article class="subpanel">
+          <p class="label">Pedidos nuevos</p>
+          <div class="mini-list" *ngIf="pedidos.length; else pedidosVacioTpl">
+            <div class="mini-row" *ngFor="let pedido of pedidos.slice(0, 4)">
+              <div>
+                <strong>{{ pedido.cliente }}</strong>
+                <small>{{ totalItemsPedido(pedido) }} productos</small>
+              </div>
+              <span class="status-pill" [attr.data-status]="pedido.estado">{{ pedido.estado }}</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
 
-  <!-- TABLA -->
-  <table class="table table-bordered table-hover">
-    <thead class="table-dark">
-      <tr>
-        <th>Nombre</th>
-        <th>Descripción</th>
-        <th>Precio</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
+    <section class="panel">
+      <div class="panel__head">
+        <div>
+          <p class="label">Productos</p>
+          <h2>{{ editandoProductoId ? 'Editar producto' : 'Nuevo producto' }}</h2>
+        </div>
+        <button *ngIf="editandoProductoId" class="ghost-button" type="button" (click)="resetProductoForm()">
+          Cancelar edicion
+        </button>
+      </div>
 
-    <tbody>
-      <tr *ngFor="let p of lista">
-        <td>{{ p.nombre }}</td>
-        <td>{{ p.descripcion }}</td>
-        <td>${{ p.precio }}</td>
-        <td>
-          <button class="btn btn-danger btn-sm" (click)="eliminar(p._id)">
-            Eliminar
-          </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+      <form class="form-grid" (ngSubmit)="guardarProducto()">
+        <label>
+          <span>Nombre</span>
+          <input [(ngModel)]="productoForm.nombre" name="nombre" required />
+        </label>
 
-</div>
+        <label>
+          <span>Descripcion</span>
+          <textarea [(ngModel)]="productoForm.descripcion" name="descripcion" rows="3"></textarea>
+        </label>
+
+        <div class="form-grid__row">
+          <label>
+            <span>Precio</span>
+            <input [(ngModel)]="productoForm.precio" name="precio" type="number" required />
+          </label>
+
+          <label>
+            <span>Categoria</span>
+            <select [(ngModel)]="productoForm.categoria" name="categoria">
+              <option *ngFor="let categoria of categoriasDisponibles" [value]="categoria">{{ categoria }}</option>
+            </select>
+          </label>
+        </div>
+
+        <label>
+          <span>Imagen URL</span>
+          <input [(ngModel)]="productoForm.imagen_url" name="imagen_url" />
+        </label>
+
+        <div class="preview-image" *ngIf="productoForm.imagen_url">
+          <img [src]="productoForm.imagen_url" alt="Vista previa del producto" />
+        </div>
+
+        <label class="check-row">
+          <input [(ngModel)]="productoForm.destacado" name="destacado" type="checkbox" />
+          <span>Mostrar como producto destacado en inicio</span>
+        </label>
+
+        <label>
+          <span>Ingredientes</span>
+          <textarea [(ngModel)]="productoForm.ingredientesTexto" name="ingredientesTexto" rows="4"></textarea>
+        </label>
+
+        <label>
+          <span>Detalles</span>
+          <textarea [(ngModel)]="productoForm.detallesTexto" name="detallesTexto" rows="4"></textarea>
+        </label>
+
+        <button type="submit">{{ editandoProductoId ? 'Guardar cambios' : 'Agregar producto' }}</button>
+      </form>
+
+      <div class="items-list" *ngIf="lista.length; else sinProductosTpl">
+        <article class="item-card" *ngFor="let producto of lista">
+          <div class="item-card__main">
+            <img *ngIf="producto.imagen_url || producto.imagen" [src]="producto.imagen_url || producto.imagen" [alt]="producto.nombre" />
+            <div>
+              <p class="item-card__tag">{{ producto.categoria }}</p>
+              <h3>{{ producto.nombre }}</h3>
+              <p>{{ producto.descripcion }}</p>
+              <small>{{ (producto.ingredientes || []).join(', ') }}</small>
+            </div>
+          </div>
+
+          <div class="item-card__actions">
+            <strong>${{ producto.precio }}</strong>
+            <span class="featured-pill" *ngIf="producto.destacado">Destacado</span>
+            <button type="button" class="ghost-button" (click)="editarProducto(producto)">Editar</button>
+            <button type="button" class="danger-button" (click)="eliminarProducto(producto._id)">Eliminar</button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel__head">
+        <div>
+          <p class="label">Promociones</p>
+          <h2>{{ editandoPromocionId ? 'Editar promocion' : 'Nueva promocion' }}</h2>
+        </div>
+        <button *ngIf="editandoPromocionId" class="ghost-button" type="button" (click)="resetPromocionForm()">
+          Cancelar edicion
+        </button>
+      </div>
+
+      <form class="form-grid" (ngSubmit)="guardarPromocion()">
+        <label>
+          <span>Titulo</span>
+          <input [(ngModel)]="promocionForm.titulo" name="titulo" required />
+        </label>
+
+        <label>
+          <span>Descripcion</span>
+          <textarea [(ngModel)]="promocionForm.descripcion" name="descripcion" rows="3"></textarea>
+        </label>
+
+        <div class="form-grid__row">
+          <label>
+            <span>Tipo</span>
+            <select [(ngModel)]="promocionForm.tipo" name="tipo">
+              <option *ngFor="let tipo of tiposPromocion" [value]="tipo">{{ tipo }}</option>
+            </select>
+          </label>
+
+          <label>
+            <span>{{ tipoPromocionLabel }}</span>
+            <input [(ngModel)]="promocionForm.valor" name="valor" type="number" required />
+          </label>
+        </div>
+
+        <div class="selector">
+          <span>Productos a los que aplica</span>
+          <div class="selector__grid">
+            <label class="selector__item" *ngFor="let producto of lista">
+              <input
+                type="checkbox"
+                [checked]="productoSeleccionado(producto._id)"
+                (change)="toggleProductoEnPromocion(producto._id || '', $any($event.target).checked)"
+              />
+              {{ producto.nombre }}
+            </label>
+          </div>
+        </div>
+
+        <button type="submit">{{ editandoPromocionId ? 'Guardar promocion' : 'Agregar promocion' }}</button>
+      </form>
+
+      <div class="items-list" *ngIf="promociones.length; else sinPromosTpl">
+        <article class="item-card" *ngFor="let promo of promociones">
+          <div>
+            <p class="item-card__tag item-card__tag--promo">{{ promo.tipo }}</p>
+            <h3>{{ promo.titulo }}</h3>
+            <p>{{ promo.descripcion }}</p>
+            <small>{{ nombreProductos(promo.producto_ids) }}</small>
+          </div>
+
+          <div class="item-card__actions">
+            <strong>{{ valorPromocion(promo) }}</strong>
+            <button type="button" class="ghost-button" (click)="editarPromocion(promo)">Editar</button>
+            <button type="button" class="danger-button" (click)="eliminarPromocion(promo._id)">Eliminar</button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel panel--full">
+      <div class="panel__head">
+        <div>
+          <p class="label">Pedidos</p>
+          <h2>Notificaciones y seguimiento</h2>
+        </div>
+      </div>
+
+      <div class="items-list" *ngIf="pedidos.length; else sinPedidosTpl">
+        <article class="item-card item-card--pedido" *ngFor="let pedido of pedidos">
+          <div class="item-card__main">
+            <div>
+              <p class="item-card__tag">{{ pedido.cliente }}</p>
+              <h3>${{ pedido.total | number: '1.0-0' }}</h3>
+              <p>{{ pedido.telefono || 'Sin telefono' }}</p>
+              <small>{{ pedido.items.length }} producto(s) · {{ pedido.notas || 'Sin notas' }}</small>
+            </div>
+          </div>
+
+          <div class="pedido-actions">
+            <span class="status-pill" [attr.data-status]="pedido.estado">{{ pedido.estado }}</span>
+            <select [ngModel]="pedido.estado" (ngModelChange)="actualizarEstadoPedido(pedido._id, $event)">
+              <option value="pendiente">pendiente</option>
+              <option value="en_proceso">en_proceso</option>
+              <option value="entregado">entregado</option>
+              <option value="cancelado">cancelado</option>
+            </select>
+          </div>
+        </article>
+      </div>
+    </section>
+  </div>
+</section>
+
+<ng-template #sinProductosTpl>
+  <article class="empty-state">
+    <strong>No hay productos cargados.</strong>
+    <p>Agrega uno nuevo para habilitar promociones, destacados y carrito.</p>
+  </article>
+</ng-template>
+
+<ng-template #sinPromosTpl>
+  <article class="empty-state">
+    <strong>No hay promociones registradas.</strong>
+    <p>Crea descuentos, combos o promociones 2x1 desde este mismo panel.</p>
+  </article>
+</ng-template>
+
+<ng-template #sinPedidosTpl>
+  <article class="empty-state">
+    <strong>Aun no llegan pedidos.</strong>
+    <p>Cuando alguien cierre su carrito apareceran aqui para seguimiento.</p>
+  </article>
+</ng-template>
+
+<ng-template #topVacioTpl>
+  <article class="empty-state compact-empty">
+    <strong>Sin datos todavia.</strong>
+  </article>
+</ng-template>
+
+<ng-template #pedidosVacioTpl>
+  <article class="empty-state compact-empty">
+    <strong>Sin pedidos recientes.</strong>
+  </article>
+</ng-template>

@@ -1,17 +1,15 @@
 import { Routes } from '@angular/router';
-import { Productos } from './cliente/productos/productos';
 import { AdminProductos } from './admin/productos/productos';
+import { Contacto } from './cliente/contacto/contacto';
+import { Home } from './cliente/home/home';
+import { Productos } from './cliente/productos/productos';
+import { Promociones } from './cliente/promociones/promociones';
 
 export const routes: Routes = [
-
-  // CLIENTE - catálogo
-  { path: '', redirectTo: 'productos', pathMatch: 'full' },
+  { path: '', component: Home },
   { path: 'productos', component: Productos },
-
-  // ADMIN
+  { path: 'promociones', component: Promociones },
+  { path: 'contacto', component: Contacto },
   { path: 'admin', component: AdminProductos },
-  { path: 'admin/nuevo', component: Productos },
-
-  // fallback
-  { path: '**', redirectTo: 'productos' }
+  { path: '**', redirectTo: '' },
 ];

@@ -1,32 +1,92 @@
-<div class="container mt-4">
-  <h3>Nuevo Producto</h3>
+<section class="catalogo-header">
+  <div>
+    <p class="label">Nuestro menu</p>
+    <h1>Productos K-JHUF</h1>
+    <p class="copy">
+      Aqui tienes el menu acomodado por categoria para que encuentres rapido lo que se te antoja,
+      con su foto, descripcion, ingredientes y detalles.
+    </p>
+  </div>
+  <div class="catalogo-header__badge">
+    <strong>{{ categorias.length || 1 }}</strong>
+    <span>categorias</span>
+  </div>
+</section>
 
-  <form (ngSubmit)="guardar()">
+<section class="category-chip-list" *ngIf="!cargando">
+  <span class="category-chip" *ngFor="let categoria of categorias">{{ categoria.nombre }}</span>
+</section>
 
-    <div class="mb-3">
-      <label>Nombre</label>
-      <input class="form-control"
-             [(ngModel)]="producto.nombre"
-             name="nombre"
-             required>
+<section *ngIf="!cargando; else cargandoTpl" class="category-sections">
+  <article class="category-block" *ngFor="let categoria of categorias">
+    <div class="category-block__head">
+      <p class="label">Categoria</p>
+      <h2>{{ categoria.nombre }}</h2>
     </div>
 
-    <div class="mb-3">
-      <label>Descripción</label>
-      <textarea class="form-control"
-                [(ngModel)]="producto.descripcion"
-                name="descripcion"></textarea>
+    <div class="catalogo-grid">
+      <article class="producto-card" *ngFor="let producto of categoria.productos; trackBy: trackById">
+        <div class="producto-card__media">
+          <img
+            *ngIf="producto.imagenMostrada"
+            [src]="producto.imagenMostrada"
+            [alt]="producto.nombre"
+            (error)="onImageError($event)"
+          />
+          <p class="producto-card__tag">{{ producto.categoria }}</p>
+        </div>
+
+        <div class="producto-card__body">
+          <div class="producto-card__head">
+            <div>
+              <h3>{{ producto.nombre }}</h3>
+              <p class="producto-card__text">{{ producto.descripcion }}</p>
+            </div>
+
+            <div class="producto-card__price">
+              <span *ngIf="producto.promocionesAplicadas.length">${{ producto.precio }}</span>
+              <strong>${{ producto.precioFinal | number: '1.0-0' }}</strong>
+            </div>
+          </div>
+
+          <div class="producto-card__promos" *ngIf="producto.promocionesAplicadas.length">
+            <span *ngFor="let promo of producto.promocionesAplicadas">{{ promo.titulo }}</span>
+          </div>
+
+          <div class="producto-card__lists">
+            <div>
+              <p class="producto-card__label">Lleva</p>
+              <ul>
+                <li *ngFor="let ingrediente of producto.ingredientes">{{ ingrediente }}</li>
+              </ul>
+            </div>
+
+            <div>
+              <p class="producto-card__label">Detalles</p>
+              <ul>
+                <li *ngFor="let detalle of producto.detalles">{{ detalle }}</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="producto-card__footer">
+            <small>{{ producto.resumenPromo }}</small>
+            <button type="button" (click)="agregarAlCarrito(producto)">Agregar al carrito</button>
+          </div>
+        </div>
+      </article>
     </div>
+  </article>
+</section>
 
-    <div class="mb-3">
-      <label>Precio</label>
-      <input type="number"
-             class="form-control"
-             [(ngModel)]="producto.precio"
-             name="precio">
-    </div>
-
-    <button class="btn btn-primary w-100">Guardar</button>
-
-  </form>
-</div>
+<ng-template #cargandoTpl>
+  <section class="catalogo-grid">
+    <article class="producto-card producto-card--loading" *ngFor="let item of [1, 2, 3, 4]">
+      <div class="skeleton skeleton--photo"></div>
+      <div class="skeleton skeleton--lg"></div>
+      <div class="skeleton skeleton--md"></div>
+      <div class="skeleton skeleton--md"></div>
+      <div class="skeleton skeleton--md"></div>
+    </article>
+  </section>
+</ng-template>

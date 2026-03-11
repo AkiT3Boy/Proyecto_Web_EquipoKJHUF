@@ -1,36 +1,38 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container-fluid">
-    <a class="navbar-brand" routerLink="/">K-JHUF</a>
+<aside class="sidebar" [class.sidebar--open]="menuAbierto">
+  <button class="sidebar__toggle" type="button" (click)="toggleMenu()" aria-label="Abrir menu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
 
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-      data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
-
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/">Inicio</a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/productos">Productos</a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/promociones">Promociones</a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/contacto">Contacto</a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link text-warning" routerLink="/admin">Admin</a>
-        </li>
-
-      </ul>
+  <div class="sidebar__brand">
+    <span class="sidebar__dot"></span>
+    <div>
+      <a class="sidebar__title" routerLink="/" (click)="cerrarMenu()">K-JHUF</a>
+      <p class="sidebar__subtitle">Snacks premium</p>
     </div>
   </div>
-</nav>
+
+  <nav class="sidebar__nav">
+    <a
+      *ngFor="let enlace of enlaces"
+      class="sidebar__link"
+      [routerLink]="enlace.ruta"
+      routerLinkActive="sidebar__link--active"
+      [routerLinkActiveOptions]="{ exact: enlace.ruta === '/' }"
+      (click)="cerrarMenu()"
+    >
+      {{ enlace.label }}
+    </a>
+  </nav>
+
+  <button class="sidebar__cart" type="button" (click)="abrirCarrito()">
+    Carrito
+    <span *ngIf="totalItems">{{ totalItems }}</span>
+  </button>
+
+  <a class="sidebar__admin" routerLink="/admin" routerLinkActive="sidebar__admin--active" (click)="cerrarMenu()">
+    <span class="sidebar__dot sidebar__dot--admin"></span>
+    Admin
+  </a>
+</aside>

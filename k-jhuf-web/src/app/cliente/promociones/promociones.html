@@ -1,1 +1,22 @@
-<p>promociones works!</p>
+<section class="promo-hero">
+  <div>
+    <p class="label">Promociones</p>
+    <h1>Ofertas activas y aplicadas al menu.</h1>
+    <p>
+      Aqui ves las promociones que estan corriendo ahorita, cuanto bajan el precio y en que
+      productos aplican.
+    </p>
+  </div>
+</section>
+
+<section class="promo-grid">
+  <article class="promo-card" *ngFor="let promo of promociones">
+    <p class="promo-card__type">{{ promo.tipo }}</p>
+    <h2>{{ promo.titulo }}</h2>
+    <p>{{ promo.descripcion }}</p>
+    <strong>{{ promo.etiquetaValor }}</strong>
+    <small *ngIf="promo.productosRelacionados.length">
+      Aplica a: {{ promo.productosRelacionados.join(', ') }}
+    </small>
+  </article>
+</section>
