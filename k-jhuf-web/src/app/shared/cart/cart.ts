@@ -18,6 +18,7 @@ export class Cart {
   total = 0;
   enviando = false;
   mensaje = '';
+  modalPedidoAbierto = false;
 
   cliente = '';
   telefono = '';
@@ -75,7 +76,8 @@ export class Cart {
       .subscribe({
         next: () => {
           this.enviando = false;
-          this.mensaje = 'Pedido enviado al admin.';
+          this.mensaje = 'Se agendo el pedido.';
+          this.modalPedidoAbierto = true;
           this.carrito.clear();
           this.cliente = '';
           this.telefono = '';
@@ -86,5 +88,11 @@ export class Cart {
           this.mensaje = error.error?.msg || 'No se pudo enviar el pedido.';
         },
       });
+  }
+
+  cerrarModalPedido(): void {
+    this.modalPedidoAbierto = false;
+    this.mensaje = '';
+    this.cerrar();
   }
 }

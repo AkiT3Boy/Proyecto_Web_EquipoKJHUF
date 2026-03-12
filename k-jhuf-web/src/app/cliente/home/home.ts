@@ -4,9 +4,9 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, forkJoin, interval, of, startWith } from 'rxjs';
 import { ProductoVista, mapearProductosConPromociones } from '../../services/catalogo';
 import { Carrito } from '../../services/carrito';
-import { Producto, ProductosService } from '../../services/productos';
-import { Promocion, Promociones as PromocionesService } from '../../services/promociones';
-import { mezclarProductos, mezclarPromociones, PRODUCTOS_SEED, PROMOCIONES_SEED } from '../../services/seed-data';
+import { HomeConfigService } from '../../services/home-config';
+import { ProductosService } from '../../services/productos';
+import { Promociones as PromocionesService } from '../../services/promociones';
 
 @Component({
   selector: 'app-home',
@@ -17,12 +17,13 @@ import { mezclarProductos, mezclarPromociones, PRODUCTOS_SEED, PROMOCIONES_SEED 
 })
 export class Home implements OnInit {
   cargando = true;
-  readonly imagenBanner = '/images/banner-home.svg';
+  readonly imagenBannerDefault = '/images/banner-home-wide.svg';
+  imagenBanner = this.imagenBannerDefault;
   readonly frasesBanner = [
-    'Esquites, tostilocos y antojos preparados al momento.',
-    'Promos activas para pedir algo botanero sin pagar de mas.',
-    'Snacks con ingredientes frescos, salsas al gusto y fotos reales.',
-    'Raspados, elotes y botanas listas para compartir o pedir solo.',
+    'Esquites, tostilocos y antojos hechos al instante.',
+    'Promociones reales para pedir rico sin gastar de mas.',
+    'Sabores botaneros con ingredientes frescos y mucho antojo.',
+    'Raspados, elotes y snacks listos para compartir o disfrutar solo.',
   ];
   metricas = [
     { valor: '0', etiqueta: 'productos' },
@@ -38,12 +39,10 @@ export class Home implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private fraseIndex = 0;
 
-  private readonly respaldoProductos: Producto[] = PRODUCTOS_SEED;
-  private readonly respaldoPromociones: Promocion[] = PROMOCIONES_SEED;
-
   constructor(
     private readonly productosService: ProductosService,
     private readonly promocionesService: PromocionesService,
+    private readonly homeConfig: HomeConfigService,
     private readonly carrito: Carrito,
   ) {}
 
@@ -56,15 +55,14 @@ export class Home implements OnInit {
       });
 
     forkJoin({
-      productos: this.productosService.getProductos().pipe(catchError(() => of(this.respaldoProductos))),
-      promociones: this.promocionesService
-        .getPromociones()
-        .pipe(catchError(() => of(this.respaldoPromociones))),
-    }).subscribe(({ productos, promociones }) => {
-      const catalogo = mapearProductosConPromociones(
-        mezclarProductos(productos.length ? productos : this.respaldoProductos),
-        mezclarPromociones(promociones.length ? promociones : this.respaldoPromociones),
-      );
+      productos: this.productosService.getProductos().pipe(catchError(() => of([]))),
+      promociones: this.promocionesService.getPromociones().pipe(catchError(() => of([]))),
+      homeConfig: this.homeConfig.getConfig().pipe(catchError(() => of({ home_banner_url: '' }))),
+    }).subscribe(({ productos, promociones, homeConfig }) => {
+      this.imagenBanner =
+        this.homeConfig.normalizarImagenBanner(homeConfig.home_banner_url) || this.imagenBannerDefault;
+
+      const catalogo = mapearProductosConPromociones(productos, promociones);
 
       this.ofertas = catalogo.filter((producto) => producto.promocionesAplicadas.length).slice(0, 4);
       this.destacados = catalogo.filter((producto) => producto.destacado).slice(0, 6);

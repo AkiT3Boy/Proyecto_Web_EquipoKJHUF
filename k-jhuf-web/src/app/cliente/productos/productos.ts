@@ -3,9 +3,8 @@ import { Component, OnInit } from '@angular/core';
 import { catchError, forkJoin, of } from 'rxjs';
 import { ProductoVista, mapearProductosConPromociones } from '../../services/catalogo';
 import { Carrito } from '../../services/carrito';
-import { Producto, ProductosService } from '../../services/productos';
-import { Promocion, Promociones as PromocionesService } from '../../services/promociones';
-import { mezclarProductos, mezclarPromociones, PRODUCTOS_SEED, PROMOCIONES_SEED } from '../../services/seed-data';
+import { ProductosService } from '../../services/productos';
+import { Promociones as PromocionesService } from '../../services/promociones';
 
 type CategoriaGrupo = {
   nombre: string;
@@ -24,9 +23,6 @@ export class Productos implements OnInit {
   categorias: CategoriaGrupo[] = [];
   cargando = true;
 
-  private readonly respaldo: Producto[] = PRODUCTOS_SEED;
-  private readonly promocionesRespaldo: Promocion[] = PROMOCIONES_SEED;
-
   constructor(
     private readonly productosService: ProductosService,
     private readonly promocionesService: PromocionesService,
@@ -35,14 +31,10 @@ export class Productos implements OnInit {
 
   ngOnInit(): void {
     forkJoin({
-      productos: this.productosService.getProductos().pipe(catchError(() => of(this.respaldo))),
-      promociones: this.promocionesService
-        .getPromociones()
-        .pipe(catchError(() => of(this.promocionesRespaldo))),
+      productos: this.productosService.getProductos().pipe(catchError(() => of([]))),
+      promociones: this.promocionesService.getPromociones().pipe(catchError(() => of([]))),
     }).subscribe(({ productos, promociones }) => {
-      const base = mezclarProductos(productos.length ? productos : this.respaldo);
-      const promos = mezclarPromociones(promociones.length ? promociones : this.promocionesRespaldo);
-      this.productos = mapearProductosConPromociones(base, promos);
+      this.productos = mapearProductosConPromociones(productos, promociones);
       this.categorias = this.agruparPorCategoria(this.productos);
       this.cargando = false;
     });

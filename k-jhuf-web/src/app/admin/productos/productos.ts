@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { catchError, forkJoin, interval, of, startWith, switchMap } from 'rxjs';
 import { Auth } from '../../services/auth';
+import { HomeConfigService } from '../../services/home-config';
 import { DashboardAdmin, Pedido, Pedidos } from '../../services/pedidos';
 import { Producto, ProductosService } from '../../services/productos';
 import { Promocion, Promociones as PromocionesService } from '../../services/promociones';
@@ -43,6 +44,7 @@ export class AdminProductos implements OnInit {
   authPassword = '';
   authConfirm = '';
   notificacionPedido = '';
+  homeBannerUrl = '';
 
   lista: Producto[] = [];
   promociones: Promocion[] = [];
@@ -62,6 +64,7 @@ export class AdminProductos implements OnInit {
 
   constructor(
     private readonly auth: Auth,
+    private readonly homeConfigService: HomeConfigService,
     private readonly productosService: ProductosService,
     private readonly promocionesService: PromocionesService,
     private readonly pedidosService: Pedidos,
@@ -172,6 +175,16 @@ export class AdminProductos implements OnInit {
       next: () => {
         this.resetProductoForm();
         this.cargarDatosUnaVez();
+      },
+      error: (error) => this.manejarErrorAdmin(error),
+    });
+  }
+
+  guardarBannerHome(): void {
+    this.authError = '';
+    this.homeConfigService.updateBannerUrl(this.homeBannerUrl).subscribe({
+      next: ({ home_banner_url }) => {
+        this.homeBannerUrl = home_banner_url;
       },
       error: (error) => this.manejarErrorAdmin(error),
     });
@@ -333,11 +346,12 @@ export class AdminProductos implements OnInit {
             promociones: this.promocionesService.getPromociones(true).pipe(catchError(() => of([]))),
             pedidos: this.pedidosService.getPedidos().pipe(catchError(() => of([]))),
             dashboard: this.pedidosService.getDashboard().pipe(catchError(() => of(undefined))),
+            homeConfig: this.homeConfigService.getConfig().pipe(catchError(() => of({ home_banner_url: '' }))),
           }),
         ),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe(({ productos, promociones, pedidos, dashboard }) => {
+      .subscribe(({ productos, promociones, pedidos, dashboard, homeConfig }) => {
         if (!this.autenticado) {
           return;
         }
@@ -346,6 +360,7 @@ export class AdminProductos implements OnInit {
         this.promociones = promociones;
         this.pedidos = pedidos;
         this.dashboard = dashboard;
+        this.homeBannerUrl = homeConfig.home_banner_url || '';
         this.actualizarNotificacionPedidos(pedidos);
       });
   }
@@ -356,11 +371,13 @@ export class AdminProductos implements OnInit {
       promociones: this.promocionesService.getPromociones(true).pipe(catchError(() => of([]))),
       pedidos: this.pedidosService.getPedidos().pipe(catchError(() => of([]))),
       dashboard: this.pedidosService.getDashboard().pipe(catchError(() => of(undefined))),
-    }).subscribe(({ productos, promociones, pedidos, dashboard }) => {
+      homeConfig: this.homeConfigService.getConfig().pipe(catchError(() => of({ home_banner_url: '' }))),
+    }).subscribe(({ productos, promociones, pedidos, dashboard, homeConfig }) => {
       this.lista = productos;
       this.promociones = promociones;
       this.pedidos = pedidos;
       this.dashboard = dashboard;
+      this.homeBannerUrl = homeConfig.home_banner_url || '';
       this.actualizarNotificacionPedidos(pedidos);
     });
   }

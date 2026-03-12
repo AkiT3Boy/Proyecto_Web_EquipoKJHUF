@@ -1,0 +1,29 @@
+<svg width="1200" height="720" viewBox="0 0 1200 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="720" rx="42" fill="url(#bg)"/>
+  <rect x="38" y="44" width="1124" height="632" rx="34" fill="url(#panel)" fill-opacity="0.72"/>
+  <circle cx="914" cy="108" r="48" fill="#FFF3D2" fill-opacity="0.9"/>
+  <circle cx="1042" cy="564" r="106" fill="#F0A21E" fill-opacity="0.26"/>
+  <path d="M860 128H1112V594H860V128Z" fill="#2B160E" fill-opacity="0.18"/>
+  <path d="M914 125C931 102 975 96 999 118C1026 99 1067 104 1088 131C1113 164 1106 208 1082 236L1002 327C995 335 983 335 976 327L897 237C871 207 889 159 914 125Z" fill="#FF7B39"/>
+  <path d="M920 134C934 116 969 111 990 130C1015 114 1049 118 1067 143C1087 170 1081 205 1062 228L989 313L918 229C897 205 900 160 920 134Z" fill="#FF9A56"/>
+  <path d="M933 204C933 174 957 150 987 150C1017 150 1041 174 1041 204V255C1041 302 1014 344 987 368C960 344 933 302 933 255V204Z" fill="#FFB169"/>
+  <path d="M953 213C953 195 968 180 987 180C1005 180 1020 195 1020 213V255C1020 286 1003 312 987 329C970 312 953 286 953 255V213Z" fill="#F95D31"/>
+  <text x="84" y="202" fill="#FFD300" font-family="Arial, Helvetica, sans-serif" font-size="118" font-weight="800">ANTOJOS</text>
+  <text x="84" y="320" fill="white" font-family="Arial, Helvetica, sans-serif" font-size="94" font-weight="800">CON SABOR</text>
+  <text x="84" y="432" fill="#FF6336" font-family="Arial, Helvetica, sans-serif" font-size="116" font-weight="800">K-JHUF</text>
+  <text x="88" y="518" fill="#FFF5EC" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="700">snacks, elotes, raspados y botanas al momento</text>
+  <text x="88" y="572" fill="#FFF5EC" font-family="Arial, Helvetica, sans-serif" font-size="28">promos reales, pedidos rapidos y fotos desde tu base de datos</text>
+  <rect x="80" y="600" width="272" height="22" rx="11" fill="#FFB169" fill-opacity="0.75"/>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="720" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3B0F03"/>
+      <stop offset="0.5" stop-color="#7B2510"/>
+      <stop offset="1" stop-color="#D35400"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="52" y1="60" x2="1132" y2="654" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#07264E"/>
+      <stop offset="0.52" stop-color="#1C183A"/>
+      <stop offset="1" stop-color="#59210C"/>
+    </linearGradient>
+  </defs>
+</svg>

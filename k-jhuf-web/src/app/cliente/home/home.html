@@ -1,43 +1,43 @@
-<section class="promo-banner" *ngIf="productoPrincipal as hero">
-  <div class="promo-banner__copy">
-    <p class="promo-banner__eyebrow">Bienvenido a K-JHUF</p>
-    <h1>Snacks con ofertas reales y fotos de tu base de datos</h1>
-    <p class="promo-banner__phrase">{{ fraseActual }}</p>
-    <p class="promo-banner__desc">
-      Aqui te mostramos lo mas pedido del dia, con fotos y promociones reales. {{ hero.nombre }}
-      lleva {{ resumenIngredientes(hero) }} y se prepara asi: {{ hero.descripcion }}
-    </p>
+<section
+  class="promo-banner"
+  *ngIf="productoPrincipal as hero"
+  [style.background-image]="'linear-gradient(110deg, rgba(8, 8, 10, 0.94) 0%, rgba(12, 12, 16, 0.9) 42%, rgba(18, 18, 22, 0.76) 100%), url(' + imagenBanner + ')'"
+>
+  <div class="promo-banner__main">
+    <div class="promo-banner__copy">
+      <p class="promo-banner__eyebrow">Bienvenido a K-JHUF</p>
+      <h1>El sabor que se antoja, preparado al momento</h1>
+      <p class="promo-banner__phrase">{{ fraseActual }}</p>
+      <p class="promo-banner__desc">
+        Aqui te mostramos lo mas pedido del dia, con fotos y promociones reales. {{ hero.nombre }}
+        lleva {{ resumenIngredientes(hero) }} y se prepara asi: {{ hero.descripcion }}
+      </p>
+    </div>
 
-    <div class="promo-banner__codes">
-      <article class="promo-code" *ngFor="let producto of ofertas.slice(0, 3)">
-        <strong>{{ producto.resumenPromo }}</strong>
-        <span>{{ producto.nombre }}</span>
-        <small>Lleva {{ resumenIngredientes(producto, 2) }}</small>
-        <small>Detalle: {{ resumenDetalles(producto, 1) }}</small>
-      </article>
+    <div class="promo-banner__hero">
+      <div class="promo-banner__product-frame" *ngIf="hero.imagenMostrada">
+        <img
+          class="promo-banner__product"
+          [src]="hero.imagenMostrada"
+          [alt]="hero.nombre"
+          (error)="onImageError($event)"
+        />
+      </div>
+      <div class="promo-banner__price">
+        <span>{{ hero.categoria }}</span>
+        <strong>${{ hero.precioFinal | number: '1.0-0' }}</strong>
+        <button type="button" (click)="agregarAlCarrito(hero)">Agregar al carrito</button>
+      </div>
     </div>
   </div>
 
-  <div class="promo-banner__hero">
-    <img class="promo-banner__backdrop" [src]="imagenBanner" alt="Banner de K-JHUF Snacks" />
-    <img
-      *ngIf="hero.imagenMostrada"
-      class="promo-banner__product"
-      [src]="hero.imagenMostrada"
-      [alt]="hero.nombre"
-      (error)="onImageError($event)"
-    />
-    <div class="promo-banner__floating">
-      <strong>{{ hero.nombre }}</strong>
-      <span>{{ hero.descripcion }}</span>
-      <small>Lleva: {{ resumenIngredientes(hero, 4) }}</small>
-      <small>Detalle: {{ resumenDetalles(hero, 2) }}</small>
-    </div>
-    <div class="promo-banner__price">
-      <span>{{ hero.categoria }}</span>
-      <strong>${{ hero.precioFinal | number: '1.0-0' }}</strong>
-      <button type="button" (click)="agregarAlCarrito(hero)">Agregar al carrito</button>
-    </div>
+  <div class="promo-banner__codes">
+    <article class="promo-code" *ngFor="let producto of ofertas.slice(0, 3)">
+      <strong>{{ producto.resumenPromo }}</strong>
+      <span>{{ producto.nombre }}</span>
+      <small>Lleva {{ resumenIngredientes(producto, 2) }}</small>
+      <small>Detalle: {{ resumenDetalles(producto, 1) }}</small>
+    </article>
   </div>
 </section>
 

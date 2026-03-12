@@ -99,6 +99,15 @@
             </div>
           </div>
         </article>
+
+        <article class="subpanel">
+          <p class="label">Banner home</p>
+          <label>
+            <span>Imagen URL del banner</span>
+            <input [(ngModel)]="homeBannerUrl" name="homeBannerUrl" />
+          </label>
+          <button type="button" class="ghost-button" (click)="guardarBannerHome()">Guardar banner</button>
+        </article>
       </div>
     </section>
 

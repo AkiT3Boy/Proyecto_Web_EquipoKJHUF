@@ -1,5 +1,14 @@
 <div class="cart-backdrop" *ngIf="abierto" (click)="cerrar()"></div>
 
+<div class="cart-confirm-backdrop" *ngIf="modalPedidoAbierto"></div>
+
+<div class="cart-confirm-modal" *ngIf="modalPedidoAbierto">
+  <p class="cart-panel__label">Pedido listo</p>
+  <h3>Se agendo el pedido</h3>
+  <p>Tu orden ya quedo registrada y el admin la va a ver en su panel.</p>
+  <button type="button" (click)="cerrarModalPedido()">Aceptar</button>
+</div>
+
 <aside class="cart-panel" [class.cart-panel--open]="abierto">
   <div class="cart-panel__head">
     <div>

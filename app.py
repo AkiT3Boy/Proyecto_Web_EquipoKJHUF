@@ -170,6 +170,11 @@ def get_admin_config():
     return mongo.db.admin.find_one({"tipo": "config"})
 
 
+def get_home_banner_url():
+    config = get_admin_config() or {}
+    return sanitize_text(config.get("home_banner_url"))
+
+
 def normalize_pedido(data):
     items = []
     total = 0
@@ -436,6 +441,11 @@ def admin_status():
     return jsonify({"configured": bool(get_admin_config())})
 
 
+@app.route("/api/home-config", methods=["GET"])
+def home_config():
+    return jsonify({"home_banner_url": get_home_banner_url()})
+
+
 @app.route("/api/admin/setup", methods=["POST"])
 def admin_setup():
     if get_admin_config():
@@ -478,6 +488,18 @@ def admin_logout():
     token = request.headers.get("X-Admin-Token", "")
     ADMIN_TOKENS.discard(token)
     return jsonify({"msg": "Sesion cerrada"})
+
+
+@app.route("/api/admin/home-config", methods=["PATCH"])
+@require_admin
+def update_home_config():
+    banner_url = sanitize_text((request.json or {}).get("home_banner_url"))
+    mongo.db.admin.update_one(
+        {"tipo": "config"},
+        {"$set": {"home_banner_url": banner_url}},
+        upsert=True,
+    )
+    return jsonify({"msg": "Imagen de banner actualizada", "home_banner_url": banner_url})
 
 
 @app.route("/api/productos", methods=["GET"])
