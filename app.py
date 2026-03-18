@@ -1,6 +1,7 @@
 from functools import wraps
+import json
 from secrets import token_hex
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
@@ -170,6 +171,23 @@ def get_admin_config():
     return mongo.db.admin.find_one({"tipo": "config"})
 
 
+def token_valido_admin(token):
+    token = sanitize_text(token)
+    if not token:
+        return False
+
+    if token in ADMIN_TOKENS:
+        return True
+
+    config = get_admin_config() or {}
+    activos = config.get("active_tokens") or []
+    if token in activos:
+        ADMIN_TOKENS.add(token)
+        return True
+
+    return False
+
+
 def get_home_banner_url():
     config = get_admin_config() or {}
     return sanitize_text(config.get("home_banner_url"))
@@ -211,6 +229,19 @@ def normalize_pedido(data):
         "total": round(total, 2),
         "creado_en": datetime.now(timezone.utc).isoformat(),
     }
+
+
+def cleanup_pedidos():
+    ahora = datetime.now(timezone.utc)
+    expiracion_terminados = (ahora - timedelta(hours=24)).isoformat()
+
+    mongo.db.pedidos.delete_many({"estado": "cancelado"})
+    mongo.db.pedidos.delete_many(
+        {
+            "estado": "entregado",
+            "cerrado_en": {"$lte": expiracion_terminados},
+        }
+    )
 
 
 def ensure_seed_data():
@@ -429,7 +460,7 @@ def require_admin(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         token = request.headers.get("X-Admin-Token", "")
-        if token not in ADMIN_TOKENS:
+        if not token_valido_admin(token):
             return jsonify({"msg": "Sesion de admin no valida"}), 401
         return func(*args, **kwargs)
 
@@ -459,11 +490,16 @@ def admin_setup():
         {
             "tipo": "config",
             "password_hash": generate_password_hash(password),
+            "active_tokens": [],
         }
     )
 
     token = token_hex(24)
     ADMIN_TOKENS.add(token)
+    mongo.db.admin.update_one(
+        {"tipo": "config"},
+        {"$addToSet": {"active_tokens": token}},
+    )
     return jsonify({"msg": "Admin configurado", "token": token})
 
 
@@ -479,6 +515,10 @@ def admin_login():
 
     token = token_hex(24)
     ADMIN_TOKENS.add(token)
+    mongo.db.admin.update_one(
+        {"tipo": "config"},
+        {"$addToSet": {"active_tokens": token}},
+    )
     return jsonify({"msg": "Sesion iniciada", "token": token})
 
 
@@ -487,6 +527,10 @@ def admin_login():
 def admin_logout():
     token = request.headers.get("X-Admin-Token", "")
     ADMIN_TOKENS.discard(token)
+    mongo.db.admin.update_one(
+        {"tipo": "config"},
+        {"$pull": {"active_tokens": token}},
+    )
     return jsonify({"msg": "Sesion cerrada"})
 
 
@@ -624,13 +668,26 @@ def eliminar_promocion(id):
 @app.route("/api/pedidos", methods=["GET"])
 @require_admin
 def get_pedidos():
+    cleanup_pedidos()
     pedidos = [serialize_document(pedido) for pedido in mongo.db.pedidos.find().sort("creado_en", -1)]
     return jsonify(pedidos)
 
 
 @app.route("/api/pedidos", methods=["POST"])
 def crear_pedido():
-    payload = normalize_pedido(request.json or {})
+    payload_data = request.get_json(silent=True)
+
+    if payload_data is None:
+        raw_body = (request.get_data(cache=False) or b"").decode("utf-8").strip()
+        if raw_body:
+            try:
+                payload_data = json.loads(raw_body)
+            except json.JSONDecodeError:
+                payload_data = {}
+        else:
+            payload_data = {}
+
+    payload = normalize_pedido(payload_data or {})
     if not payload["items"]:
         return jsonify({"msg": "El pedido debe incluir al menos un producto"}), 400
 
@@ -646,16 +703,30 @@ def actualizar_estado_pedido(id):
         return jsonify({"msg": "Pedido invalido"}), 400
 
     estado = sanitize_text((request.json or {}).get("estado"), "pendiente").lower()
+    if estado == "terminado":
+        estado = "entregado"
     if estado not in {"pendiente", "en_proceso", "entregado", "cancelado"}:
         return jsonify({"msg": "Estado de pedido no valido"}), 400
 
-    mongo.db.pedidos.update_one({"_id": object_id}, {"$set": {"estado": estado}})
+    if estado == "cancelado":
+        mongo.db.pedidos.delete_one({"_id": object_id})
+        return jsonify({"msg": "Pedido cancelado y eliminado"})
+
+    update_fields = {"estado": estado}
+
+    if estado == "entregado":
+        update_fields["cerrado_en"] = datetime.now(timezone.utc).isoformat()
+    else:
+        update_fields["cerrado_en"] = None
+
+    mongo.db.pedidos.update_one({"_id": object_id}, {"$set": update_fields})
     return jsonify({"msg": "Estado actualizado"})
 
 
 @app.route("/api/admin/dashboard", methods=["GET"])
 @require_admin
 def admin_dashboard():
+    cleanup_pedidos()
     pedidos = [serialize_document(pedido) for pedido in mongo.db.pedidos.find()]
     promociones_activas = mongo.db.promociones.count_documents({"activo": True})
     productos_activos = mongo.db.productos.count_documents({"activo": True})

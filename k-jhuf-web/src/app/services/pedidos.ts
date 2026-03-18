@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, defer } from 'rxjs';
+import { Observable } from 'rxjs';
 import { Auth } from './auth';
 
 export type PedidoItem = {
@@ -51,44 +51,88 @@ export class Pedidos {
   ) {}
 
   crearPedido(payload: Omit<Pedido, '_id' | 'estado' | 'total'>): Observable<{ msg: string; _id: string }> {
-    return defer(async () => {
-      const controller = new AbortController();
-      const timeoutId = window.setTimeout(() => controller.abort(), 10000);
+    const sendBeaconDisponible =
+      typeof navigator !== 'undefined' &&
+      typeof navigator.sendBeacon === 'function' &&
+      typeof Blob !== 'undefined';
 
-      try {
-        const response = await fetch(this.api, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload),
-          signal: controller.signal,
-        });
+    if (sendBeaconDisponible) {
+      return new Observable<{ msg: string; _id: string }>((subscriber) => {
+        try {
+          const blob = new Blob([JSON.stringify(payload)], {
+            type: 'text/plain;charset=UTF-8',
+          });
+          const enviado = navigator.sendBeacon(this.api, blob);
 
-        const data = (await response.json().catch(() => ({}))) as Partial<{ msg: string; _id: string }>;
+          if (!enviado) {
+            subscriber.error(new Error('No se pudo poner en cola el pedido.'));
+            return;
+          }
 
-        if (!response.ok) {
-          throw new Error(data.msg || 'No se pudo enviar el pedido.');
+          subscriber.next({
+            msg: 'Pedido recibido',
+            _id: '',
+          });
+          subscriber.complete();
+        } catch (error) {
+          subscriber.error(
+            error instanceof Error ? error : new Error('No se pudo enviar el pedido.'),
+          );
+        }
+      });
+    }
+
+    return new Observable<{ msg: string; _id: string }>((subscriber) => {
+      const request = new XMLHttpRequest();
+      request.open('POST', this.api, true);
+      request.setRequestHeader('Content-Type', 'application/json');
+      request.timeout = 10000;
+
+      request.onload = () => {
+        const data = this.parseJsonResponse(request.responseText);
+
+        if (request.status >= 200 && request.status < 300) {
+          subscriber.next({
+            msg: data.msg || 'Pedido recibido',
+            _id: data._id || '',
+          });
+          subscriber.complete();
+          return;
         }
 
-        return {
-          msg: data.msg || 'Pedido recibido',
-          _id: data._id || '',
-        };
-      } catch (error) {
-        if (error instanceof DOMException && error.name === 'AbortError') {
-          throw new Error('El servidor tardo demasiado en responder. Intenta otra vez.');
-        }
+        subscriber.error(
+          new Error(data.msg || `No se pudo enviar el pedido. Codigo ${request.status || 0}.`),
+        );
+      };
 
-        if (error instanceof Error) {
-          throw error;
-        }
+      request.onerror = () => {
+        subscriber.error(new Error('No se pudo conectar con el servidor de pedidos.'));
+      };
 
-        throw new Error('No se pudo enviar el pedido.');
-      } finally {
-        window.clearTimeout(timeoutId);
-      }
+      request.ontimeout = () => {
+        subscriber.error(new Error('El servidor tardo demasiado en responder. Intenta otra vez.'));
+      };
+
+      request.onabort = () => {
+        subscriber.error(new Error('El envio del pedido fue cancelado.'));
+      };
+
+      request.send(JSON.stringify(payload));
+
+      return () => {
+        if (request.readyState !== XMLHttpRequest.DONE) {
+          request.abort();
+        }
+      };
     });
+  }
+
+  private parseJsonResponse(responseText: string): Partial<{ msg: string; _id: string }> {
+    try {
+      return JSON.parse(responseText || '{}') as Partial<{ msg: string; _id: string }>;
+    } catch {
+      return {};
+    }
   }
 
   getPedidos(): Observable<Pedido[]> {

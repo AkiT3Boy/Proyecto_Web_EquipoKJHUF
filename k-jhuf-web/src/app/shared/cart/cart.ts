@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, inject } from '@angular/core';
+import { Component, DestroyRef, NgZone, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Carrito, CartItem } from '../../services/carrito';
@@ -26,6 +26,7 @@ export class Cart {
   notas = '';
 
   private readonly destroyRef = inject(DestroyRef);
+  private readonly ngZone = inject(NgZone);
 
   constructor(
     private readonly carrito: Carrito,
@@ -95,19 +96,23 @@ export class Cart {
       })
       .subscribe({
         next: (response) => {
-          this.enviando = false;
-          this.modalConfirmacionAbierto = false;
-          this.mensaje = response.msg || 'Se agendo el pedido.';
-          this.modalPedidoAbierto = true;
-          this.carrito.clear();
-          this.cliente = '';
-          this.telefono = '';
-          this.notas = '';
+          this.ngZone.run(() => {
+            this.enviando = false;
+            this.modalConfirmacionAbierto = false;
+            this.mensaje = response.msg || 'Se agendo el pedido.';
+            this.modalPedidoAbierto = true;
+            this.carrito.clear();
+            this.cliente = '';
+            this.telefono = '';
+            this.notas = '';
+          });
         },
         error: (error) => {
-          this.enviando = false;
-          this.modalConfirmacionAbierto = true;
-          this.mensaje = error?.error?.msg || error?.message || 'No se pudo enviar el pedido. Intenta otra vez.';
+          this.ngZone.run(() => {
+            this.enviando = false;
+            this.modalConfirmacionAbierto = true;
+            this.mensaje = error?.error?.msg || error?.message || 'No se pudo enviar el pedido. Intenta otra vez.';
+          });
         },
       });
   }

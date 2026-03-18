@@ -3,7 +3,7 @@ import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { catchError, forkJoin, interval, of, startWith, switchMap } from 'rxjs';
+import { Observable, catchError, forkJoin, interval, of, startWith, switchMap } from 'rxjs';
 import { Auth } from '../../services/auth';
 import { HomeConfigService } from '../../services/home-config';
 import { DashboardAdmin, Pedido, Pedidos } from '../../services/pedidos';
@@ -305,6 +305,13 @@ export class AdminProductos implements OnInit {
     return `$${promocion.valor}`;
   }
 
+  estadoPedidoLabel(estado: Pedido['estado']): string {
+    if (estado === 'entregado') {
+      return 'terminado';
+    }
+    return estado;
+  }
+
   actualizarEstadoPedido(id: string | undefined, estado: Pedido['estado']): void {
     if (!id) {
       return;
@@ -342,11 +349,13 @@ export class AdminProductos implements OnInit {
         startWith(0),
         switchMap(() =>
           forkJoin({
-            productos: this.productosService.getProductos(true).pipe(catchError(() => of([]))),
-            promociones: this.promocionesService.getPromociones(true).pipe(catchError(() => of([]))),
-            pedidos: this.pedidosService.getPedidos().pipe(catchError(() => of([]))),
-            dashboard: this.pedidosService.getDashboard().pipe(catchError(() => of(undefined))),
-            homeConfig: this.homeConfigService.getConfig().pipe(catchError(() => of({ home_banner_url: '' }))),
+            productos: this.productosService.getProductos(true).pipe(this.adminFallback<Producto[]>([])),
+            promociones: this.promocionesService.getPromociones(true).pipe(this.adminFallback<Promocion[]>([])),
+            pedidos: this.pedidosService.getPedidos().pipe(this.adminFallback<Pedido[]>([])),
+            dashboard: this.pedidosService.getDashboard().pipe(this.adminFallback<DashboardAdmin | undefined>(undefined)),
+            homeConfig: this.homeConfigService
+              .getConfig()
+              .pipe(this.adminFallback<{ home_banner_url: string }>({ home_banner_url: '' })),
           }),
         ),
         takeUntilDestroyed(this.destroyRef),
@@ -367,11 +376,13 @@ export class AdminProductos implements OnInit {
 
   private cargarDatosUnaVez(): void {
     forkJoin({
-      productos: this.productosService.getProductos(true).pipe(catchError(() => of([]))),
-      promociones: this.promocionesService.getPromociones(true).pipe(catchError(() => of([]))),
-      pedidos: this.pedidosService.getPedidos().pipe(catchError(() => of([]))),
-      dashboard: this.pedidosService.getDashboard().pipe(catchError(() => of(undefined))),
-      homeConfig: this.homeConfigService.getConfig().pipe(catchError(() => of({ home_banner_url: '' }))),
+      productos: this.productosService.getProductos(true).pipe(this.adminFallback<Producto[]>([])),
+      promociones: this.promocionesService.getPromociones(true).pipe(this.adminFallback<Promocion[]>([])),
+      pedidos: this.pedidosService.getPedidos().pipe(this.adminFallback<Pedido[]>([])),
+      dashboard: this.pedidosService.getDashboard().pipe(this.adminFallback<DashboardAdmin | undefined>(undefined)),
+      homeConfig: this.homeConfigService
+        .getConfig()
+        .pipe(this.adminFallback<{ home_banner_url: string }>({ home_banner_url: '' })),
     }).subscribe(({ productos, promociones, pedidos, dashboard, homeConfig }) => {
       this.lista = productos;
       this.promociones = promociones;
@@ -442,5 +453,15 @@ export class AdminProductos implements OnInit {
     }
 
     this.authError = error.error?.msg || 'No se pudo completar la accion.';
+  }
+
+  private adminFallback<T>(fallback: T) {
+    return (source: Observable<T>) =>
+      source.pipe(
+        catchError((error) => {
+          this.manejarErrorAdmin(error);
+          return of(fallback);
+        }),
+      );
   }
 }

@@ -95,7 +95,7 @@
                 <strong>{{ pedido.cliente }}</strong>
                 <small>{{ totalItemsPedido(pedido) }} productos</small>
               </div>
-              <span class="status-pill" [attr.data-status]="pedido.estado">{{ pedido.estado }}</span>
+              <span class="status-pill" [attr.data-status]="pedido.estado">{{ estadoPedidoLabel(pedido.estado) }}</span>
             </div>
           </div>
         </article>
@@ -287,11 +287,11 @@
           </div>
 
           <div class="pedido-actions">
-            <span class="status-pill" [attr.data-status]="pedido.estado">{{ pedido.estado }}</span>
+            <span class="status-pill" [attr.data-status]="pedido.estado">{{ estadoPedidoLabel(pedido.estado) }}</span>
             <select [ngModel]="pedido.estado" (ngModelChange)="actualizarEstadoPedido(pedido._id, $event)">
               <option value="pendiente">pendiente</option>
               <option value="en_proceso">en_proceso</option>
-              <option value="entregado">entregado</option>
+              <option value="entregado">terminado</option>
               <option value="cancelado">cancelado</option>
             </select>
           </div>
