@@ -14,11 +14,18 @@
 </section>
 
 <section class="category-chip-list" *ngIf="!cargando">
-  <span class="category-chip" *ngFor="let categoria of categorias">{{ categoria.nombre }}</span>
+  <button
+    type="button"
+    class="category-chip"
+    *ngFor="let categoria of categorias"
+    (click)="scrollToCategoria(categoria.nombre)"
+  >
+    {{ categoria.nombre }}
+  </button>
 </section>
 
 <section *ngIf="!cargando; else cargandoTpl" class="category-sections">
-  <article class="category-block" *ngFor="let categoria of categorias">
+  <article class="category-block" *ngFor="let categoria of categorias" [attr.id]="categoryId(categoria.nombre)">
     <div class="category-block__head">
       <p class="label">Categoria</p>
       <h2>{{ categoria.nombre }}</h2>

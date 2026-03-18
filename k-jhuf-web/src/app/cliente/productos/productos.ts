@@ -57,6 +57,31 @@ export class Productos implements OnInit {
     target.style.display = 'none';
   }
 
+  scrollToCategoria(nombre: string): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    const destino = document.getElementById(this.categoryId(nombre));
+    if (!destino) {
+      return;
+    }
+
+    destino.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  }
+
+  categoryId(nombre: string): string {
+    return `categoria-${(nombre || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')}`;
+  }
+
   private agruparPorCategoria(productos: ProductoVista[]): CategoriaGrupo[] {
     const grupos = new Map<string, ProductoVista[]>();
 

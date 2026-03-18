@@ -1,5 +1,23 @@
 <div class="cart-backdrop" *ngIf="abierto" (click)="cerrar()"></div>
 
+<div class="cart-confirm-backdrop" *ngIf="modalConfirmacionAbierto"></div>
+
+<div class="cart-confirm-modal" *ngIf="modalConfirmacionAbierto">
+  <p class="cart-panel__label">Confirmar pedido</p>
+  <h3>¿Quieres enviar este pedido?</h3>
+  <p>
+    Se va a registrar a nombre de <strong>{{ cliente }}</strong> con telefono <strong>{{ telefono }}</strong>.
+  </p>
+  <p>Total: <strong>${{ total | number: '1.0-0' }}</strong></p>
+  <p class="cart-confirm-modal__message" *ngIf="mensaje">{{ mensaje }}</p>
+  <div class="cart-confirm-modal__actions">
+    <button type="button" class="cart-confirm-modal__secondary" (click)="cancelarConfirmacion()">Cancelar</button>
+    <button type="button" (click)="enviarPedido()" [disabled]="enviando">
+      {{ enviando ? 'Enviando...' : 'Si, confirmar pedido' }}
+    </button>
+  </div>
+</div>
+
 <div class="cart-confirm-backdrop" *ngIf="modalPedidoAbierto"></div>
 
 <div class="cart-confirm-modal" *ngIf="modalPedidoAbierto">
@@ -58,7 +76,7 @@
   <div class="cart-panel__footer">
     <strong>Total: ${{ total | number: '1.0-0' }}</strong>
     <p class="cart-panel__message" *ngIf="mensaje">{{ mensaje }}</p>
-    <button type="button" [disabled]="!items.length || enviando" (click)="enviarPedido()">
+    <button type="button" [disabled]="!items.length || enviando" (click)="confirmarPedido()">
       {{ enviando ? 'Enviando...' : 'Confirmar pedido' }}
     </button>
   </div>

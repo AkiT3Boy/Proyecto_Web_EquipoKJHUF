@@ -338,6 +338,10 @@
     justify-items: start;
     min-height: auto;
   }
+
+  .promo-banner__product-frame {
+    width: min(100%, 260px);
+  }
 }
 
 @media (max-width: 760px) {
@@ -345,12 +349,75 @@
     padding: 1.2rem;
   }
 
+  .promo-banner__main {
+    gap: 1rem;
+  }
+
+  .promo-banner h1 {
+    font-size: clamp(2rem, 9vw, 3rem);
+  }
+
+  .promo-banner__desc {
+    max-width: none;
+    font-size: 0.96rem;
+  }
+
   .promo-banner__product-frame {
     width: min(100%, 220px);
     padding: 0.55rem;
   }
 
+  .promo-banner__price {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .promo-banner__price button,
+  .offer-card__footer button,
+  .recomendado-card__body button {
+    width: 100%;
+  }
+
   .benefits-strip {
     grid-template-columns: 1fr;
+  }
+
+  .benefits-strip article {
+    flex-direction: column;
+  }
+
+  .offer-card__footer,
+  .recomendado-card__price {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 560px) {
+  .promo-banner {
+    padding: 1rem;
+    border-radius: 24px;
+  }
+
+  .promo-banner__codes {
+    grid-template-columns: 1fr;
+  }
+
+  .promo-banner__hero {
+    gap: 0.8rem;
+  }
+
+  .promo-banner__product-frame {
+    width: 100%;
+    max-width: none;
+  }
+
+  .promo-banner__price strong {
+    font-size: 1.6rem;
+  }
+
+  .offer-card img,
+  .recomendado-card img {
+    height: 200px;
   }
 }

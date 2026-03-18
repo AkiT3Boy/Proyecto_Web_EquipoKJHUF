@@ -410,4 +410,73 @@ h3 {
   .pedido-actions {
     justify-items: start;
   }
+
+  .admin-header,
+  .panel,
+  .auth-modal,
+  .empty-state,
+  .stat-card,
+  .subpanel {
+    border-radius: 22px;
+  }
+
+  .admin-header,
+  .panel {
+    padding: 1.2rem;
+  }
+
+  .stats-grid {
+    gap: 0.8rem;
+  }
+
+  .item-card__main img {
+    width: 100%;
+    max-width: 260px;
+    height: 180px;
+  }
+
+  .ghost-button,
+  .danger-button,
+  .logout-button,
+  .form-grid button,
+  .auth-modal button {
+    width: 100%;
+  }
+
+  .pedido-actions,
+  .item-card__actions {
+    width: 100%;
+  }
+
+  .pedido-actions select {
+    width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  .admin-header {
+    padding: 1rem;
+  }
+
+  .admin-header h1,
+  .panel h2,
+  .panel h3,
+  .subpanel h2 {
+    word-break: break-word;
+  }
+
+  .auth-modal {
+    width: min(100%, 100%);
+    padding: 1.2rem;
+  }
+
+  .mini-row,
+  .selector__item,
+  .item-card {
+    padding: 0.9rem;
+  }
+
+  .item-card__actions strong {
+    font-size: 1.3rem;
+  }
 }

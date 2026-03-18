@@ -337,7 +337,7 @@ export class AdminProductos implements OnInit {
     }
 
     this.pollingIniciado = true;
-    interval(15000)
+    interval(5000)
       .pipe(
         startWith(0),
         switchMap(() =>

@@ -18,6 +18,7 @@ export class Cart {
   total = 0;
   enviando = false;
   mensaje = '';
+  modalConfirmacionAbierto = false;
   modalPedidoAbierto = false;
 
   cliente = '';
@@ -52,13 +53,32 @@ export class Cart {
     this.carrito.remove(productoId);
   }
 
-  enviarPedido(): void {
+  confirmarPedido(): void {
     this.mensaje = '';
 
     if (!this.items.length) {
       return;
     }
 
+    if (!this.cliente.trim()) {
+      this.mensaje = 'Agrega tu nombre antes de confirmar.';
+      return;
+    }
+
+    if (!this.telefono.trim()) {
+      this.mensaje = 'Agrega tu telefono antes de confirmar.';
+      return;
+    }
+
+    this.modalConfirmacionAbierto = true;
+  }
+
+  enviarPedido(): void {
+    if (!this.items.length || this.enviando) {
+      return;
+    }
+
+    this.mensaje = '';
     this.enviando = true;
     this.pedidos
       .crearPedido({
@@ -74,9 +94,10 @@ export class Cart {
         })),
       })
       .subscribe({
-        next: () => {
+        next: (response) => {
           this.enviando = false;
-          this.mensaje = 'Se agendo el pedido.';
+          this.modalConfirmacionAbierto = false;
+          this.mensaje = response.msg || 'Se agendo el pedido.';
           this.modalPedidoAbierto = true;
           this.carrito.clear();
           this.cliente = '';
@@ -85,9 +106,14 @@ export class Cart {
         },
         error: (error) => {
           this.enviando = false;
-          this.mensaje = error.error?.msg || 'No se pudo enviar el pedido.';
+          this.modalConfirmacionAbierto = true;
+          this.mensaje = error?.error?.msg || error?.message || 'No se pudo enviar el pedido. Intenta otra vez.';
         },
       });
+  }
+
+  cancelarConfirmacion(): void {
+    this.modalConfirmacionAbierto = false;
   }
 
   cerrarModalPedido(): void {

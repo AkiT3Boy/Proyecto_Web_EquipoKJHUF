@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, defer } from 'rxjs';
 import { Auth } from './auth';
 
 export type PedidoItem = {
@@ -51,7 +51,44 @@ export class Pedidos {
   ) {}
 
   crearPedido(payload: Omit<Pedido, '_id' | 'estado' | 'total'>): Observable<{ msg: string; _id: string }> {
-    return this.http.post<{ msg: string; _id: string }>(this.api, payload);
+    return defer(async () => {
+      const controller = new AbortController();
+      const timeoutId = window.setTimeout(() => controller.abort(), 10000);
+
+      try {
+        const response = await fetch(this.api, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+          signal: controller.signal,
+        });
+
+        const data = (await response.json().catch(() => ({}))) as Partial<{ msg: string; _id: string }>;
+
+        if (!response.ok) {
+          throw new Error(data.msg || 'No se pudo enviar el pedido.');
+        }
+
+        return {
+          msg: data.msg || 'Pedido recibido',
+          _id: data._id || '',
+        };
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          throw new Error('El servidor tardo demasiado en responder. Intenta otra vez.');
+        }
+
+        if (error instanceof Error) {
+          throw error;
+        }
+
+        throw new Error('No se pudo enviar el pedido.');
+      } finally {
+        window.clearTimeout(timeoutId);
+      }
+    });
   }
 
   getPedidos(): Observable<Pedido[]> {

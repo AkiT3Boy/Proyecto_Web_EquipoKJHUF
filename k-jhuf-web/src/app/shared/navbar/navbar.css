@@ -3,6 +3,7 @@
   top: 0;
   align-self: flex-start;
   z-index: 5;
+  min-width: 0;
 }
 
 .sidebar {
@@ -146,9 +147,14 @@
 @media (max-width: 960px) {
   :host {
     position: static;
+    width: 100%;
   }
 
   .sidebar {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 1rem;
     width: 100%;
     min-height: auto;
     padding: 1rem;
@@ -158,7 +164,21 @@
 
   .sidebar__toggle {
     display: block;
-    align-self: flex-end;
+    align-self: start;
+    margin-left: auto;
+    order: 2;
+  }
+
+  .sidebar__brand {
+    width: 100%;
+    padding-top: 0;
+    align-items: center;
+    justify-content: flex-start;
+    order: 1;
+  }
+
+  .sidebar__title {
+    font-size: 1.55rem;
   }
 
   .sidebar__nav,
@@ -167,9 +187,103 @@
     display: none;
   }
 
+  .sidebar--open .sidebar__nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    order: 3;
+    grid-column: 1 / -1;
+  }
+
   .sidebar--open .sidebar__nav,
   .sidebar--open .sidebar__cart,
   .sidebar--open .sidebar__admin {
-    display: grid;
+    width: 100%;
+  }
+
+  .sidebar--open .sidebar__cart,
+  .sidebar--open .sidebar__admin {
+    display: flex;
+    order: 4;
+    justify-content: center;
+    grid-column: auto;
+  }
+
+  .sidebar__link,
+  .sidebar__cart,
+  .sidebar__admin {
+    min-height: 3.2rem;
+  }
+
+  .sidebar__link {
+    flex: 1 1 calc(50% - 0.75rem);
+    min-width: 140px;
+  }
+}
+
+@media (max-width: 640px) {
+  .sidebar {
+    padding: 0.85rem 0.8rem;
+  }
+
+  .sidebar__toggle {
+    width: 2.8rem;
+    height: 2.8rem;
+  }
+
+  .sidebar__brand {
+    gap: 0.7rem;
+  }
+
+  .sidebar__title {
+    font-size: 1.3rem;
+  }
+
+  .sidebar__subtitle {
+    font-size: 0.84rem;
+  }
+
+  .sidebar--open .sidebar__nav {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.2rem;
+    margin-right: -0.1rem;
+    scrollbar-width: thin;
+  }
+
+  .sidebar__link {
+    flex: 0 0 auto;
+    min-width: max-content;
+    padding-inline: 1rem;
+  }
+
+  .sidebar--open .sidebar__cart,
+  .sidebar--open .sidebar__admin {
+    flex: 1 1 calc(50% - 0.5rem);
+  }
+}
+
+@media (max-width: 420px) {
+  .sidebar {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar__toggle {
+    order: 1;
+  }
+
+  .sidebar__brand {
+    order: 2;
+  }
+
+  .sidebar--open .sidebar__nav {
+    order: 3;
+  }
+
+  .sidebar--open .sidebar__cart,
+  .sidebar--open .sidebar__admin {
+    grid-column: 1 / -1;
+    width: 100%;
   }
 }

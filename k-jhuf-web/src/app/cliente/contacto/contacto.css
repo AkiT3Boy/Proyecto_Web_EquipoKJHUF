@@ -82,3 +82,28 @@ h1 {
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 720px) {
+  .contacto-card {
+    padding: 1.2rem;
+    border-radius: 22px;
+  }
+
+  .contacto-card--map {
+    min-height: 22rem;
+  }
+}
+
+@media (max-width: 520px) {
+  h1 {
+    font-size: clamp(1.9rem, 10vw, 2.8rem);
+  }
+
+  .contacto-item {
+    padding: 0.9rem 1rem;
+  }
+
+  .contacto-card--map {
+    min-height: 18rem;
+  }
+}
