@@ -9,7 +9,7 @@
       <h1>El sabor que se antoja, preparado al momento</h1>
       <p class="promo-banner__phrase">{{ fraseActual }}</p>
       <p class="promo-banner__desc">
-        Aqui te mostramos lo mas pedido del dia, con fotos y promociones reales. {{ hero.nombre }}
+        Aqui te mostramos lo mas pedido del dia, con fotos y promociones reales de nuestros productos. {{ hero.nombre }}
         lleva {{ resumenIngredientes(hero) }} y se prepara asi: {{ hero.descripcion }}
       </p>
     </div>
@@ -50,7 +50,7 @@
 
 <section class="offers-section">
   <div class="section-head">
-    <p class="section-label">Ofertas de hoy</p>
+    <p class="section-label">Ofertas del dia de hoy</p>
     <h2>Productos con promo aplicada</h2>
   </div>
 
@@ -111,7 +111,7 @@
 
 <ng-template #noOffersTpl>
   <div class="home-empty">
-    <strong>Hoy no hay promos activas, pero el menu sigue disponible.</strong>
+    <strong>Hoy no hay promos activas, pero todavia el menu sigue disponible.</strong>
     <p>En cuanto cargues una promocion, aqui se va a mostrar automaticamente.</p>
   </div>
 </ng-template>
