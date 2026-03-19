@@ -56,6 +56,9 @@ export class Navbar {
     { label: 'Contacto', ruta: '/contacto' },
   ];
 
+  // Límite máximo para el nombre
+  readonly NOMBRE_MAX_LENGTH = 50;
+
   constructor(
     private readonly carrito: Carrito,
     private readonly usuarios: UsuariosService,
@@ -169,11 +172,19 @@ export class Navbar {
       });
   }
 
+  // --- MÉTODO PARA NOMBRE: filtra números y limita longitud ---
   onAuthNombreChange(valor: string): void {
-    this.authNombre = valor;
+    // Eliminar números
+    let valorFiltrado = valor.replace(/\d/g, '');
+    // Limitar a NOMBRE_MAX_LENGTH caracteres
+    if (valorFiltrado.length > this.NOMBRE_MAX_LENGTH) {
+      valorFiltrado = valorFiltrado.slice(0, this.NOMBRE_MAX_LENGTH);
+    }
+    this.authNombre = valorFiltrado;
     this.authTouched.nombre = true;
   }
 
+  // --- MÉTODO PARA TELÉFONO: usa sanitizePhone (ya filtra no dígitos y limita a 10) ---
   onAuthTelefonoChange(valor: string): void {
     this.authTelefono = this.sanitizePhone(valor);
     this.authTouched.telefono = true;
@@ -189,6 +200,7 @@ export class Navbar {
     this.authTouched.confirm = true;
   }
 
+  // --- Getters de error (sin cambios) ---
   get authNombreError(): string {
     if (this.modoUsuario !== 'registro' || !this.authTouched.nombre) {
       return '';
@@ -217,6 +229,7 @@ export class Navbar {
     return this.authPassword === this.authConfirm ? '' : 'Las contrasenas no coinciden.';
   }
 
+  // --- Validaciones privadas ---
   private nombreValido(nombre: string): boolean {
     const valor = (nombre || '').trim();
     return valor.length >= 3 && /[A-Za-zÁÉÍÓÚáéíóúÑñ]/.test(valor);
@@ -252,5 +265,13 @@ export class Navbar {
       password: false,
       confirm: false,
     };
+  }
+    soloLetras(event: KeyboardEvent) {
+    const char = event.key;
+    const regex = /^[A-Za-zÁÉÍÓÚáéíóúñÑ ]+$/;
+
+    if (!regex.test(char)) {
+      event.preventDefault();
+    }
   }
 }

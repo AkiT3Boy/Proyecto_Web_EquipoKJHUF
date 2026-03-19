@@ -10,27 +10,36 @@
   <p *ngIf="modoUsuario === 'registro'">Crea tu cuenta para pedir y darle seguimiento a tus compras.</p>
   <p *ngIf="modoUsuario === 'login'">Entra con tu telefono y contrasena para seguir usando tu cuenta.</p>
 
+  <!-- Campo Nombre (solo en registro) -->
   <label *ngIf="modoUsuario === 'registro'">
     <span>Nombre</span>
-    <input [ngModel]="authNombre" (ngModelChange)="onAuthNombreChange($event)" name="sidebarAuthNombre" />
+    <input [ngModel]="authNombre" (ngModelChange)="onAuthNombreChange($event)" name="sidebarAuthNombre" maxlength="50"
+      type="text" class="form-control" name="nombre" ngModel required minlength="3" pattern="^[A-Za-zÁÉÍÓÚáéíóúñÑ ]+$"
+      (keypress)="soloLetras($event)" #nombre="ngModel" />
     <small class="sidebar__field-error" *ngIf="authNombreError">{{ authNombreError }}</small>
   </label>
 
+  <!-- Campo Teléfono -->
   <label>
     <span>Telefono</span>
-    <input [ngModel]="authTelefono" (ngModelChange)="onAuthTelefonoChange($event)" name="sidebarAuthTelefono" maxlength="10" />
+    <input [ngModel]="authTelefono" (ngModelChange)="onAuthTelefonoChange($event)" name="sidebarAuthTelefono"
+      type="number" class="form-control" maxlength="10" />
     <small class="sidebar__field-error" *ngIf="authTelefonoError">{{ authTelefonoError }}</small>
   </label>
 
+  <!-- Campo Contraseña -->
   <label>
     <span>Contrasena</span>
-    <input [ngModel]="authPassword" (ngModelChange)="onAuthPasswordChange($event)" name="sidebarAuthPassword" type="password" />
+    <input [ngModel]="authPassword" (ngModelChange)="onAuthPasswordChange($event)" name="sidebarAuthPassword"
+      type="password" />
     <small class="sidebar__field-error" *ngIf="authPasswordError">{{ authPasswordError }}</small>
   </label>
 
+  <!-- Campo Confirmar Contraseña (solo en registro) -->
   <label *ngIf="modoUsuario === 'registro'">
     <span>Confirmar contrasena</span>
-    <input [ngModel]="authConfirm" (ngModelChange)="onAuthConfirmChange($event)" name="sidebarAuthConfirm" type="password" />
+    <input [ngModel]="authConfirm" (ngModelChange)="onAuthConfirmChange($event)" name="sidebarAuthConfirm"
+      type="password" />
     <small class="sidebar__field-error" *ngIf="authConfirmError">{{ authConfirmError }}</small>
   </label>
 
@@ -95,14 +104,9 @@
   </div>
 
   <nav class="sidebar__nav">
-    <a
-      *ngFor="let enlace of enlaces"
-      class="sidebar__link"
-      [routerLink]="enlace.ruta"
-      routerLinkActive="sidebar__link--active"
-      [routerLinkActiveOptions]="{ exact: enlace.ruta === '/' }"
-      (click)="cerrarMenu()"
-    >
+    <a *ngFor="let enlace of enlaces" class="sidebar__link" [routerLink]="enlace.ruta"
+      routerLinkActive="sidebar__link--active" [routerLinkActiveOptions]="{ exact: enlace.ruta === '/' }"
+      (click)="cerrarMenu()">
       {{ enlace.label }}
     </a>
   </nav>
