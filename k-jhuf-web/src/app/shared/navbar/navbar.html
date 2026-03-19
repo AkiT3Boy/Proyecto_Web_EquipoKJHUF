@@ -13,10 +13,12 @@
   <!-- Campo Nombre (solo en registro) -->
   <label *ngIf="modoUsuario === 'registro'">
     <span>Nombre</span>
-    <input [ngModel]="authNombre" (ngModelChange)="onAuthNombreChange($event)" name="sidebarAuthNombre" maxlength="50"
+    <input [ngModel]="authNombre" (ngModelChange)="onAuthNombreChange($event)" name="sidebarAuthNombre" maxlength="40"
       type="text" class="form-control" name="nombre" ngModel required minlength="3" pattern="^[A-Za-zÁÉÍÓÚáéíóúñÑ ]+$"
       (keypress)="soloLetras($event)" #nombre="ngModel" />
     <small class="sidebar__field-error" *ngIf="authNombreError">{{ authNombreError }}</small>
+    <small class="sidebar__field-warning" *ngIf="!authNombreError && authNombre.length === 40">Se ha alcanzado el límite
+      de 40 caracteres.</small>
   </label>
 
   <!-- Campo Teléfono -->

@@ -137,6 +137,13 @@
   color: #b74a2d;
 }
 
+.sidebar__field-warning {
+  margin-top: 0.1rem;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.82rem;
+  color: #d98826;
+}
+
 .sidebar__auth-actions {
   display: grid;
   gap: 0.7rem;
