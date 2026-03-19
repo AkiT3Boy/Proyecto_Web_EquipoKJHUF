@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, timeout } from 'rxjs';
 import { Auth } from './auth';
 import { UsuariosService } from './usuarios';
 
@@ -53,58 +53,13 @@ export class Pedidos {
   ) {}
 
   crearPedido(payload: Omit<Pedido, '_id' | 'estado' | 'total'>): Observable<{ msg: string; _id: string }> {
-    return new Observable<{ msg: string; _id: string }>((subscriber) => {
-      const request = new XMLHttpRequest();
-      request.open('POST', this.api, true);
-      request.setRequestHeader('Content-Type', 'application/json');
-      request.setRequestHeader('X-User-Token', this.usuarios.getToken() || '');
-      request.timeout = 10000;
-
-      request.onload = () => {
-        const data = this.parseJsonResponse(request.responseText);
-
-        if (request.status >= 200 && request.status < 300) {
-          subscriber.next({
-            msg: data.msg || 'Pedido recibido',
-            _id: data._id || '',
-          });
-          subscriber.complete();
-          return;
-        }
-
-        subscriber.error(
-          new Error(data.msg || `No se pudo enviar el pedido. Codigo ${request.status || 0}.`),
-        );
-      };
-
-      request.onerror = () => {
-        subscriber.error(new Error('No se pudo conectar con el servidor de pedidos.'));
-      };
-
-      request.ontimeout = () => {
-        subscriber.error(new Error('El servidor tardo demasiado en responder. Intenta otra vez.'));
-      };
-
-      request.onabort = () => {
-        subscriber.error(new Error('El envio del pedido fue cancelado.'));
-      };
-
-      request.send(JSON.stringify(payload));
-
-      return () => {
-        if (request.readyState !== XMLHttpRequest.DONE) {
-          request.abort();
-        }
-      };
-    });
-  }
-
-  private parseJsonResponse(responseText: string): Partial<{ msg: string; _id: string }> {
-    try {
-      return JSON.parse(responseText || '{}') as Partial<{ msg: string; _id: string }>;
-    } catch {
-      return {};
-    }
+    return this.http
+      .post<{ msg: string; _id: string }>(this.api, payload, {
+        headers: {
+          'X-User-Token': this.usuarios.getToken() || '',
+        },
+      })
+      .pipe(timeout(10000));
   }
 
   getPedidos(): Observable<Pedido[]> {

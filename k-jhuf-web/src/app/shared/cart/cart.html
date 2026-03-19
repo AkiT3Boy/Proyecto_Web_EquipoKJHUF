@@ -75,7 +75,9 @@
   <p>Total: <strong>${{ total | number: '1.0-0' }}</strong></p>
   <p class="cart-confirm-modal__message" *ngIf="mensaje">{{ mensaje }}</p>
   <div class="cart-confirm-modal__actions">
-    <button type="button" class="cart-confirm-modal__secondary" (click)="cancelarConfirmacion()">Cancelar</button>
+    <button type="button" class="cart-confirm-modal__secondary" (click)="cancelarConfirmacion()" [disabled]="enviando">
+      Cancelar
+    </button>
     <button type="button" (click)="enviarPedido()" [disabled]="enviando">
       {{ enviando ? 'Enviando...' : 'Si, confirmar pedido' }}
     </button>

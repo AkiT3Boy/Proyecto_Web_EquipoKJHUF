@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, NgZone, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, DestroyRef, NgZone, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Carrito, CartItem } from '../../services/carrito';
@@ -49,6 +49,7 @@ export class Cart {
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly ngZone = inject(NgZone);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   constructor(
     private readonly carrito: Carrito,
@@ -142,21 +143,27 @@ export class Cart {
       .subscribe({
         next: (response) => {
           this.ngZone.run(() => {
-            this.enviando = false;
-            this.modalConfirmacionAbierto = false;
-            this.mensaje = response.msg || 'Se agendo el pedido.';
-            this.modalPedidoAbierto = true;
-            this.carrito.clear();
-            this.cliente = this.usuario?.nombre || '';
-            this.telefono = this.usuario?.telefono || '';
-            this.notas = '';
+            window.setTimeout(() => {
+              this.enviando = false;
+              this.modalConfirmacionAbierto = false;
+              this.mensaje = response.msg || 'Se agendo el pedido.';
+              this.modalPedidoAbierto = true;
+              this.cliente = this.usuario?.nombre || '';
+              this.telefono = this.usuario?.telefono || '';
+              this.notas = '';
+              this.carrito.clear();
+              this.cdr.detectChanges();
+            }, 0);
           });
         },
         error: (error) => {
           this.ngZone.run(() => {
-            this.enviando = false;
-            this.modalConfirmacionAbierto = true;
-            this.mensaje = error?.error?.msg || error?.message || 'No se pudo enviar el pedido. Intenta otra vez.';
+            window.setTimeout(() => {
+              this.enviando = false;
+              this.modalConfirmacionAbierto = true;
+              this.mensaje = error?.error?.msg || error?.message || 'No se pudo enviar el pedido. Intenta otra vez.';
+              this.cdr.detectChanges();
+            }, 0);
           });
         },
       });
