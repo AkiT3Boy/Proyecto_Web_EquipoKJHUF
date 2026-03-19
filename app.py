@@ -7,7 +7,7 @@ from urllib.request import Request, urlopen
 
 from bson import ObjectId
 from bson.errors import InvalidId
-from flask import Flask, Response, jsonify, request
+from flask import Flask, Response, jsonify, request, g
 from flask_cors import CORS
 from flask_pymongo import PyMongo
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -19,6 +19,7 @@ app.config["MONGO_URI"] = "mongodb://localhost:27017/Kjhuf"
 mongo = PyMongo(app)
 
 ADMIN_TOKENS = set()
+USER_TOKENS = set()
 
 
 def parse_object_id(value):
@@ -39,6 +40,20 @@ def sanitize_number(value, default=0):
         return float(value)
     except (TypeError, ValueError):
         return default
+
+
+def normalize_phone(value):
+    return "".join(char for char in sanitize_text(value) if char.isdigit())
+
+
+def valid_name(value):
+    nombre = sanitize_text(value)
+    return len(nombre) >= 3 and any(char.isalpha() for char in nombre)
+
+
+def valid_phone(value):
+    telefono = normalize_phone(value)
+    return len(telefono) == 10
 
 
 def sanitize_list(value):
@@ -171,6 +186,19 @@ def get_admin_config():
     return mongo.db.admin.find_one({"tipo": "config"})
 
 
+def serialize_usuario_public(document):
+    serializado = serialize_document(document)
+    if not serializado:
+        return None
+
+    return {
+        "_id": serializado.get("_id"),
+        "nombre": sanitize_text(serializado.get("nombre")),
+        "telefono": normalize_phone(serializado.get("telefono")),
+        "creado_en": serializado.get("creado_en"),
+    }
+
+
 def token_valido_admin(token):
     token = sanitize_text(token)
     if not token:
@@ -188,12 +216,30 @@ def token_valido_admin(token):
     return False
 
 
+def token_valido_usuario(token):
+    token = sanitize_text(token)
+    if not token:
+        return None
+
+    if token in USER_TOKENS:
+        usuario = mongo.db.usuarios.find_one({"active_tokens": token})
+        if usuario:
+            return usuario
+
+    usuario = mongo.db.usuarios.find_one({"active_tokens": token})
+    if usuario:
+        USER_TOKENS.add(token)
+        return usuario
+
+    return None
+
+
 def get_home_banner_url():
     config = get_admin_config() or {}
     return sanitize_text(config.get("home_banner_url"))
 
 
-def normalize_pedido(data):
+def normalize_pedido(data, usuario=None):
     items = []
     total = 0
 
@@ -220,9 +266,17 @@ def normalize_pedido(data):
         )
         total += subtotal
 
+    cliente = sanitize_text(data.get("cliente"), "Cliente mostrador")
+    telefono = normalize_phone(data.get("telefono"))
+
+    if usuario:
+        cliente = sanitize_text(usuario.get("nombre"), cliente)
+        telefono = normalize_phone(usuario.get("telefono")) or telefono
+
     return {
-        "cliente": sanitize_text(data.get("cliente"), "Cliente mostrador"),
-        "telefono": sanitize_text(data.get("telefono")),
+        "usuario_id": str(usuario.get("_id")) if usuario and usuario.get("_id") else "",
+        "cliente": cliente,
+        "telefono": telefono,
         "notas": sanitize_text(data.get("notas")),
         "estado": "pendiente",
         "items": items,
@@ -467,9 +521,103 @@ def require_admin(func):
     return wrapper
 
 
+def require_user(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        token = request.headers.get("X-User-Token", "")
+        usuario = token_valido_usuario(token)
+        if not usuario:
+            return jsonify({"msg": "Debes iniciar sesion para agendar pedidos"}), 401
+
+        g.current_user = usuario
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
 @app.route("/api/admin/status", methods=["GET"])
 def admin_status():
     return jsonify({"configured": bool(get_admin_config())})
+
+
+@app.route("/api/usuarios/register", methods=["POST"])
+def user_register():
+    data = request.json or {}
+    nombre = sanitize_text(data.get("nombre"))
+    telefono = normalize_phone(data.get("telefono"))
+    password = sanitize_text(data.get("password"))
+
+    if not valid_name(nombre):
+        return jsonify({"msg": "Ingresa un nombre valido de al menos 3 caracteres"}), 400
+
+    if not valid_phone(telefono):
+        return jsonify({"msg": "Ingresa un numero de 10 digitos"}), 400
+
+    if len(password) < 4:
+        return jsonify({"msg": "La contrasena debe tener al menos 4 caracteres"}), 400
+
+    if mongo.db.usuarios.find_one({"telefono": telefono}):
+        return jsonify({"msg": "Ese numero ya esta registrado"}), 409
+
+    payload = {
+        "nombre": nombre,
+        "telefono": telefono,
+        "password_hash": generate_password_hash(password),
+        "active_tokens": [],
+        "creado_en": datetime.now(timezone.utc).isoformat(),
+    }
+
+    resultado = mongo.db.usuarios.insert_one(payload)
+    token = token_hex(24)
+    USER_TOKENS.add(token)
+    mongo.db.usuarios.update_one(
+        {"_id": resultado.inserted_id},
+        {"$addToSet": {"active_tokens": token}},
+    )
+
+    usuario = mongo.db.usuarios.find_one({"_id": resultado.inserted_id})
+    return jsonify({"msg": "Usuario registrado", "token": token, "usuario": serialize_usuario_public(usuario)})
+
+
+@app.route("/api/usuarios/login", methods=["POST"])
+def user_login():
+    data = request.json or {}
+    telefono = normalize_phone(data.get("telefono"))
+    password = sanitize_text(data.get("password"))
+
+    if not valid_phone(telefono):
+        return jsonify({"msg": "Ingresa un numero de 10 digitos"}), 400
+
+    usuario = mongo.db.usuarios.find_one({"telefono": telefono})
+    if not usuario or not check_password_hash(usuario.get("password_hash", ""), password):
+        return jsonify({"msg": "Telefono o contrasena incorrectos"}), 401
+
+    token = token_hex(24)
+    USER_TOKENS.add(token)
+    mongo.db.usuarios.update_one(
+        {"_id": usuario["_id"]},
+        {"$addToSet": {"active_tokens": token}},
+    )
+    usuario = mongo.db.usuarios.find_one({"_id": usuario["_id"]})
+    return jsonify({"msg": "Sesion iniciada", "token": token, "usuario": serialize_usuario_public(usuario)})
+
+
+@app.route("/api/usuarios/me", methods=["GET"])
+@require_user
+def user_me():
+    return jsonify({"usuario": serialize_usuario_public(g.current_user)})
+
+
+@app.route("/api/usuarios/logout", methods=["POST"])
+@require_user
+def user_logout():
+    token = request.headers.get("X-User-Token", "")
+    USER_TOKENS.discard(token)
+    mongo.db.usuarios.update_one(
+        {"_id": g.current_user["_id"]},
+        {"$pull": {"active_tokens": token}},
+    )
+    return jsonify({"msg": "Sesion cerrada"})
 
 
 @app.route("/api/home-config", methods=["GET"])
@@ -674,6 +822,7 @@ def get_pedidos():
 
 
 @app.route("/api/pedidos", methods=["POST"])
+@require_user
 def crear_pedido():
     payload_data = request.get_json(silent=True)
 
@@ -687,7 +836,7 @@ def crear_pedido():
         else:
             payload_data = {}
 
-    payload = normalize_pedido(payload_data or {})
+    payload = normalize_pedido(payload_data or {}, g.current_user)
     if not payload["items"]:
         return jsonify({"msg": "El pedido debe incluir al menos un producto"}), 400
 

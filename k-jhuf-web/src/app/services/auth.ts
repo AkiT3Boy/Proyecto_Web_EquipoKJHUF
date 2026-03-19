@@ -43,11 +43,11 @@ export class Auth {
   }
 
   getToken(): string | null {
-    if (typeof localStorage === 'undefined') {
+    if (typeof sessionStorage === 'undefined') {
       return null;
     }
 
-    return localStorage.getItem(this.tokenKey);
+    return sessionStorage.getItem(this.tokenKey);
   }
 
   isAuthenticated(): boolean {
@@ -62,14 +62,14 @@ export class Auth {
   }
 
   clearToken(): void {
-    if (typeof localStorage !== 'undefined') {
-      localStorage.removeItem(this.tokenKey);
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.removeItem(this.tokenKey);
     }
   }
 
   private saveToken(token: string): void {
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem(this.tokenKey, token);
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.setItem(this.tokenKey, token);
     }
   }
 }

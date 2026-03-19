@@ -1,5 +1,69 @@
 <div class="cart-backdrop" *ngIf="abierto" (click)="cerrar()"></div>
 
+<div class="cart-confirm-backdrop" *ngIf="modalUsuarioAbierto"></div>
+
+<div class="cart-confirm-modal" *ngIf="modalUsuarioAbierto">
+  <p class="cart-panel__label">Cuenta de usuario</p>
+  <h3>{{ modoUsuario === 'registro' ? 'Registrate para pedir' : 'Inicia sesion para pedir' }}</h3>
+  <p *ngIf="modoUsuario === 'registro'">Necesitas una cuenta para agendar pedidos desde el carrito.</p>
+  <p *ngIf="modoUsuario === 'login'">Inicia sesion con tu numero y contrasena para continuar.</p>
+
+  <label *ngIf="modoUsuario === 'registro'">
+    <span>Nombre</span>
+    <input [ngModel]="authNombre" (ngModelChange)="onAuthNombreChange($event)" name="authNombre" />
+    <small class="cart-field-error" *ngIf="authNombreError">{{ authNombreError }}</small>
+  </label>
+
+  <label>
+    <span>Telefono</span>
+    <input [ngModel]="authTelefono" (ngModelChange)="onAuthTelefonoChange($event)" name="authTelefono" maxlength="10" />
+    <small class="cart-field-error" *ngIf="authTelefonoError">{{ authTelefonoError }}</small>
+  </label>
+
+  <label>
+    <span>Contrasena</span>
+    <input [ngModel]="authPassword" (ngModelChange)="onAuthPasswordChange($event)" name="authPassword" type="password" />
+    <small class="cart-field-error" *ngIf="authPasswordError">{{ authPasswordError }}</small>
+  </label>
+
+  <label *ngIf="modoUsuario === 'registro'">
+    <span>Confirmar contrasena</span>
+    <input [ngModel]="authConfirm" (ngModelChange)="onAuthConfirmChange($event)" name="authConfirm" type="password" />
+    <small class="cart-field-error" *ngIf="authConfirmError">{{ authConfirmError }}</small>
+  </label>
+
+  <p class="cart-confirm-modal__message" *ngIf="authError">{{ authError }}</p>
+
+  <div class="cart-confirm-modal__actions">
+    <button type="button" class="cart-confirm-modal__secondary" (click)="cerrarModalUsuario()">Cancelar</button>
+    <button type="button" (click)="enviarAuthUsuario()">
+      {{ modoUsuario === 'registro' ? 'Crear cuenta' : 'Iniciar sesion' }}
+    </button>
+  </div>
+
+  <div class="cart-auth-switch">
+    <button *ngIf="modoUsuario === 'login'" type="button" class="cart-auth-link" (click)="abrirRegistro()">
+      No tengo cuenta, quiero registrarme
+    </button>
+    <button *ngIf="modoUsuario === 'registro'" type="button" class="cart-auth-link" (click)="abrirLogin()">
+      Ya tengo cuenta, quiero iniciar sesion
+    </button>
+  </div>
+</div>
+
+<div class="cart-confirm-backdrop" *ngIf="modalUsuarioExitoAbierto"></div>
+
+<div class="cart-confirm-modal" *ngIf="modalUsuarioExitoAbierto">
+  <p class="cart-panel__label">Cuenta lista</p>
+  <h3>Todo listo</h3>
+  <p>{{ authExito }}</p>
+  <p>Ya puedes seguir con tu pedido usando los datos de tu cuenta.</p>
+  <div class="cart-confirm-modal__actions">
+    <button type="button" class="cart-confirm-modal__secondary" (click)="cerrarModalExitoUsuario()">Cerrar</button>
+    <button type="button" (click)="cerrarModalExitoUsuario(true)">Continuar con el pedido</button>
+  </div>
+</div>
+
 <div class="cart-confirm-backdrop" *ngIf="modalConfirmacionAbierto"></div>
 
 <div class="cart-confirm-modal" *ngIf="modalConfirmacionAbierto">
@@ -58,12 +122,20 @@
     <div class="cart-form">
       <label>
         <span>Nombre</span>
-        <input [(ngModel)]="cliente" name="cliente" />
+        <input [ngModel]="cliente" (ngModelChange)="onClienteChange($event)" name="cliente" [readonly]="!!usuario" />
+        <small class="cart-field-error" *ngIf="clienteError">{{ clienteError }}</small>
       </label>
 
       <label>
         <span>Telefono</span>
-        <input [(ngModel)]="telefono" name="telefono" />
+        <input
+          [ngModel]="telefono"
+          (ngModelChange)="onTelefonoChange($event)"
+          name="telefono"
+          maxlength="10"
+          [readonly]="!!usuario"
+        />
+        <small class="cart-field-error" *ngIf="telefonoError">{{ telefonoError }}</small>
       </label>
 
       <label>

@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Auth } from './auth';
+import { UsuariosService } from './usuarios';
 
 export type PedidoItem = {
   producto_id: string;
@@ -48,44 +49,15 @@ export class Pedidos {
   constructor(
     private readonly http: HttpClient,
     private readonly auth: Auth,
+    private readonly usuarios: UsuariosService,
   ) {}
 
   crearPedido(payload: Omit<Pedido, '_id' | 'estado' | 'total'>): Observable<{ msg: string; _id: string }> {
-    const sendBeaconDisponible =
-      typeof navigator !== 'undefined' &&
-      typeof navigator.sendBeacon === 'function' &&
-      typeof Blob !== 'undefined';
-
-    if (sendBeaconDisponible) {
-      return new Observable<{ msg: string; _id: string }>((subscriber) => {
-        try {
-          const blob = new Blob([JSON.stringify(payload)], {
-            type: 'text/plain;charset=UTF-8',
-          });
-          const enviado = navigator.sendBeacon(this.api, blob);
-
-          if (!enviado) {
-            subscriber.error(new Error('No se pudo poner en cola el pedido.'));
-            return;
-          }
-
-          subscriber.next({
-            msg: 'Pedido recibido',
-            _id: '',
-          });
-          subscriber.complete();
-        } catch (error) {
-          subscriber.error(
-            error instanceof Error ? error : new Error('No se pudo enviar el pedido.'),
-          );
-        }
-      });
-    }
-
     return new Observable<{ msg: string; _id: string }>((subscriber) => {
       const request = new XMLHttpRequest();
       request.open('POST', this.api, true);
       request.setRequestHeader('Content-Type', 'application/json');
+      request.setRequestHeader('X-User-Token', this.usuarios.getToken() || '');
       request.timeout = 10000;
 
       request.onload = () => {

@@ -1,4 +1,70 @@
+<div class="sidebar__modal-backdrop" *ngIf="modalUsuarioAbierto" (click)="cerrarModalUsuario()"></div>
+
+<div class="sidebar__auth-modal" *ngIf="modalUsuarioAbierto">
+  <div class="sidebar__auth-head">
+    <p class="sidebar__auth-label">Cuenta de cliente</p>
+    <button type="button" class="sidebar__auth-close" (click)="cerrarModalUsuario()">×</button>
+  </div>
+
+  <h3>{{ modoUsuario === 'registro' ? 'Registrate' : 'Inicia sesion' }}</h3>
+  <p *ngIf="modoUsuario === 'registro'">Crea tu cuenta para pedir y darle seguimiento a tus compras.</p>
+  <p *ngIf="modoUsuario === 'login'">Entra con tu telefono y contrasena para seguir usando tu cuenta.</p>
+
+  <label *ngIf="modoUsuario === 'registro'">
+    <span>Nombre</span>
+    <input [ngModel]="authNombre" (ngModelChange)="onAuthNombreChange($event)" name="sidebarAuthNombre" />
+    <small class="sidebar__field-error" *ngIf="authNombreError">{{ authNombreError }}</small>
+  </label>
+
+  <label>
+    <span>Telefono</span>
+    <input [ngModel]="authTelefono" (ngModelChange)="onAuthTelefonoChange($event)" name="sidebarAuthTelefono" maxlength="10" />
+    <small class="sidebar__field-error" *ngIf="authTelefonoError">{{ authTelefonoError }}</small>
+  </label>
+
+  <label>
+    <span>Contrasena</span>
+    <input [ngModel]="authPassword" (ngModelChange)="onAuthPasswordChange($event)" name="sidebarAuthPassword" type="password" />
+    <small class="sidebar__field-error" *ngIf="authPasswordError">{{ authPasswordError }}</small>
+  </label>
+
+  <label *ngIf="modoUsuario === 'registro'">
+    <span>Confirmar contrasena</span>
+    <input [ngModel]="authConfirm" (ngModelChange)="onAuthConfirmChange($event)" name="sidebarAuthConfirm" type="password" />
+    <small class="sidebar__field-error" *ngIf="authConfirmError">{{ authConfirmError }}</small>
+  </label>
+
+  <p class="sidebar__auth-error" *ngIf="authError">{{ authError }}</p>
+
+  <div class="sidebar__auth-actions">
+    <button type="button" class="sidebar__auth-secondary" (click)="cerrarModalUsuario()">Cancelar</button>
+    <button type="button" (click)="enviarAuthUsuario()">
+      {{ modoUsuario === 'registro' ? 'Crear cuenta' : 'Iniciar sesion' }}
+    </button>
+  </div>
+
+  <button *ngIf="modoUsuario === 'login'" type="button" class="sidebar__auth-switch" (click)="abrirRegistro()">
+    No tengo cuenta, quiero registrarme
+  </button>
+  <button *ngIf="modoUsuario === 'registro'" type="button" class="sidebar__auth-switch" (click)="abrirLogin()">
+    Ya tengo cuenta, quiero iniciar sesion
+  </button>
+</div>
+
+<div class="sidebar__auth-modal" *ngIf="modalUsuarioExitoAbierto">
+  <div class="sidebar__auth-head">
+    <p class="sidebar__auth-label">Cuenta lista</p>
+    <button type="button" class="sidebar__auth-close" (click)="cerrarModalExitoUsuario()">×</button>
+  </div>
+  <h3>Todo listo</h3>
+  <p>{{ authExito }}</p>
+  <div class="sidebar__auth-actions">
+    <button type="button" (click)="cerrarModalExitoUsuario()">Aceptar</button>
+  </div>
+</div>
+
 <aside class="sidebar" [class.sidebar--open]="menuAbierto">
+
   <button class="sidebar__toggle" type="button" (click)="toggleMenu()" aria-label="Abrir menu">
     <span></span>
     <span></span>
@@ -11,6 +77,21 @@
       <a class="sidebar__title" routerLink="/" (click)="cerrarMenu()">K-JHUF</a>
       <p class="sidebar__subtitle">Snacks premium</p>
     </div>
+  </div>
+
+  <div class="sidebar__user" *ngIf="usuario as user">
+    <img [src]="avatarDefault" [alt]="user.nombre" />
+    <div>
+      <strong>{{ user.nombre }}</strong>
+      <small>{{ user.telefono }}</small>
+    </div>
+  </div>
+
+  <div class="sidebar__auth-buttons" *ngIf="!usuario">
+    <button type="button" class="sidebar__auth-button" (click)="abrirLogin()">Iniciar sesion</button>
+    <button type="button" class="sidebar__auth-button sidebar__auth-button--ghost" (click)="abrirRegistro()">
+      Registrarse
+    </button>
   </div>
 
   <nav class="sidebar__nav">
@@ -29,6 +110,10 @@
   <button class="sidebar__cart" type="button" (click)="abrirCarrito()">
     Carrito
     <span *ngIf="totalItems">{{ totalItems }}</span>
+  </button>
+
+  <button *ngIf="usuario" class="sidebar__user-action" type="button" (click)="cerrarSesionUsuario()">
+    Cerrar sesion
   </button>
 
   <a class="sidebar__admin" routerLink="/admin" routerLinkActive="sidebar__admin--active" (click)="cerrarMenu()">

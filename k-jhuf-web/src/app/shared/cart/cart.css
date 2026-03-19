@@ -37,6 +37,33 @@
   color: var(--text-soft);
 }
 
+.cart-confirm-modal label {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.8rem;
+}
+
+.cart-confirm-modal span {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.85rem;
+  color: var(--text-soft);
+}
+
+.cart-field-error {
+  margin-top: 0.1rem;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.82rem;
+  color: #b74a2d;
+}
+
+.cart-confirm-modal input {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(129, 104, 91, 0.18);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.94);
+}
+
 .cart-confirm-modal__message {
   margin: 0.6rem 0 0;
   color: #b74a2d !important;
@@ -68,6 +95,21 @@
 .cart-confirm-modal__secondary {
   color: var(--accent) !important;
   background: rgba(240, 95, 65, 0.1) !important;
+}
+
+.cart-auth-switch {
+  margin-top: 0.8rem;
+}
+
+.cart-auth-link {
+  border: 0;
+  padding: 0;
+  color: var(--accent);
+  background: transparent !important;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .cart-panel {

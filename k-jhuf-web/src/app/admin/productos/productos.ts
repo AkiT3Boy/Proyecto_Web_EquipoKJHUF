@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { Component, DestroyRef, OnDestroy, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -36,7 +36,7 @@ type PromocionForm = {
   templateUrl: './productos.html',
   styleUrls: ['./productos.css'],
 })
-export class AdminProductos implements OnInit {
+export class AdminProductos implements OnInit, OnDestroy {
   adminListo = false;
   configurado = false;
   autenticado = false;
@@ -85,6 +85,24 @@ export class AdminProductos implements OnInit {
       },
       error: () => {
         this.adminListo = true;
+      },
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (!this.autenticado) {
+      this.auth.clearToken();
+      return;
+    }
+
+    this.auth.logout().subscribe({
+      next: () => {
+        this.auth.clearToken();
+        this.autenticado = false;
+      },
+      error: () => {
+        this.auth.clearToken();
+        this.autenticado = false;
       },
     });
   }
