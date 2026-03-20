@@ -544,3 +544,54 @@ h3 {
     font-size: 1.3rem;
   }
 }
+
+@media (max-width: 520px) {
+
+  /* 🔥 GRID DE PRODUCTOS (2 POR FILA) */
+  .items-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.7rem;
+  }
+
+  /* 🔥 CARD TIPO CATÁLOGO (VERTICAL) */
+  .item-card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.8rem;
+  }
+
+  /* 🔥 IMAGEN ARRIBA (CLAVE) */
+  .item-card__main {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .item-card__main img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+  }
+
+  /* 🔻 CONTENIDO ORDENADO */
+  .item-card__actions {
+    width: 100%;
+    justify-items: start;
+  }
+
+  /* 🔥 LIMPIEZA DE TEXTO (MISMO ENFOQUE) */
+  .item-card small,
+  .mini-row small,
+  .empty-state p {
+    display: none;
+  }
+
+  /* 🔻 BOTONES MÁS COMPACTOS */
+  .item-card__actions button,
+  .pedido-actions button {
+    width: 100%;
+    font-size: 0.8rem;
+    padding: 0.5rem;
+  }
+
+}
