@@ -10,25 +10,25 @@
 
   <label *ngIf="modoUsuario === 'registro'">
     <span>Nombre</span>
-    <input [ngModel]="authNombre" (ngModelChange)="onAuthNombreChange($event)" name="authNombre" />
+    <input [ngModel]="authNombre" (ngModelChange)="onAuthNombreChange($event)" name="authNombre" maxlength="60" />
     <small class="cart-field-error" *ngIf="authNombreError">{{ authNombreError }}</small>
   </label>
 
   <label>
     <span>Telefono</span>
-    <input [ngModel]="authTelefono" (ngModelChange)="onAuthTelefonoChange($event)" name="authTelefono" maxlength="10" />
+    <input [ngModel]="authTelefono" (ngModelChange)="onAuthTelefonoChange($event)" name="authTelefono" maxlength="10" inputmode="numeric" />
     <small class="cart-field-error" *ngIf="authTelefonoError">{{ authTelefonoError }}</small>
   </label>
 
   <label>
     <span>Contrasena</span>
-    <input [ngModel]="authPassword" (ngModelChange)="onAuthPasswordChange($event)" name="authPassword" type="password" />
+    <input [ngModel]="authPassword" (ngModelChange)="onAuthPasswordChange($event)" name="authPassword" type="password" maxlength="32" />
     <small class="cart-field-error" *ngIf="authPasswordError">{{ authPasswordError }}</small>
   </label>
 
   <label *ngIf="modoUsuario === 'registro'">
     <span>Confirmar contrasena</span>
-    <input [ngModel]="authConfirm" (ngModelChange)="onAuthConfirmChange($event)" name="authConfirm" type="password" />
+    <input [ngModel]="authConfirm" (ngModelChange)="onAuthConfirmChange($event)" name="authConfirm" type="password" maxlength="32" />
     <small class="cart-field-error" *ngIf="authConfirmError">{{ authConfirmError }}</small>
   </label>
 
@@ -112,6 +112,7 @@
           <input
             type="number"
             min="1"
+            max="50"
             [ngModel]="item.cantidad"
             (ngModelChange)="cambiarCantidad(item.producto_id, $event)"
           />
@@ -124,7 +125,7 @@
     <div class="cart-form">
       <label>
         <span>Nombre</span>
-        <input [ngModel]="cliente" (ngModelChange)="onClienteChange($event)" name="cliente" [readonly]="!!usuario" />
+        <input [ngModel]="cliente" (ngModelChange)="onClienteChange($event)" name="cliente" maxlength="60" [readonly]="!!usuario" />
         <small class="cart-field-error" *ngIf="clienteError">{{ clienteError }}</small>
       </label>
 
@@ -142,7 +143,7 @@
 
       <label>
         <span>Notas</span>
-        <textarea [(ngModel)]="notas" name="notas" rows="3"></textarea>
+        <textarea [(ngModel)]="notas" name="notas" rows="3" maxlength="200"></textarea>
       </label>
     </div>
   </div>

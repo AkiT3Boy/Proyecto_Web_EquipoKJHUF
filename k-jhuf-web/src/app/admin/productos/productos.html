@@ -34,13 +34,13 @@
 
       <label>
         <span>Contrasena</span>
-        <input [ngModel]="authPassword" (ngModelChange)="onAuthPasswordChange($event)" name="authPassword" type="password" />
+        <input [ngModel]="authPassword" (ngModelChange)="onAuthPasswordChange($event)" name="authPassword" type="password" maxlength="32" />
         <small class="field-error" *ngIf="authPasswordError">{{ authPasswordError }}</small>
       </label>
 
       <label *ngIf="modoAuth === 'setup'">
         <span>Confirmar contrasena</span>
-        <input [ngModel]="authConfirm" (ngModelChange)="onAuthConfirmChange($event)" name="authConfirm" type="password" />
+        <input [ngModel]="authConfirm" (ngModelChange)="onAuthConfirmChange($event)" name="authConfirm" type="password" maxlength="32" />
         <small class="field-error" *ngIf="authConfirmError">{{ authConfirmError }}</small>
       </label>
 
@@ -107,7 +107,7 @@
           <p class="label">Banner home</p>
           <label>
             <span>Imagen URL del banner</span>
-            <input [ngModel]="homeBannerUrl" (ngModelChange)="onBannerChange($event)" name="homeBannerUrl" />
+            <input [ngModel]="homeBannerUrl" (ngModelChange)="onBannerChange($event)" name="homeBannerUrl" maxlength="400" />
             <small class="field-error" *ngIf="bannerError">{{ bannerError }}</small>
           </label>
           <button type="button" class="ghost-button" (click)="guardarBannerHome()">Guardar banner</button>
@@ -129,7 +129,7 @@
       <form class="form-grid" (ngSubmit)="guardarProducto()">
         <label>
           <span>Nombre</span>
-          <input [ngModel]="productoForm.nombre" (ngModelChange)="onProductoFieldChange('nombre', $event)" name="nombre" required />
+          <input [ngModel]="productoForm.nombre" (ngModelChange)="onProductoFieldChange('nombre', $event)" name="nombre" maxlength="80" required />
           <small class="field-error" *ngIf="productoNombreError">{{ productoNombreError }}</small>
         </label>
 
@@ -140,6 +140,7 @@
             (ngModelChange)="onProductoFieldChange('descripcion', $event)"
             name="descripcion"
             rows="3"
+            maxlength="220"
           ></textarea>
           <small class="field-error" *ngIf="productoDescripcionError">{{ productoDescripcionError }}</small>
         </label>
@@ -147,7 +148,7 @@
         <div class="form-grid__row">
           <label>
             <span>Precio</span>
-            <input [ngModel]="productoForm.precio" (ngModelChange)="onProductoFieldChange('precio', $event)" name="precio" type="number" required />
+            <input [ngModel]="productoForm.precio" (ngModelChange)="onProductoFieldChange('precio', $event)" name="precio" type="number" min="1" max="9999" required />
             <small class="field-error" *ngIf="productoPrecioError">{{ productoPrecioError }}</small>
           </label>
 
@@ -162,7 +163,7 @@
 
         <label>
           <span>Imagen URL</span>
-          <input [ngModel]="productoForm.imagen_url" (ngModelChange)="onProductoFieldChange('imagen_url', $event)" name="imagen_url" />
+          <input [ngModel]="productoForm.imagen_url" (ngModelChange)="onProductoFieldChange('imagen_url', $event)" name="imagen_url" maxlength="400" />
           <small class="field-error" *ngIf="productoImagenError">{{ productoImagenError }}</small>
         </label>
 
@@ -182,6 +183,7 @@
             (ngModelChange)="onProductoFieldChange('ingredientesTexto', $event)"
             name="ingredientesTexto"
             rows="4"
+            maxlength="400"
           ></textarea>
           <small class="field-error" *ngIf="productoIngredientesError">{{ productoIngredientesError }}</small>
         </label>
@@ -193,6 +195,7 @@
             (ngModelChange)="onProductoFieldChange('detallesTexto', $event)"
             name="detallesTexto"
             rows="4"
+            maxlength="400"
           ></textarea>
           <small class="field-error" *ngIf="productoDetallesError">{{ productoDetallesError }}</small>
         </label>
@@ -236,7 +239,7 @@
       <form class="form-grid" (ngSubmit)="guardarPromocion()">
         <label>
           <span>Titulo</span>
-          <input [ngModel]="promocionForm.titulo" (ngModelChange)="onPromocionFieldChange('titulo', $event)" name="titulo" required />
+          <input [ngModel]="promocionForm.titulo" (ngModelChange)="onPromocionFieldChange('titulo', $event)" name="titulo" maxlength="80" required />
           <small class="field-error" *ngIf="promocionTituloError">{{ promocionTituloError }}</small>
         </label>
 
@@ -247,6 +250,7 @@
             (ngModelChange)="onPromocionFieldChange('descripcion', $event)"
             name="descripcion"
             rows="3"
+            maxlength="180"
           ></textarea>
           <small class="field-error" *ngIf="promocionDescripcionError">{{ promocionDescripcionError }}</small>
         </label>
@@ -262,7 +266,7 @@
 
           <label>
             <span>{{ tipoPromocionLabel }}</span>
-            <input [ngModel]="promocionForm.valor" (ngModelChange)="onPromocionFieldChange('valor', $event)" name="valor" type="number" required />
+            <input [ngModel]="promocionForm.valor" (ngModelChange)="onPromocionFieldChange('valor', $event)" name="valor" type="number" min="1" max="9999" required />
             <small class="field-error" *ngIf="promocionValorError">{{ promocionValorError }}</small>
           </label>
         </div>

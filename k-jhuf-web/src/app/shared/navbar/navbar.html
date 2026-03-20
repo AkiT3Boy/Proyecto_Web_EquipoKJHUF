@@ -34,7 +34,7 @@
   <label>
     <span>Contrasena</span>
     <input [ngModel]="authPassword" (ngModelChange)="onAuthPasswordChange($event)" name="sidebarAuthPassword"
-      type="password" />
+      type="password" maxlength="32" />
     <small class="sidebar__field-error" *ngIf="authPasswordError">{{ authPasswordError }}</small>
   </label>
 
@@ -42,7 +42,7 @@
   <label *ngIf="modoUsuario === 'registro'">
     <span>Confirmar contrasena</span>
     <input [ngModel]="authConfirm" (ngModelChange)="onAuthConfirmChange($event)" name="sidebarAuthConfirm"
-      type="password" />
+      type="password" maxlength="32" />
     <small class="sidebar__field-error" *ngIf="authConfirmError">{{ authConfirmError }}</small>
   </label>
 
