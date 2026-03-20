@@ -16,7 +16,30 @@
     <p>{{ promo.descripcion }}</p>
     <strong>{{ promo.etiquetaValor }}</strong>
     <small *ngIf="promo.productosRelacionados.length">
-      Aplica a: {{ promo.productosRelacionados.join(', ') }}
+      Aplica a: {{ nombresRelacionados(promo) }}
     </small>
+    <button type="button" class="promo-card__action" (click)="usarPromocion(promo)">
+      {{ promo.accionLabel }}
+    </button>
   </article>
 </section>
+
+<div class="promo-modal-backdrop" *ngIf="modalSeleccionAbierto" (click)="cerrarSeleccionPromocion()"></div>
+
+<div class="promo-modal" *ngIf="modalSeleccionAbierto && promocionSeleccionada as promo">
+  <p class="label">Elegir producto</p>
+  <h2>{{ promo.titulo }}</h2>
+  <p>{{ promo.descripcion }}</p>
+
+  <div class="promo-modal__list">
+    <button type="button" class="promo-modal__item" *ngFor="let producto of promo.productosRelacionados" (click)="elegirProductoPromocion(producto)">
+      <div>
+        <strong>{{ producto.nombre }}</strong>
+        <small>{{ producto.descripcion }}</small>
+      </div>
+      <span>${{ producto.precioFinal | number: '1.0-0' }}</span>
+    </button>
+  </div>
+
+  <button type="button" class="promo-modal__close" (click)="cerrarSeleccionPromocion()">Cancelar</button>
+</div>

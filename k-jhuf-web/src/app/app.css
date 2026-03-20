@@ -16,6 +16,12 @@
   padding: 2rem;
 }
 
+@media (max-width: 1280px) {
+  .app-content {
+    padding: 1.4rem;
+  }
+}
+
 @media (max-width: 960px) {
   .app-shell {
     flex-direction: column;

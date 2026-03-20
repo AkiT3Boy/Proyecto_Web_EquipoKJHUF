@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { ProductoVista } from './catalogo';
+import { Promocion } from './promociones';
 
 export type CartItem = {
   producto_id: string;
@@ -10,6 +11,18 @@ export type CartItem = {
   cantidad: number;
   imagen_url: string;
   promoResumen: string;
+  promocionesAplicadas: Promocion[];
+};
+
+export type CartDiscount = {
+  label: string;
+  amount: number;
+};
+
+export type CartPricing = {
+  subtotal: number;
+  descuentos: CartDiscount[];
+  total: number;
 };
 
 @Injectable({
@@ -36,21 +49,27 @@ export class Carrito {
   }
 
   add(producto: ProductoVista): void {
+    this.addMany(producto, 1);
+  }
+
+  addMany(producto: ProductoVista, cantidad = 1): void {
     const items = [...this.items$.value];
     const productoId = producto._id || producto.nombre;
     const existente = items.find((item) => item.producto_id === productoId);
+    const precioVisual = this.calcularPrecioVisual(producto);
 
     if (existente) {
-      existente.cantidad += 1;
+      existente.cantidad += cantidad;
     } else {
       items.push({
         producto_id: productoId,
         nombre: producto.nombre,
-        precio: producto.precioFinal,
+        precio: precioVisual,
         precioOriginal: producto.precio,
-        cantidad: 1,
+        cantidad,
         imagen_url: producto.imagenMostrada,
         promoResumen: producto.resumenPromo,
+        promocionesAplicadas: producto.promocionesAplicadas || [],
       });
     }
 
@@ -84,7 +103,19 @@ export class Carrito {
   }
 
   getSubtotal(): number {
-    return this.items$.value.reduce((acc, item) => acc + item.precio * item.cantidad, 0);
+    return this.getPricing().total;
+  }
+
+  getPricing(): CartPricing {
+    const subtotal = this.items$.value.reduce((acc, item) => acc + item.precio * item.cantidad, 0);
+    const descuentos = this.calcularDescuentos();
+    const total = Math.max(subtotal - descuentos.reduce((acc, item) => acc + item.amount, 0), 0);
+
+    return {
+      subtotal: Number(subtotal.toFixed(2)),
+      descuentos,
+      total: Number(total.toFixed(2)),
+    };
   }
 
   private setItems(items: CartItem[]): void {
@@ -105,9 +136,78 @@ export class Carrito {
     }
 
     try {
-      return JSON.parse(saved) as CartItem[];
+      return (JSON.parse(saved) as CartItem[]).map((item) => ({
+        ...item,
+        promocionesAplicadas: item.promocionesAplicadas || [],
+      }));
     } catch {
       return [];
     }
+  }
+
+  private calcularPrecioVisual(producto: ProductoVista): number {
+    return Number(
+      (producto.promocionesAplicadas || []).reduce((acumulado, promocion) => {
+        if (promocion.tipo === 'porcentaje') {
+          return acumulado - acumulado * (promocion.valor / 100);
+        }
+
+        if (promocion.tipo === 'precio') {
+          return Math.min(acumulado, promocion.valor);
+        }
+
+        return acumulado;
+      }, producto.precio).toFixed(2),
+    );
+  }
+
+  private calcularDescuentos(): CartDiscount[] {
+    const descuentos: CartDiscount[] = [];
+    const itemsMap = new Map(this.items$.value.map((item) => [item.producto_id, item]));
+    const promos = new Map<string, Promocion>();
+
+    for (const item of this.items$.value) {
+      for (const promo of item.promocionesAplicadas || []) {
+        if (!promo._id) {
+          continue;
+        }
+        promos.set(promo._id, promo);
+      }
+    }
+
+    for (const promo of promos.values()) {
+      const ids = promo.producto_ids || [];
+      if (promo.tipo === 'combo' && ids.length >= 2) {
+        const bundleCount = Math.min(...ids.map((id) => itemsMap.get(id)?.cantidad || 0));
+        if (bundleCount > 0) {
+          const bundlePrice = ids.reduce((acc, id) => acc + (itemsMap.get(id)?.precio || 0), 0);
+          const descuento = Math.max(bundlePrice - promo.valor, 0) * bundleCount;
+          if (descuento > 0) {
+            descuentos.push({ label: promo.titulo || 'Combo', amount: Number(descuento.toFixed(2)) });
+          }
+        }
+      }
+
+      if (promo.tipo === '2x1') {
+        const preciosElegibles: number[] = [];
+        for (const id of ids) {
+          const item = itemsMap.get(id);
+          if (!item) {
+            continue;
+          }
+          preciosElegibles.push(...Array(item.cantidad).fill(item.precio));
+        }
+        if (preciosElegibles.length >= 2) {
+          preciosElegibles.sort((a, b) => a - b);
+          const gratis = Math.floor(preciosElegibles.length / 2);
+          const descuento = preciosElegibles.slice(0, gratis).reduce((acc, value) => acc + value, 0);
+          if (descuento > 0) {
+            descuentos.push({ label: promo.titulo || 'Promo 2x1', amount: Number(descuento.toFixed(2)) });
+          }
+        }
+      }
+    }
+
+    return descuentos;
   }
 }
