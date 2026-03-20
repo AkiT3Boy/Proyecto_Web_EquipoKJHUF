@@ -3,7 +3,6 @@
   top: 0;
   align-self: flex-start;
   z-index: 5;
-  min-width: 0;
 }
 
 .sidebar {
@@ -135,13 +134,6 @@
   font-family: Arial, Helvetica, sans-serif;
   font-size: 0.82rem;
   color: #b74a2d;
-}
-
-.sidebar__field-warning {
-  margin-top: 0.1rem;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 0.82rem;
-  color: #d98826;
 }
 
 .sidebar__auth-actions {
@@ -290,7 +282,7 @@
   font-weight: 700;
   text-decoration: none;
   color: #56515a;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .sidebar__link:hover,

@@ -12,6 +12,7 @@
   </div>
 
   <p class="page-error" *ngIf="autenticado && authError">{{ authError }}</p>
+  <p class="page-success" *ngIf="autenticado && pageSuccess">{{ pageSuccess }}</p>
   <p class="page-notice" *ngIf="autenticado && notificacionPedido">{{ notificacionPedido }}</p>
 
   <div class="admin-overlay" *ngIf="adminListo && !autenticado">
@@ -33,12 +34,14 @@
 
       <label>
         <span>Contrasena</span>
-        <input [(ngModel)]="authPassword" name="authPassword" type="password" />
+        <input [ngModel]="authPassword" (ngModelChange)="onAuthPasswordChange($event)" name="authPassword" type="password" />
+        <small class="field-error" *ngIf="authPasswordError">{{ authPasswordError }}</small>
       </label>
 
       <label *ngIf="modoAuth === 'setup'">
         <span>Confirmar contrasena</span>
-        <input [(ngModel)]="authConfirm" name="authConfirm" type="password" />
+        <input [ngModel]="authConfirm" (ngModelChange)="onAuthConfirmChange($event)" name="authConfirm" type="password" />
+        <small class="field-error" *ngIf="authConfirmError">{{ authConfirmError }}</small>
       </label>
 
       <p class="auth-error" *ngIf="authError">{{ authError }}</p>
@@ -104,7 +107,8 @@
           <p class="label">Banner home</p>
           <label>
             <span>Imagen URL del banner</span>
-            <input [(ngModel)]="homeBannerUrl" name="homeBannerUrl" />
+            <input [ngModel]="homeBannerUrl" (ngModelChange)="onBannerChange($event)" name="homeBannerUrl" />
+            <small class="field-error" *ngIf="bannerError">{{ bannerError }}</small>
           </label>
           <button type="button" class="ghost-button" (click)="guardarBannerHome()">Guardar banner</button>
         </article>
@@ -125,31 +129,41 @@
       <form class="form-grid" (ngSubmit)="guardarProducto()">
         <label>
           <span>Nombre</span>
-          <input [(ngModel)]="productoForm.nombre" name="nombre" required />
+          <input [ngModel]="productoForm.nombre" (ngModelChange)="onProductoFieldChange('nombre', $event)" name="nombre" required />
+          <small class="field-error" *ngIf="productoNombreError">{{ productoNombreError }}</small>
         </label>
 
         <label>
           <span>Descripcion</span>
-          <textarea [(ngModel)]="productoForm.descripcion" name="descripcion" rows="3"></textarea>
+          <textarea
+            [ngModel]="productoForm.descripcion"
+            (ngModelChange)="onProductoFieldChange('descripcion', $event)"
+            name="descripcion"
+            rows="3"
+          ></textarea>
+          <small class="field-error" *ngIf="productoDescripcionError">{{ productoDescripcionError }}</small>
         </label>
 
         <div class="form-grid__row">
           <label>
             <span>Precio</span>
-            <input [(ngModel)]="productoForm.precio" name="precio" type="number" required />
+            <input [ngModel]="productoForm.precio" (ngModelChange)="onProductoFieldChange('precio', $event)" name="precio" type="number" required />
+            <small class="field-error" *ngIf="productoPrecioError">{{ productoPrecioError }}</small>
           </label>
 
           <label>
             <span>Categoria</span>
-            <select [(ngModel)]="productoForm.categoria" name="categoria">
+            <select [ngModel]="productoForm.categoria" (ngModelChange)="onProductoFieldChange('categoria', $event)" name="categoria">
               <option *ngFor="let categoria of categoriasDisponibles" [value]="categoria">{{ categoria }}</option>
             </select>
+            <small class="field-error" *ngIf="productoCategoriaError">{{ productoCategoriaError }}</small>
           </label>
         </div>
 
         <label>
           <span>Imagen URL</span>
-          <input [(ngModel)]="productoForm.imagen_url" name="imagen_url" />
+          <input [ngModel]="productoForm.imagen_url" (ngModelChange)="onProductoFieldChange('imagen_url', $event)" name="imagen_url" />
+          <small class="field-error" *ngIf="productoImagenError">{{ productoImagenError }}</small>
         </label>
 
         <div class="preview-image" *ngIf="productoForm.imagen_url">
@@ -157,18 +171,30 @@
         </div>
 
         <label class="check-row">
-          <input [(ngModel)]="productoForm.destacado" name="destacado" type="checkbox" />
+          <input [ngModel]="productoForm.destacado" (ngModelChange)="onProductoFieldChange('destacado', $event)" name="destacado" type="checkbox" />
           <span>Mostrar como producto destacado en inicio</span>
         </label>
 
         <label>
           <span>Ingredientes</span>
-          <textarea [(ngModel)]="productoForm.ingredientesTexto" name="ingredientesTexto" rows="4"></textarea>
+          <textarea
+            [ngModel]="productoForm.ingredientesTexto"
+            (ngModelChange)="onProductoFieldChange('ingredientesTexto', $event)"
+            name="ingredientesTexto"
+            rows="4"
+          ></textarea>
+          <small class="field-error" *ngIf="productoIngredientesError">{{ productoIngredientesError }}</small>
         </label>
 
         <label>
           <span>Detalles</span>
-          <textarea [(ngModel)]="productoForm.detallesTexto" name="detallesTexto" rows="4"></textarea>
+          <textarea
+            [ngModel]="productoForm.detallesTexto"
+            (ngModelChange)="onProductoFieldChange('detallesTexto', $event)"
+            name="detallesTexto"
+            rows="4"
+          ></textarea>
+          <small class="field-error" *ngIf="productoDetallesError">{{ productoDetallesError }}</small>
         </label>
 
         <button type="submit">{{ editandoProductoId ? 'Guardar cambios' : 'Agregar producto' }}</button>
@@ -210,25 +236,34 @@
       <form class="form-grid" (ngSubmit)="guardarPromocion()">
         <label>
           <span>Titulo</span>
-          <input [(ngModel)]="promocionForm.titulo" name="titulo" required />
+          <input [ngModel]="promocionForm.titulo" (ngModelChange)="onPromocionFieldChange('titulo', $event)" name="titulo" required />
+          <small class="field-error" *ngIf="promocionTituloError">{{ promocionTituloError }}</small>
         </label>
 
         <label>
           <span>Descripcion</span>
-          <textarea [(ngModel)]="promocionForm.descripcion" name="descripcion" rows="3"></textarea>
+          <textarea
+            [ngModel]="promocionForm.descripcion"
+            (ngModelChange)="onPromocionFieldChange('descripcion', $event)"
+            name="descripcion"
+            rows="3"
+          ></textarea>
+          <small class="field-error" *ngIf="promocionDescripcionError">{{ promocionDescripcionError }}</small>
         </label>
 
         <div class="form-grid__row">
           <label>
             <span>Tipo</span>
-            <select [(ngModel)]="promocionForm.tipo" name="tipo">
+            <select [ngModel]="promocionForm.tipo" (ngModelChange)="onPromocionFieldChange('tipo', $event)" name="tipo">
               <option *ngFor="let tipo of tiposPromocion" [value]="tipo">{{ tipo }}</option>
             </select>
+            <small class="field-error" *ngIf="promocionTipoError">{{ promocionTipoError }}</small>
           </label>
 
           <label>
             <span>{{ tipoPromocionLabel }}</span>
-            <input [(ngModel)]="promocionForm.valor" name="valor" type="number" required />
+            <input [ngModel]="promocionForm.valor" (ngModelChange)="onPromocionFieldChange('valor', $event)" name="valor" type="number" required />
+            <small class="field-error" *ngIf="promocionValorError">{{ promocionValorError }}</small>
           </label>
         </div>
 
@@ -244,6 +279,7 @@
               {{ producto.nombre }}
             </label>
           </div>
+          <small class="field-error" *ngIf="promocionProductosError">{{ promocionProductosError }}</small>
         </div>
 
         <button type="submit">{{ editandoPromocionId ? 'Guardar promocion' : 'Agregar promocion' }}</button>
@@ -300,6 +336,18 @@
     </section>
   </div>
 </section>
+
+<div class="confirm-overlay" *ngIf="confirmacionAbierta">
+  <div class="confirm-modal">
+    <p class="label">Confirmar accion</p>
+    <h3>{{ confirmacionTitulo }}</h3>
+    <p>{{ confirmacionMensaje }}</p>
+    <div class="confirm-actions">
+      <button type="button" class="ghost-button" (click)="cerrarConfirmacion()">Cancelar</button>
+      <button type="button" (click)="ejecutarConfirmacion()">Si, continuar</button>
+    </div>
+  </div>
+</div>
 
 <ng-template #sinProductosTpl>
   <article class="empty-state">
