@@ -59,7 +59,7 @@ export class Navbar {
 
   // Límite máximo para el nombre
   readonly NOMBRE_MAX_LENGTH = 25;
-  private actionLockUntil = 0;
+
 
   constructor(
     private readonly carrito: Carrito,
@@ -95,24 +95,14 @@ export class Navbar {
     this.cerrarMenu();
   }
 
-  abrirCarritoDesdeEvento(event?: Event): void {
-    if (!this.consumeUiAction(event)) {
-      return;
-    }
-    this.abrirCarrito();
-  }
+
 
   abrirAdmin(): void {
     this.cerrarMenu();
     void this.router.navigateByUrl('/admin');
   }
 
-  abrirAdminDesdeEvento(event?: Event): void {
-    if (!this.consumeUiAction(event)) {
-      return;
-    }
-    this.abrirAdmin();
-  }
+
 
   cerrarSesionUsuario(): void {
     this.usuarios.logout().subscribe({
@@ -128,12 +118,7 @@ export class Navbar {
     });
   }
 
-  cerrarSesionUsuarioDesdeEvento(event?: Event): void {
-    if (!this.consumeUiAction(event)) {
-      return;
-    }
-    this.cerrarSesionUsuario();
-  }
+
 
   abrirRegistro(): void {
     this.modalUsuarioAbierto = true;
@@ -147,43 +132,21 @@ export class Navbar {
     this.resetAuthState();
   }
 
-  abrirRegistroDesdeEvento(event?: Event): void {
-    if (!this.consumeUiAction(event)) {
-      return;
-    }
-    this.abrirRegistro();
-  }
 
-  abrirLoginDesdeEvento(event?: Event): void {
-    if (!this.consumeUiAction(event)) {
-      return;
-    }
-    this.abrirLogin();
-  }
 
   cerrarModalUsuario(): void {
     this.modalUsuarioAbierto = false;
     this.resetAuthState();
   }
 
-  cerrarModalUsuarioDesdeEvento(event?: Event): void {
-    if (!this.consumeUiAction(event)) {
-      return;
-    }
-    this.cerrarModalUsuario();
-  }
+
 
   cerrarModalExitoUsuario(): void {
     this.modalUsuarioExitoAbierto = false;
     this.authExito = '';
   }
 
-  cerrarModalExitoUsuarioDesdeEvento(event?: Event): void {
-    if (!this.consumeUiAction(event)) {
-      return;
-    }
-    this.cerrarModalExitoUsuario();
-  }
+
 
   enviarAuthUsuario(): void {
     this.authError = '';
@@ -234,12 +197,7 @@ export class Navbar {
       });
   }
 
-  enviarAuthUsuarioDesdeEvento(event?: Event): void {
-    if (!this.consumeUiAction(event)) {
-      return;
-    }
-    this.enviarAuthUsuario();
-  }
+
 
   // --- MÉTODO PARA NOMBRE: filtra números y limita longitud ---
   onAuthNombreChange(valor: string): void {
@@ -340,18 +298,7 @@ export class Navbar {
     };
   }
 
-  private consumeUiAction(event?: Event): boolean {
-    event?.preventDefault();
-    event?.stopPropagation();
 
-    const now = Date.now();
-    if (now < this.actionLockUntil) {
-      return false;
-    }
-
-    this.actionLockUntil = now + 220;
-    return true;
-  }
 
     soloLetras(event: KeyboardEvent) {
     const char = event.key;

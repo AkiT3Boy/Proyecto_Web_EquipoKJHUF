@@ -5,6 +5,10 @@
   z-index: 5;
 }
 
+button, a {
+  cursor: pointer;
+}
+
 .sidebar {
   display: flex;
   flex-direction: column;

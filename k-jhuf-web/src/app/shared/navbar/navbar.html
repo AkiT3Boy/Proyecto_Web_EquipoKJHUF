@@ -1,4 +1,4 @@
-<div class="sidebar__modal-backdrop" *ngIf="modalUsuarioAbierto" (click)="cerrarModalUsuarioDesdeEvento($event)"></div>
+<div class="sidebar__modal-backdrop" *ngIf="modalUsuarioAbierto" (click)="cerrarModalUsuario()"></div>
 
 <div class="sidebar__auth-modal" *ngIf="modalUsuarioAbierto">
   <div class="sidebar__auth-dialog">
@@ -6,9 +6,7 @@
     <p class="sidebar__auth-label">Cuenta de cliente</p>
     <button
       type="button"
-      class="sidebar__auth-close"
-      (pointerdown)="cerrarModalUsuarioDesdeEvento($event)"
-      (click)="cerrarModalUsuarioDesdeEvento($event)"
+      class="sidebar__auth-close" (click)="cerrarModalUsuario()"
     >
       X
     </button>
@@ -84,16 +82,12 @@
   <div class="sidebar__auth-actions">
     <button
       type="button"
-      class="sidebar__auth-secondary"
-      (pointerdown)="cerrarModalUsuarioDesdeEvento($event)"
-      (click)="cerrarModalUsuarioDesdeEvento($event)"
+      class="sidebar__auth-secondary" (click)="cerrarModalUsuario()"
     >
       Cancelar
     </button>
     <button
-      type="button"
-      (pointerdown)="enviarAuthUsuarioDesdeEvento($event)"
-      (click)="enviarAuthUsuarioDesdeEvento($event)"
+      type="button" (click)="enviarAuthUsuario()"
     >
       {{ modoUsuario === 'registro' ? 'Crear cuenta' : 'Iniciar sesion' }}
     </button>
@@ -102,18 +96,14 @@
   <button
     *ngIf="modoUsuario === 'login'"
     type="button"
-    class="sidebar__auth-switch"
-    (pointerdown)="abrirRegistroDesdeEvento($event)"
-    (click)="abrirRegistroDesdeEvento($event)"
+    class="sidebar__auth-switch" (click)="abrirRegistro()"
   >
     No tengo cuenta, quiero registrarme
   </button>
   <button
     *ngIf="modoUsuario === 'registro'"
     type="button"
-    class="sidebar__auth-switch"
-    (pointerdown)="abrirLoginDesdeEvento($event)"
-    (click)="abrirLoginDesdeEvento($event)"
+    class="sidebar__auth-switch" (click)="abrirLogin()"
   >
     Ya tengo cuenta, quiero iniciar sesion
   </button>
@@ -126,9 +116,7 @@
     <p class="sidebar__auth-label">Cuenta lista</p>
     <button
       type="button"
-      class="sidebar__auth-close"
-      (pointerdown)="cerrarModalExitoUsuarioDesdeEvento($event)"
-      (click)="cerrarModalExitoUsuarioDesdeEvento($event)"
+      class="sidebar__auth-close" (click)="cerrarModalExitoUsuario()"
     >
       X
     </button>
@@ -137,9 +125,7 @@
   <p>{{ authExito }}</p>
   <div class="sidebar__auth-actions">
     <button
-      type="button"
-      (pointerdown)="cerrarModalExitoUsuarioDesdeEvento($event)"
-      (click)="cerrarModalExitoUsuarioDesdeEvento($event)"
+      type="button" (click)="cerrarModalExitoUsuario()"
     >
       Aceptar
     </button>
@@ -173,17 +159,13 @@
   <div class="sidebar__auth-buttons" *ngIf="!usuario">
     <button
       type="button"
-      class="sidebar__auth-button"
-      (pointerdown)="abrirLoginDesdeEvento($event)"
-      (click)="abrirLoginDesdeEvento($event)"
+      class="sidebar__auth-button" (click)="abrirLogin()"
     >
       Iniciar sesion
     </button>
     <button
       type="button"
-      class="sidebar__auth-button sidebar__auth-button--ghost"
-      (pointerdown)="abrirRegistroDesdeEvento($event)"
-      (click)="abrirRegistroDesdeEvento($event)"
+      class="sidebar__auth-button sidebar__auth-button--ghost" (click)="abrirRegistro()"
     >
       Registrarse
     </button>
@@ -211,16 +193,16 @@
     </a>
   </nav>
 
-  <button class="sidebar__cart" type="button" (pointerdown)="abrirCarritoDesdeEvento($event)" (click)="abrirCarritoDesdeEvento($event)">
+  <button class="sidebar__cart" type="button" (click)="abrirCarrito()">
     Carrito
     <span *ngIf="totalItems">{{ totalItems }}</span>
   </button>
 
-  <button *ngIf="usuario" class="sidebar__user-action" type="button" (pointerdown)="cerrarSesionUsuarioDesdeEvento($event)" (click)="cerrarSesionUsuarioDesdeEvento($event)">
+  <button *ngIf="usuario" class="sidebar__user-action" type="button" (click)="cerrarSesionUsuario()">
     Cerrar sesion
   </button>
 
-  <button class="sidebar__admin" type="button" (pointerdown)="abrirAdminDesdeEvento($event)" (click)="abrirAdminDesdeEvento($event)">
+  <button class="sidebar__admin" type="button" (click)="abrirAdmin()">
     <span class="sidebar__dot sidebar__dot--admin"></span>
     Admin
   </button>
