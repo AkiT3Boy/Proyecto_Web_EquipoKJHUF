@@ -2,6 +2,7 @@ from functools import wraps
 import json
 from secrets import token_hex
 from datetime import datetime, timezone, timedelta
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
@@ -20,6 +21,12 @@ mongo = PyMongo(app)
 
 ADMIN_TOKENS = set()
 USER_TOKENS = set()
+try:
+    LOCAL_TZ = ZoneInfo("America/Mexico_City")
+except ZoneInfoNotFoundError:
+    LOCAL_TZ = timezone(timedelta(hours=-6))
+BUSINESS_OPEN_MINUTES = 18 * 60
+BUSINESS_CLOSE_MINUTES = 23 * 60
 
 
 def parse_object_id(value):
@@ -239,32 +246,173 @@ def get_home_banner_url():
     return sanitize_text(config.get("home_banner_url"))
 
 
+def get_local_now():
+    return datetime.now(LOCAL_TZ)
+
+
+def parse_hora_entrega(value):
+    texto = sanitize_text(value)
+    if not texto:
+        return None, "Selecciona una hora para tu pedido"
+
+    try:
+        hora, minuto = texto.split(":")
+        hora = int(hora)
+        minuto = int(minuto)
+    except (ValueError, AttributeError):
+        return None, "La hora del pedido no es valida"
+
+    if hora < 0 or hora > 23 or minuto < 0 or minuto > 59:
+        return None, "La hora del pedido no es valida"
+
+    total_minutos = hora * 60 + minuto
+    return total_minutos, ""
+
+
+def validar_hora_entrega(value):
+    total_minutos, error = parse_hora_entrega(value)
+    if error:
+        return "", error
+
+    if total_minutos < BUSINESS_OPEN_MINUTES or total_minutos > BUSINESS_CLOSE_MINUTES:
+        return (
+            "",
+            "El horario para pedidos es de 18:00 a 23:00. Elige una hora dentro de ese horario",
+        )
+
+    ahora = get_local_now()
+    minutos_actuales = ahora.hour * 60 + ahora.minute
+    if total_minutos < minutos_actuales:
+        return "", "La hora del pedido debe ser de hoy y no puede ser anterior a la hora actual"
+
+    horas = str(total_minutos // 60).zfill(2)
+    minutos = str(total_minutos % 60).zfill(2)
+    return f"{horas}:{minutos}", ""
+
+
+def precio_unitario_con_promos(precio, promociones):
+    acumulado = float(precio)
+    for promocion in promociones:
+        tipo = sanitize_text(promocion.get("tipo")).lower()
+        valor = sanitize_number(promocion.get("valor"))
+
+        if tipo == "porcentaje":
+            acumulado -= acumulado * (valor / 100)
+        elif tipo == "precio":
+            acumulado = min(acumulado, valor)
+
+    return round(max(acumulado, 0), 2)
+
+
+def calcular_descuentos_grupales(items, promociones):
+    descuentos = []
+    items_map = {item.get("producto_id"): item for item in items if item.get("producto_id")}
+
+    for promocion in promociones:
+        tipo = sanitize_text(promocion.get("tipo")).lower()
+        producto_ids = [sanitize_text(producto_id) for producto_id in promocion.get("producto_ids", []) if sanitize_text(producto_id)]
+        if not producto_ids:
+            continue
+
+        if tipo == "combo" and len(producto_ids) >= 2:
+            bundle_count = min(
+                items_map.get(producto_id, {}).get("cantidad", 0) for producto_id in producto_ids
+            )
+            if bundle_count <= 0:
+                continue
+
+            bundle_regular = sum(items_map[producto_id]["precio"] for producto_id in producto_ids)
+            descuento = max(bundle_regular - sanitize_number(promocion.get("valor")), 0) * bundle_count
+            if descuento > 0:
+                descuentos.append(
+                    {
+                        "titulo": sanitize_text(promocion.get("titulo"), "Combo"),
+                        "tipo": "combo",
+                        "monto": round(descuento, 2),
+                    }
+                )
+
+        if tipo == "2x1":
+            precios_elegibles = []
+            for producto_id in producto_ids:
+                item = items_map.get(producto_id)
+                if not item:
+                    continue
+                precios_elegibles.extend([float(item.get("precio", 0))] * int(item.get("cantidad", 0)))
+
+            if len(precios_elegibles) < 2:
+                continue
+
+            precios_elegibles.sort()
+            gratis = len(precios_elegibles) // 2
+            descuento = sum(precios_elegibles[:gratis])
+            if descuento > 0:
+                descuentos.append(
+                    {
+                        "titulo": sanitize_text(promocion.get("titulo"), "Promo 2x1"),
+                        "tipo": "2x1",
+                        "monto": round(descuento, 2),
+                    }
+                )
+
+    return descuentos
+
+
 def normalize_pedido(data, usuario=None):
     items = []
-    total = 0
+    subtotal = 0
+
+    hora_entrega, hora_error = validar_hora_entrega(data.get("hora_entrega"))
+    if hora_error:
+        return {"error": hora_error}
+
+    productos_db = {}
+    producto_ids = [sanitize_text(item.get("producto_id")) for item in (data.get("items") or []) if sanitize_text(item.get("producto_id"))]
+    if producto_ids:
+        productos_db = {
+            str(producto["_id"]): producto
+            for producto in mongo.db.productos.find({"_id": {"$in": [ObjectId(producto_id) for producto_id in producto_ids if parse_object_id(producto_id)]}})
+        }
+
+    promociones_activas = [
+        promocion
+        for promocion in mongo.db.promociones.find({"activo": True})
+    ]
+    promos_por_producto = {}
+    for promocion in promociones_activas:
+        for producto_id in promocion.get("producto_ids", []):
+            producto_id = sanitize_text(producto_id)
+            if not producto_id:
+                continue
+            promos_por_producto.setdefault(producto_id, []).append(promocion)
 
     for item in (data.get("items") or []):
         producto_id = sanitize_text(item.get("producto_id"))
-        nombre = sanitize_text(item.get("nombre"))
-        precio = sanitize_number(item.get("precio"))
+        producto_db = productos_db.get(producto_id)
+        nombre = sanitize_text((producto_db or {}).get("nombre") or item.get("nombre"))
+        precio_base = sanitize_number((producto_db or {}).get("precio"), sanitize_number(item.get("precio")))
         cantidad = max(int(sanitize_number(item.get("cantidad"), 1)), 1)
-        imagen_url = sanitize_text(item.get("imagen_url") or item.get("imagen"))
-        subtotal = round(precio * cantidad, 2)
+        imagen_url = sanitize_text((producto_db or {}).get("imagen_url") or (producto_db or {}).get("imagen") or item.get("imagen_url") or item.get("imagen"))
 
         if not nombre:
             continue
+
+        promociones_item = promos_por_producto.get(producto_id, [])
+        precio = precio_unitario_con_promos(precio_base, promociones_item)
+        subtotal_item = round(precio * cantidad, 2)
 
         items.append(
             {
                 "producto_id": producto_id,
                 "nombre": nombre,
                 "precio": precio,
+                "precio_original": round(precio_base, 2),
                 "cantidad": cantidad,
                 "imagen_url": imagen_url,
-                "subtotal": subtotal,
+                "subtotal": subtotal_item,
             }
         )
-        total += subtotal
+        subtotal += subtotal_item
 
     cliente = sanitize_text(data.get("cliente"), "Cliente mostrador")
     telefono = normalize_phone(data.get("telefono"))
@@ -273,14 +421,22 @@ def normalize_pedido(data, usuario=None):
         cliente = sanitize_text(usuario.get("nombre"), cliente)
         telefono = normalize_phone(usuario.get("telefono")) or telefono
 
+    descuentos_aplicados = calcular_descuentos_grupales(items, promociones_activas)
+    total = round(max(subtotal - sum(descuento["monto"] for descuento in descuentos_aplicados), 0), 2)
+    ahora_local = get_local_now()
+
     return {
         "usuario_id": str(usuario.get("_id")) if usuario and usuario.get("_id") else "",
         "cliente": cliente,
         "telefono": telefono,
         "notas": sanitize_text(data.get("notas")),
+        "hora_entrega": hora_entrega,
+        "fecha_pedido_local": ahora_local.date().isoformat(),
         "estado": "pendiente",
         "items": items,
-        "total": round(total, 2),
+        "subtotal": round(subtotal, 2),
+        "descuentos_aplicados": descuentos_aplicados,
+        "total": total,
         "creado_en": datetime.now(timezone.utc).isoformat(),
     }
 
@@ -620,6 +776,37 @@ def user_logout():
     return jsonify({"msg": "Sesion cerrada"})
 
 
+@app.route("/api/usuarios/pedidos", methods=["GET"])
+@require_user
+def user_orders():
+    cleanup_pedidos()
+    usuario_id = str(g.current_user.get("_id"))
+    pedidos = [
+        serialize_document(pedido)
+        for pedido in mongo.db.pedidos.find({"usuario_id": usuario_id}).sort("creado_en", -1)
+    ]
+    return jsonify(pedidos)
+
+
+@app.route("/api/usuarios/pedidos/<id>/cancelar", methods=["PATCH"])
+@require_user
+def user_cancel_order(id):
+    object_id = parse_object_id(id)
+    if not object_id:
+        return jsonify({"msg": "Pedido invalido"}), 400
+
+    usuario_id = str(g.current_user.get("_id"))
+    pedido = mongo.db.pedidos.find_one({"_id": object_id, "usuario_id": usuario_id})
+    if not pedido:
+        return jsonify({"msg": "Pedido no encontrado"}), 404
+
+    if pedido.get("estado") == "entregado":
+        return jsonify({"msg": "Ese pedido ya esta terminado y no se puede cancelar"}), 400
+
+    mongo.db.pedidos.delete_one({"_id": object_id})
+    return jsonify({"msg": "Pedido cancelado"})
+
+
 @app.route("/api/home-config", methods=["GET"])
 def home_config():
     return jsonify({"home_banner_url": get_home_banner_url()})
@@ -837,6 +1024,8 @@ def crear_pedido():
             payload_data = {}
 
     payload = normalize_pedido(payload_data or {}, g.current_user)
+    if payload.get("error"):
+        return jsonify({"msg": payload["error"]}), 400
     if not payload["items"]:
         return jsonify({"msg": "El pedido debe incluir al menos un producto"}), 400
 

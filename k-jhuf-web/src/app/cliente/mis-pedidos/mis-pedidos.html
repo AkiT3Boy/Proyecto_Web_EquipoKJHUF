@@ -1,0 +1,59 @@
+<section class="orders-hero">
+  <p class="label">Mis pedidos</p>
+  <h1>Seguimiento de tus pedidos</h1>
+  <p>Aqui puedes ver lo que pediste, el estado actual y cancelar mientras siga pendiente o en proceso.</p>
+</section>
+
+<p class="orders-message" *ngIf="mensaje">{{ mensaje }}</p>
+<p class="orders-error" *ngIf="error">{{ error }}</p>
+
+<section class="orders-list" *ngIf="pedidos.length; else vacioTpl">
+  <article class="order-card" *ngFor="let pedido of pedidos">
+    <div class="order-card__head">
+      <div>
+        <p class="order-card__time">{{ pedido.fecha_pedido_local || 'Hoy' }} · {{ pedido.hora_entrega || 'Sin hora' }}</p>
+        <h2>${{ pedido.total | number: '1.0-0' }}</h2>
+      </div>
+      <span class="status-pill" [attr.data-status]="pedido.estado">{{ estadoLabel(pedido.estado) }}</span>
+    </div>
+
+    <div class="order-card__items">
+      <div class="order-item" *ngFor="let item of pedido.items">
+        <img *ngIf="item.imagen_url" [src]="item.imagen_url" [alt]="item.nombre" />
+        <div>
+          <strong>{{ item.nombre }}</strong>
+          <small>{{ item.cantidad }} x ${{ item.precio | number: '1.0-0' }}</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="order-card__discounts" *ngIf="pedido.descuentos_aplicados?.length">
+      <small *ngFor="let descuento of pedido.descuentos_aplicados">{{ descuento.titulo }}: -${{ descuento.monto | number: '1.0-0' }}</small>
+    </div>
+
+    <p class="order-card__notes" *ngIf="pedido.notas">Notas: {{ pedido.notas }}</p>
+
+    <button *ngIf="puedeCancelar(pedido)" type="button" class="cancel-button" (click)="abrirConfirmacionCancelacion(pedido)">
+      Cancelar pedido
+    </button>
+  </article>
+</section>
+
+<div class="orders-modal-backdrop" *ngIf="confirmacionAbierta" (click)="cerrarConfirmacion()"></div>
+
+<div class="orders-modal" *ngIf="confirmacionAbierta && pedidoCancelar">
+  <p class="label">Cancelar pedido</p>
+  <h2>¿Quieres cancelar este pedido?</h2>
+  <p>Se eliminara de tu historial activo y tambien desaparecera del panel del admin.</p>
+  <div class="orders-modal__actions">
+    <button type="button" class="secondary-button" (click)="cerrarConfirmacion()">Volver</button>
+    <button type="button" class="cancel-button" (click)="cancelarPedido()">Si, cancelar</button>
+  </div>
+</div>
+
+<ng-template #vacioTpl>
+  <section class="orders-empty" *ngIf="!cargando">
+    <strong>Aun no tienes pedidos.</strong>
+    <p>Cuando cierres tu carrito, tus pedidos van a aparecer aqui.</p>
+  </section>
+</ng-template>

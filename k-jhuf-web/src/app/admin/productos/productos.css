@@ -74,6 +74,11 @@ h3 {
   color: #b83b37;
 }
 
+.page-success {
+  margin: 1rem 0 0;
+  color: var(--success);
+}
+
 .page-notice {
   margin: 1rem 0 0;
   color: var(--success);
@@ -179,6 +184,13 @@ h3 {
   border: 1px solid rgba(129, 104, 91, 0.18);
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.78);
+}
+
+.field-error {
+  margin-top: 0.1rem;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.82rem;
+  color: #b83b37;
 }
 
 .form-grid__row {
@@ -380,6 +392,53 @@ h3 {
   margin-top: 0.9rem;
 }
 
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(34, 24, 20, 0.42);
+  backdrop-filter: blur(6px);
+  z-index: 30;
+}
+
+.confirm-modal {
+  width: min(100%, 420px);
+  padding: 1.6rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 26px;
+  background: var(--bg-panel);
+  box-shadow: var(--shadow-soft);
+}
+
+.confirm-modal h3 {
+  margin: 0.4rem 0 0.6rem;
+}
+
+.confirm-modal p:last-of-type {
+  color: var(--text-soft);
+}
+
+.confirm-actions {
+  display: grid;
+  gap: 0.7rem;
+  margin-top: 1rem;
+}
+
+.confirm-actions button {
+  min-height: 3rem;
+  border: 0;
+  border-radius: 14px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 700;
+}
+
+.confirm-actions button:last-child {
+  color: white;
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+}
+
 @media (max-width: 1080px) {
   .admin-grid,
   .stats-grid,
@@ -466,6 +525,11 @@ h3 {
   }
 
   .auth-modal {
+    width: min(100%, 100%);
+    padding: 1.2rem;
+  }
+
+  .confirm-modal {
     width: min(100%, 100%);
     padding: 1.2rem;
   }

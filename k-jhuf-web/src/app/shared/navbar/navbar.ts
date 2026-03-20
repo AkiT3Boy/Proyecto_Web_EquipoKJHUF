@@ -2,8 +2,9 @@ import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { Carrito } from '../../services/carrito';
+import { PreloadService } from '../../services/preload';
 import { UsuarioSesion, UsuariosService } from '../../services/usuarios';
 
 @Component({
@@ -56,9 +57,15 @@ export class Navbar {
     { label: 'Contacto', ruta: '/contacto' },
   ];
 
+  // Límite máximo para el nombre
+  readonly NOMBRE_MAX_LENGTH = 25;
+  private actionLockUntil = 0;
+
   constructor(
     private readonly carrito: Carrito,
     private readonly usuarios: UsuariosService,
+    private readonly preload: PreloadService,
+    private readonly router: Router,
   ) {
     this.carrito.items.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.totalItems = this.carrito.getCount();
@@ -88,16 +95,44 @@ export class Navbar {
     this.cerrarMenu();
   }
 
+  abrirCarritoDesdeEvento(event?: Event): void {
+    if (!this.consumeUiAction(event)) {
+      return;
+    }
+    this.abrirCarrito();
+  }
+
+  abrirAdmin(): void {
+    this.cerrarMenu();
+    void this.router.navigateByUrl('/admin');
+  }
+
+  abrirAdminDesdeEvento(event?: Event): void {
+    if (!this.consumeUiAction(event)) {
+      return;
+    }
+    this.abrirAdmin();
+  }
+
   cerrarSesionUsuario(): void {
     this.usuarios.logout().subscribe({
       next: () => {
+        this.preload.resetUserPreload();
         this.cerrarMenu();
       },
       error: () => {
         this.usuarios.clearSession();
+        this.preload.resetUserPreload();
         this.cerrarMenu();
       },
     });
+  }
+
+  cerrarSesionUsuarioDesdeEvento(event?: Event): void {
+    if (!this.consumeUiAction(event)) {
+      return;
+    }
+    this.cerrarSesionUsuario();
   }
 
   abrirRegistro(): void {
@@ -112,14 +147,42 @@ export class Navbar {
     this.resetAuthState();
   }
 
+  abrirRegistroDesdeEvento(event?: Event): void {
+    if (!this.consumeUiAction(event)) {
+      return;
+    }
+    this.abrirRegistro();
+  }
+
+  abrirLoginDesdeEvento(event?: Event): void {
+    if (!this.consumeUiAction(event)) {
+      return;
+    }
+    this.abrirLogin();
+  }
+
   cerrarModalUsuario(): void {
     this.modalUsuarioAbierto = false;
     this.resetAuthState();
   }
 
+  cerrarModalUsuarioDesdeEvento(event?: Event): void {
+    if (!this.consumeUiAction(event)) {
+      return;
+    }
+    this.cerrarModalUsuario();
+  }
+
   cerrarModalExitoUsuario(): void {
     this.modalUsuarioExitoAbierto = false;
     this.authExito = '';
+  }
+
+  cerrarModalExitoUsuarioDesdeEvento(event?: Event): void {
+    if (!this.consumeUiAction(event)) {
+      return;
+    }
+    this.cerrarModalExitoUsuario();
   }
 
   enviarAuthUsuario(): void {
@@ -142,6 +205,7 @@ export class Navbar {
             this.cerrarModalUsuario();
             this.authExito = `Cuenta creada para ${usuario.nombre}.`;
             this.modalUsuarioExitoAbierto = true;
+            this.preload.preloadUser();
             this.cerrarMenu();
           },
           error: (error) => {
@@ -161,6 +225,7 @@ export class Navbar {
           this.cerrarModalUsuario();
           this.authExito = `Sesion iniciada como ${usuario.nombre}.`;
           this.modalUsuarioExitoAbierto = true;
+          this.preload.preloadUser();
           this.cerrarMenu();
         },
         error: (error) => {
@@ -169,11 +234,26 @@ export class Navbar {
       });
   }
 
+  enviarAuthUsuarioDesdeEvento(event?: Event): void {
+    if (!this.consumeUiAction(event)) {
+      return;
+    }
+    this.enviarAuthUsuario();
+  }
+
+  // --- MÉTODO PARA NOMBRE: filtra números y limita longitud ---
   onAuthNombreChange(valor: string): void {
-    this.authNombre = valor;
+    // Eliminar números
+    let valorFiltrado = valor.replace(/\d/g, '');
+    // Limitar a NOMBRE_MAX_LENGTH caracteres
+    if (valorFiltrado.length > this.NOMBRE_MAX_LENGTH) {
+      valorFiltrado = valorFiltrado.slice(0, this.NOMBRE_MAX_LENGTH);
+    }
+    this.authNombre = valorFiltrado;
     this.authTouched.nombre = true;
   }
 
+  // --- MÉTODO PARA TELÉFONO: usa sanitizePhone (ya filtra no dígitos y limita a 10) ---
   onAuthTelefonoChange(valor: string): void {
     this.authTelefono = this.sanitizePhone(valor);
     this.authTouched.telefono = true;
@@ -189,6 +269,11 @@ export class Navbar {
     this.authTouched.confirm = true;
   }
 
+  marcarAuthTouched(field: keyof typeof this.authTouched): void {
+    this.authTouched[field] = true;
+  }
+
+  // --- Getters de error (sin cambios) ---
   get authNombreError(): string {
     if (this.modoUsuario !== 'registro' || !this.authTouched.nombre) {
       return '';
@@ -217,6 +302,7 @@ export class Navbar {
     return this.authPassword === this.authConfirm ? '' : 'Las contrasenas no coinciden.';
   }
 
+  // --- Validaciones privadas ---
   private nombreValido(nombre: string): boolean {
     const valor = (nombre || '').trim();
     return valor.length >= 3 && /[A-Za-zÁÉÍÓÚáéíóúÑñ]/.test(valor);
@@ -252,5 +338,36 @@ export class Navbar {
       password: false,
       confirm: false,
     };
+  }
+
+  private consumeUiAction(event?: Event): boolean {
+    event?.preventDefault();
+    event?.stopPropagation();
+
+    const now = Date.now();
+    if (now < this.actionLockUntil) {
+      return false;
+    }
+
+    this.actionLockUntil = now + 220;
+    return true;
+  }
+
+    soloLetras(event: KeyboardEvent) {
+    const char = event.key;
+    const regex = /^[A-Za-zÁÉÍÓÚáéíóúñÑ ]+$/;
+
+    if (!regex.test(char)) {
+      event.preventDefault();
+    }
+  }
+
+  soloNumeros(event: KeyboardEvent) {
+    const char = event.key;
+    const regex = /^[0-9]+$/;
+
+    if (!regex.test(char)) {
+      event.preventDefault();
+    }
   }
 }
