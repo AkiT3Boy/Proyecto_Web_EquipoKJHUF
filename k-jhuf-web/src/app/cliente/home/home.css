@@ -1,7 +1,7 @@
 .promo-banner {
   display: grid;
-  gap: 1.6rem;
-  padding: 2rem;
+  gap: 1.1rem;
+  padding: 1.35rem;
   border: 1px solid var(--border-soft);
   border-radius: 32px;
   background-color: #0d0d10;
@@ -61,8 +61,8 @@
 
 .promo-banner__codes {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.9rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.7rem;
 }
 
 .promo-code,
@@ -77,7 +77,7 @@
 }
 
 .promo-code {
-  padding: 1rem;
+  padding: 0.85rem;
   background: rgba(255, 248, 241, 0.9);
 }
 
@@ -208,8 +208,8 @@
 
 .offers-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
 }
 
 .offer-card {
@@ -246,6 +246,10 @@
 .offer-card__body p {
   line-height: 1.6;
   color: #655b56;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .offer-card__footer,
@@ -274,8 +278,8 @@
 
 .recomendados-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
 }
 
 .recomendado-card {
@@ -307,6 +311,10 @@
   margin: 0.5rem 0 0;
   line-height: 1.55;
   color: #655b56;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .home-empty {
@@ -324,11 +332,6 @@
 }
 
 @media (max-width: 1180px) {
-  .offers-grid,
-  .recomendados-grid {
-    grid-template-columns: 1fr;
-  }
-
   .promo-banner__main,
   .promo-banner__codes {
     grid-template-columns: 1fr;
@@ -342,12 +345,44 @@
 
 @media (max-width: 760px) {
   .promo-banner {
-    padding: 1.2rem;
+    padding: 1rem;
   }
 
   .promo-banner__product-frame {
     width: min(100%, 220px);
     padding: 0.55rem;
+  }
+
+  .benefits-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+    padding: 0.8rem;
+  }
+
+  .offer-card img,
+  .recomendado-card img {
+    height: 190px;
+  }
+
+  .offer-card__body,
+  .recomendado-card__body {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .promo-banner h1 {
+    font-size: clamp(1.9rem, 10vw, 2.9rem);
+  }
+
+  .promo-banner__desc {
+    font-size: 0.96rem;
+    line-height: 1.45;
+  }
+
+  .promo-banner__price {
+    min-width: 0;
+    width: 100%;
   }
 
   .benefits-strip {

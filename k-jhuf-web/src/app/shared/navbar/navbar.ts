@@ -59,6 +59,7 @@ export class Navbar {
 
   // Límite máximo para el nombre
   readonly NOMBRE_MAX_LENGTH = 25;
+  private actionLockUntil = 0;
 
   constructor(
     private readonly carrito: Carrito,
@@ -94,9 +95,23 @@ export class Navbar {
     this.cerrarMenu();
   }
 
+  abrirCarritoDesdeEvento(event?: Event): void {
+    if (!this.consumeUiAction(event)) {
+      return;
+    }
+    this.abrirCarrito();
+  }
+
   abrirAdmin(): void {
     this.cerrarMenu();
     void this.router.navigateByUrl('/admin');
+  }
+
+  abrirAdminDesdeEvento(event?: Event): void {
+    if (!this.consumeUiAction(event)) {
+      return;
+    }
+    this.abrirAdmin();
   }
 
   cerrarSesionUsuario(): void {
@@ -113,6 +128,13 @@ export class Navbar {
     });
   }
 
+  cerrarSesionUsuarioDesdeEvento(event?: Event): void {
+    if (!this.consumeUiAction(event)) {
+      return;
+    }
+    this.cerrarSesionUsuario();
+  }
+
   abrirRegistro(): void {
     this.modalUsuarioAbierto = true;
     this.modoUsuario = 'registro';
@@ -125,14 +147,42 @@ export class Navbar {
     this.resetAuthState();
   }
 
+  abrirRegistroDesdeEvento(event?: Event): void {
+    if (!this.consumeUiAction(event)) {
+      return;
+    }
+    this.abrirRegistro();
+  }
+
+  abrirLoginDesdeEvento(event?: Event): void {
+    if (!this.consumeUiAction(event)) {
+      return;
+    }
+    this.abrirLogin();
+  }
+
   cerrarModalUsuario(): void {
     this.modalUsuarioAbierto = false;
     this.resetAuthState();
   }
 
+  cerrarModalUsuarioDesdeEvento(event?: Event): void {
+    if (!this.consumeUiAction(event)) {
+      return;
+    }
+    this.cerrarModalUsuario();
+  }
+
   cerrarModalExitoUsuario(): void {
     this.modalUsuarioExitoAbierto = false;
     this.authExito = '';
+  }
+
+  cerrarModalExitoUsuarioDesdeEvento(event?: Event): void {
+    if (!this.consumeUiAction(event)) {
+      return;
+    }
+    this.cerrarModalExitoUsuario();
   }
 
   enviarAuthUsuario(): void {
@@ -184,6 +234,13 @@ export class Navbar {
       });
   }
 
+  enviarAuthUsuarioDesdeEvento(event?: Event): void {
+    if (!this.consumeUiAction(event)) {
+      return;
+    }
+    this.enviarAuthUsuario();
+  }
+
   // --- MÉTODO PARA NOMBRE: filtra números y limita longitud ---
   onAuthNombreChange(valor: string): void {
     // Eliminar números
@@ -210,6 +267,10 @@ export class Navbar {
   onAuthConfirmChange(valor: string): void {
     this.authConfirm = valor;
     this.authTouched.confirm = true;
+  }
+
+  marcarAuthTouched(field: keyof typeof this.authTouched): void {
+    this.authTouched[field] = true;
   }
 
   // --- Getters de error (sin cambios) ---
@@ -278,6 +339,20 @@ export class Navbar {
       confirm: false,
     };
   }
+
+  private consumeUiAction(event?: Event): boolean {
+    event?.preventDefault();
+    event?.stopPropagation();
+
+    const now = Date.now();
+    if (now < this.actionLockUntil) {
+      return false;
+    }
+
+    this.actionLockUntil = now + 220;
+    return true;
+  }
+
     soloLetras(event: KeyboardEvent) {
     const char = event.key;
     const regex = /^[A-Za-zÁÉÍÓÚáéíóúñÑ ]+$/;

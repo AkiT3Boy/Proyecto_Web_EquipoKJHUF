@@ -7,7 +7,7 @@
 }
 
 .promo-hero {
-  padding: 2rem;
+  padding: 1.35rem;
   background:
     radial-gradient(circle at top right, rgba(240, 95, 65, 0.18), transparent 26%),
     linear-gradient(135deg, rgba(252, 241, 236, 0.96), rgba(246, 237, 231, 0.92));
@@ -37,15 +37,15 @@ h1 {
 
 .promo-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1.5rem;
-  margin-top: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
 }
 
 .promo-card {
   display: grid;
   gap: 0.8rem;
-  padding: 1.6rem;
+  padding: 1.1rem;
 }
 
 .promo-card__type {
@@ -71,6 +71,10 @@ h1 {
   margin: 0;
   line-height: 1.6;
   color: #655c57;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .promo-card strong {
@@ -173,12 +177,6 @@ h1 {
   background: rgba(240, 95, 65, 0.1);
 }
 
-@media (max-width: 960px) {
-  .promo-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
 @media (max-width: 720px) {
   .promo-hero,
   .promo-card {
@@ -186,11 +184,11 @@ h1 {
   }
 
   .promo-hero {
-    padding: 1.2rem;
+    padding: 1rem;
   }
 
   .promo-card {
-    padding: 1.2rem;
+    padding: 1rem;
   }
 
   .promo-modal {

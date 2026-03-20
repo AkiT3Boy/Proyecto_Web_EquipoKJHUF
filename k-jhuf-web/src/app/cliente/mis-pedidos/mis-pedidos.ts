@@ -34,6 +34,10 @@ export class MisPedidos {
     }
 
     this.pedidoPendiente = this.pedidosService.getPedidoPendiente();
+    if (this.pedidoPendiente) {
+      this.pedidos = [this.pedidoPendiente];
+      this.cargando = false;
+    }
 
     interval(2000)
       .pipe(

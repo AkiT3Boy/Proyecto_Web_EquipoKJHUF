@@ -192,7 +192,7 @@ export class Pedidos {
 
   private getPendingOrderKey(): string {
     const usuario = this.usuarios.getUsuarioActual();
-    const base = usuario?.telefono?.trim() || this.usuarios.getToken() || 'anon';
+    const base = this.usuarios.getToken() || usuario?.telefono?.trim() || 'anon';
     const safeBase = base.replace(/[^a-zA-Z0-9_-]/g, '_');
     return `kjhuf_pending_order_${safeBase}`;
   }
