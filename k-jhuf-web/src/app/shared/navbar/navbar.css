@@ -360,6 +360,10 @@
     border-bottom: 1px solid var(--border-soft);
   }
 
+  .sidebar--open {
+    align-items: start;
+  }
+
   .sidebar__toggle {
     display: block;
     align-self: start;
@@ -389,20 +393,11 @@
   }
 
   .sidebar--open .sidebar__nav {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.75rem;
     order: 3;
     grid-column: 1 / -1;
-  }
-
-  .sidebar--open .sidebar__nav,
-  .sidebar--open .sidebar__cart,
-  .sidebar--open .sidebar__admin,
-  .sidebar--open .sidebar__user,
-  .sidebar--open .sidebar__user-action,
-  .sidebar--open .sidebar__auth-buttons {
-    width: 100%;
   }
 
   .sidebar--open .sidebar__cart,
@@ -413,6 +408,7 @@
     display: flex;
     order: 4;
     justify-content: center;
+    grid-column: 1 / -1;
   }
 
   .sidebar--open .sidebar__user {
@@ -432,8 +428,28 @@
   }
 
   .sidebar__link {
-    flex: 1 1 calc(50% - 0.75rem);
-    min-width: 140px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .sidebar__auth-modal {
+    padding: 1rem;
+    align-content: start;
+  }
+
+  .sidebar__auth-modal::before {
+    width: min(100%, 540px);
+    min-height: calc(100vh - 2rem);
+  }
+
+  .sidebar__auth-head,
+  .sidebar__auth-modal h3,
+  .sidebar__auth-modal p,
+  .sidebar__auth-modal label,
+  .sidebar__auth-error,
+  .sidebar__auth-actions,
+  .sidebar__auth-switch {
+    width: min(100%, 540px);
   }
 }
 
@@ -459,53 +475,42 @@
     font-size: 0.84rem;
   }
 
+  .sidebar--open {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar--open .sidebar__brand {
+    grid-column: 1 / -1;
+  }
+
   .sidebar--open .sidebar__nav {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding-bottom: 0.2rem;
-    margin-right: -0.1rem;
-    scrollbar-width: thin;
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
   }
 
   .sidebar__link {
-    flex: 0 0 auto;
-    min-width: max-content;
+    min-width: 0;
     padding-inline: 1rem;
   }
 
-  .sidebar--open .sidebar__cart,
-  .sidebar--open .sidebar__admin,
-  .sidebar--open .sidebar__user,
-  .sidebar--open .sidebar__user-action,
   .sidebar--open .sidebar__auth-buttons {
-    flex: 1 1 calc(50% - 0.5rem);
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar__auth-modal {
+    padding: 0.75rem;
+  }
+
+  .sidebar__auth-modal::before {
+    width: 100%;
+    min-height: calc(100vh - 1.5rem);
+    border-radius: 22px;
   }
 }
 
 @media (max-width: 420px) {
   .sidebar {
     grid-template-columns: 1fr;
-  }
-
-  .sidebar__toggle {
-    order: 1;
-  }
-
-  .sidebar__brand {
-    order: 2;
-  }
-
-  .sidebar--open .sidebar__nav {
-    order: 3;
-  }
-
-  .sidebar--open .sidebar__cart,
-  .sidebar--open .sidebar__admin,
-  .sidebar--open .sidebar__user,
-  .sidebar--open .sidebar__user-action,
-  .sidebar--open .sidebar__auth-buttons {
-    grid-column: 1 / -1;
-    width: 100%;
   }
 
   .sidebar__auth-modal {

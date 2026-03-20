@@ -2,8 +2,9 @@ import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { Carrito } from '../../services/carrito';
+import { PreloadService } from '../../services/preload';
 import { UsuarioSesion, UsuariosService } from '../../services/usuarios';
 
 @Component({
@@ -57,11 +58,13 @@ export class Navbar {
   ];
 
   // Límite máximo para el nombre
-  readonly NOMBRE_MAX_LENGTH = 50;
+  readonly NOMBRE_MAX_LENGTH = 25;
 
   constructor(
     private readonly carrito: Carrito,
     private readonly usuarios: UsuariosService,
+    private readonly preload: PreloadService,
+    private readonly router: Router,
   ) {
     this.carrito.items.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.totalItems = this.carrito.getCount();
@@ -91,13 +94,20 @@ export class Navbar {
     this.cerrarMenu();
   }
 
+  abrirAdmin(): void {
+    this.cerrarMenu();
+    void this.router.navigateByUrl('/admin');
+  }
+
   cerrarSesionUsuario(): void {
     this.usuarios.logout().subscribe({
       next: () => {
+        this.preload.resetUserPreload();
         this.cerrarMenu();
       },
       error: () => {
         this.usuarios.clearSession();
+        this.preload.resetUserPreload();
         this.cerrarMenu();
       },
     });
@@ -145,6 +155,7 @@ export class Navbar {
             this.cerrarModalUsuario();
             this.authExito = `Cuenta creada para ${usuario.nombre}.`;
             this.modalUsuarioExitoAbierto = true;
+            this.preload.preloadUser();
             this.cerrarMenu();
           },
           error: (error) => {
@@ -164,6 +175,7 @@ export class Navbar {
           this.cerrarModalUsuario();
           this.authExito = `Sesion iniciada como ${usuario.nombre}.`;
           this.modalUsuarioExitoAbierto = true;
+          this.preload.preloadUser();
           this.cerrarMenu();
         },
         error: (error) => {

@@ -10,7 +10,7 @@
 
   <label *ngIf="modoUsuario === 'registro'">
     <span>Nombre</span>
-    <input [ngModel]="authNombre" (ngModelChange)="onAuthNombreChange($event)" name="authNombre" maxlength="60" />
+    <input [ngModel]="authNombre" (ngModelChange)="onAuthNombreChange($event)" name="authNombre" maxlength="25" />
     <small class="cart-field-error" *ngIf="authNombreError">{{ authNombreError }}</small>
   </label>
 
@@ -22,13 +22,13 @@
 
   <label>
     <span>Contrasena</span>
-    <input [ngModel]="authPassword" (ngModelChange)="onAuthPasswordChange($event)" name="authPassword" type="password" maxlength="32" />
+    <input [ngModel]="authPassword" (ngModelChange)="onAuthPasswordChange($event)" name="authPassword" type="password" maxlength="25" />
     <small class="cart-field-error" *ngIf="authPasswordError">{{ authPasswordError }}</small>
   </label>
 
   <label *ngIf="modoUsuario === 'registro'">
     <span>Confirmar contrasena</span>
-    <input [ngModel]="authConfirm" (ngModelChange)="onAuthConfirmChange($event)" name="authConfirm" type="password" maxlength="32" />
+    <input [ngModel]="authConfirm" (ngModelChange)="onAuthConfirmChange($event)" name="authConfirm" type="password" maxlength="25" />
     <small class="cart-field-error" *ngIf="authConfirmError">{{ authConfirmError }}</small>
   </label>
 
@@ -72,6 +72,7 @@
   <p>
     Se va a registrar a nombre de <strong>{{ cliente }}</strong> con telefono <strong>{{ telefono }}</strong>.
   </p>
+  <p>Hora de entrega: <strong>{{ horaEntrega }}</strong></p>
   <p>Total: <strong>${{ total | number: '1.0-0' }}</strong></p>
   <p class="cart-confirm-modal__message" *ngIf="mensaje">{{ mensaje }}</p>
   <div class="cart-confirm-modal__actions">
@@ -87,10 +88,14 @@
 <div class="cart-confirm-backdrop" *ngIf="modalPedidoAbierto"></div>
 
 <div class="cart-confirm-modal" *ngIf="modalPedidoAbierto">
-  <p class="cart-panel__label">Pedido listo</p>
-  <h3>Se agendo el pedido</h3>
-  <p>Tu orden ya quedo registrada y el admin la va a ver en su panel.</p>
-  <button type="button" (click)="cerrarModalPedido()">Aceptar</button>
+  <p class="cart-panel__label">{{ modalPedidoConfirmado ? 'Pedido listo' : 'Estado del pedido' }}</p>
+  <h3>{{ modalPedidoTitulo }}</h3>
+  <p>{{ modalPedidoTexto }}</p>
+  <p class="cart-confirm-modal__message" *ngIf="estadoProcesoPedido">{{ estadoProcesoPedido }}</p>
+  <p class="cart-confirm-modal__message" *ngIf="mensaje && !modalPedidoConfirmado">{{ mensaje }}</p>
+  <button type="button" (click)="cerrarModalPedido()" [disabled]="enviando && !modalPedidoConfirmado">
+    {{ enviando && !modalPedidoConfirmado ? 'Procesando...' : (modalPedidoConfirmado ? 'Aceptar' : 'Cerrar') }}
+  </button>
 </div>
 
 <aside class="cart-panel" [class.cart-panel--open]="abierto">
@@ -125,7 +130,7 @@
     <div class="cart-form">
       <label>
         <span>Nombre</span>
-        <input [ngModel]="cliente" (ngModelChange)="onClienteChange($event)" name="cliente" maxlength="60" [readonly]="!!usuario" />
+        <input [ngModel]="cliente" (ngModelChange)="onClienteChange($event)" name="cliente" maxlength="25" [readonly]="!!usuario" />
         <small class="cart-field-error" *ngIf="clienteError">{{ clienteError }}</small>
       </label>
 
@@ -143,12 +148,22 @@
 
       <label>
         <span>Notas</span>
-        <textarea [(ngModel)]="notas" name="notas" rows="3" maxlength="200"></textarea>
+        <textarea [(ngModel)]="notas" name="notas" rows="3" maxlength="50"></textarea>
+      </label>
+
+      <label>
+        <span>Hora de entrega</span>
+        <input [ngModel]="horaEntrega" (ngModelChange)="onHoraEntregaChange($event)" name="horaEntrega" type="time" min="18:00" max="23:00" />
+        <small class="cart-field-error" *ngIf="horaEntregaError">{{ horaEntregaError }}</small>
       </label>
     </div>
   </div>
 
   <div class="cart-panel__footer">
+    <strong>Subtotal: ${{ subtotal | number: '1.0-0' }}</strong>
+    <div class="cart-panel__discounts" *ngIf="descuentos.length">
+      <small *ngFor="let descuento of descuentos">{{ descuento.label }}: -${{ descuento.amount | number: '1.0-0' }}</small>
+    </div>
     <strong>Total: ${{ total | number: '1.0-0' }}</strong>
     <p class="cart-panel__message" *ngIf="mensaje">{{ mensaje }}</p>
     <button type="button" [disabled]="!items.length || enviando" (click)="confirmarPedido()">

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, DestroyRef, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, DestroyRef, ElementRef, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -37,6 +37,10 @@ type PromocionForm = {
   styleUrls: ['./productos.css'],
 })
 export class AdminProductos implements OnInit, OnDestroy {
+  @ViewChild('authPasswordInput') authPasswordInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('authConfirmInput') authConfirmInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('confirmPrimaryButton') confirmPrimaryButton?: ElementRef<HTMLButtonElement>;
+
   adminListo = false;
   configurado = false;
   autenticado = false;
@@ -47,6 +51,7 @@ export class AdminProductos implements OnInit, OnDestroy {
   notificacionPedido = '';
   homeBannerUrl = '';
   confirmacionAbierta = false;
+  confirmacionProcesando = false;
   confirmacionTitulo = '';
   confirmacionMensaje = '';
 
@@ -87,6 +92,7 @@ export class AdminProductos implements OnInit, OnDestroy {
   private pendingSnapshot = 0;
   private pollingIniciado = false;
   private accionConfirmada: (() => void) | null = null;
+  private modalActionCooldownUntil = 0;
 
   constructor(
     private readonly auth: Auth,
@@ -107,10 +113,13 @@ export class AdminProductos implements OnInit, OnDestroy {
 
         if (this.autenticado) {
           this.iniciarPolling();
+        } else {
+          this.focusAuthInput();
         }
       },
       error: () => {
         this.adminListo = true;
+        this.focusAuthInput();
       },
     });
   }
@@ -276,6 +285,7 @@ export class AdminProductos implements OnInit, OnDestroy {
     }
 
     if (this.authPasswordError || this.authConfirmError) {
+      this.focusAuthInput();
       return;
     }
 
@@ -292,6 +302,7 @@ export class AdminProductos implements OnInit, OnDestroy {
         },
         error: (error) => {
           this.authError = error.error?.msg || 'No se pudo crear la contrasena.';
+          this.focusAuthInput();
         },
       });
       return;
@@ -307,6 +318,7 @@ export class AdminProductos implements OnInit, OnDestroy {
       },
       error: (error) => {
         this.authError = error.error?.msg || 'Contrasena incorrecta.';
+        this.focusAuthInput();
       },
     });
   }
@@ -319,10 +331,12 @@ export class AdminProductos implements OnInit, OnDestroy {
         this.pedidos = [];
         this.dashboard = undefined;
         this.pageSuccess = '';
+        this.focusAuthInput();
       },
       error: () => {
         this.auth.clearToken();
         this.autenticado = false;
+        this.focusAuthInput();
       },
     });
   }
@@ -333,6 +347,20 @@ export class AdminProductos implements OnInit, OnDestroy {
     this.authConfirm = '';
     this.authTouched = { password: false, confirm: false };
     this.router.navigateByUrl('/');
+  }
+
+  cerrarModalAuthDesdeEvento(event?: Event): void {
+    if (!this.consumirAccionModal(event)) {
+      return;
+    }
+    this.cerrarModalAuth();
+  }
+
+  iniciarSesionDesdeEvento(event?: Event): void {
+    if (!this.consumirAccionModal(event)) {
+      return;
+    }
+    this.iniciarSesion();
   }
 
   guardarProducto(): void {
@@ -417,6 +445,7 @@ export class AdminProductos implements OnInit, OnDestroy {
         this.productosService.eliminarProducto(id).subscribe({
           next: () => {
             this.pageSuccess = 'Producto eliminado.';
+            this.lista = this.lista.filter((item) => item._id !== id);
             if (this.editandoProductoId === id) {
               this.resetProductoForm();
             }
@@ -491,6 +520,7 @@ export class AdminProductos implements OnInit, OnDestroy {
         this.promocionesService.eliminarPromocion(id).subscribe({
           next: () => {
             this.pageSuccess = 'Promocion eliminada.';
+            this.promociones = this.promociones.filter((item) => item._id !== id);
             if (this.editandoPromocionId === id) {
               this.resetPromocionForm();
             }
@@ -550,19 +580,22 @@ export class AdminProductos implements OnInit, OnDestroy {
     }
     const pedido = this.pedidos.find((item) => item._id === id);
     const estadoLabel = estado === 'entregado' ? 'terminado' : estado;
-    this.abrirConfirmacion(
-      'Actualizar pedido',
-      `El pedido de ${pedido?.cliente || 'este cliente'} cambiara a ${estadoLabel}.`,
-      () => {
-        this.pedidosService.actualizarEstado(id, estado).subscribe({
-          next: () => {
-            this.pageSuccess = `Pedido cambiado a ${estadoLabel}.`;
-            this.cargarDatosUnaVez();
-          },
-          error: (error) => this.manejarErrorAdmin(error),
-        });
+    this.authError = '';
+    this.pageSuccess = '';
+    this.pedidosService.actualizarEstado(id, estado).subscribe({
+      next: () => {
+        this.pageSuccess = `Pedido de ${pedido?.cliente || 'cliente'} cambiado a ${estadoLabel}.`;
+        if (estado === 'cancelado') {
+          this.pedidos = this.pedidos.filter((item) => item._id !== id);
+        } else {
+          this.pedidos = this.pedidos.map((item) =>
+            item._id === id ? { ...item, estado } : item,
+          );
+        }
+        this.cargarDatosUnaVez();
       },
-    );
+      error: (error) => this.manejarErrorAdmin(error),
+    });
   }
 
   totalItemsPedido(pedido: Pedido): number {
@@ -591,8 +624,16 @@ export class AdminProductos implements OnInit, OnDestroy {
     this.authTouched.confirm = true;
   }
 
+  marcarAuthTouched(field: 'password' | 'confirm'): void {
+    this.authTouched[field] = true;
+  }
+
   onBannerChange(valor: string): void {
     this.homeBannerUrl = valor;
+    this.bannerTouched = true;
+  }
+
+  marcarBannerTouched(): void {
     this.bannerTouched = true;
   }
 
@@ -604,6 +645,10 @@ export class AdminProductos implements OnInit, OnDestroy {
     this.productoTouched[field as keyof typeof this.productoTouched] = true;
   }
 
+  marcarProductoTouchedField(field: keyof typeof this.productoTouched): void {
+    this.productoTouched[field] = true;
+  }
+
   onPromocionFieldChange(field: keyof PromocionForm, valor: string | number | string[]): void {
     this.promocionForm = {
       ...this.promocionForm,
@@ -612,17 +657,45 @@ export class AdminProductos implements OnInit, OnDestroy {
     this.promocionTouched[field as keyof typeof this.promocionTouched] = true;
   }
 
+  marcarPromocionTouchedField(field: keyof typeof this.promocionTouched): void {
+    this.promocionTouched[field] = true;
+  }
+
   cerrarConfirmacion(): void {
     this.confirmacionAbierta = false;
+    this.confirmacionProcesando = false;
     this.confirmacionTitulo = '';
     this.confirmacionMensaje = '';
     this.accionConfirmada = null;
   }
 
-  ejecutarConfirmacion(): void {
-    const accion = this.accionConfirmada;
+  cerrarConfirmacionDesdeEvento(event?: Event): void {
+    if (!this.consumirAccionModal(event)) {
+      return;
+    }
     this.cerrarConfirmacion();
+  }
+
+  ejecutarConfirmacionDesdeEvento(event?: Event): void {
+    if (!this.consumirAccionModal(event)) {
+      return;
+    }
+    this.ejecutarConfirmacion();
+  }
+
+  ejecutarConfirmacion(): void {
+    if (this.confirmacionProcesando) {
+      return;
+    }
+
+    const accion = this.accionConfirmada;
+    this.confirmacionProcesando = true;
+    this.confirmacionAbierta = false;
+    this.confirmacionTitulo = '';
+    this.confirmacionMensaje = '';
+    this.accionConfirmada = null;
     accion?.();
+    this.confirmacionProcesando = false;
   }
 
   private iniciarPolling(): void {
@@ -811,10 +884,63 @@ export class AdminProductos implements OnInit, OnDestroy {
   }
 
   private abrirConfirmacion(titulo: string, mensaje: string, accion: () => void): void {
+    this.blurActiveElement();
     this.confirmacionTitulo = titulo;
     this.confirmacionMensaje = mensaje;
     this.accionConfirmada = accion;
     this.confirmacionAbierta = true;
+    this.focusConfirmButton();
+  }
+
+  private focusAuthInput(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    window.setTimeout(() => {
+      if (this.modoAuth === 'setup' && this.authConfirmError) {
+        this.authConfirmInput?.nativeElement.focus();
+        this.authConfirmInput?.nativeElement.select();
+        return;
+      }
+
+      this.authPasswordInput?.nativeElement.focus();
+      this.authPasswordInput?.nativeElement.select();
+    }, 0);
+  }
+
+  private focusConfirmButton(): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    window.setTimeout(() => {
+      this.confirmPrimaryButton?.nativeElement.focus();
+    }, 0);
+  }
+
+  private blurActiveElement(): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    const activeElement = document.activeElement;
+    if (activeElement instanceof HTMLElement) {
+      activeElement.blur();
+    }
+  }
+
+  private consumirAccionModal(event?: Event): boolean {
+    event?.preventDefault();
+    event?.stopPropagation();
+
+    const now = Date.now();
+    if (now < this.modalActionCooldownUntil) {
+      return false;
+    }
+
+    this.modalActionCooldownUntil = now + 250;
+    return true;
   }
 
   private textoMinimo(valor: string, minimo: number): boolean {

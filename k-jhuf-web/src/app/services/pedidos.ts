@@ -8,9 +8,16 @@ export type PedidoItem = {
   producto_id: string;
   nombre: string;
   precio: number;
+  precio_original?: number;
   cantidad: number;
   imagen_url: string;
   subtotal?: number;
+};
+
+export type PedidoDescuento = {
+  titulo: string;
+  tipo: string;
+  monto: number;
 };
 
 export type Pedido = {
@@ -18,10 +25,19 @@ export type Pedido = {
   cliente: string;
   telefono: string;
   notas: string;
+  hora_entrega?: string;
+  fecha_pedido_local?: string;
   estado: 'pendiente' | 'en_proceso' | 'entregado' | 'cancelado';
   items: PedidoItem[];
+  subtotal?: number;
+  descuentos_aplicados?: PedidoDescuento[];
   total: number;
   creado_en?: string;
+};
+
+export type PedidoPendiente = Omit<Pedido, 'estado'> & {
+  estado: 'pendiente';
+  pendiente_local?: boolean;
 };
 
 export type DashboardAdmin = {
@@ -62,6 +78,20 @@ export class Pedidos {
       .pipe(timeout(10000));
   }
 
+  getMisPedidos(): Observable<Pedido[]> {
+    return this.http.get<Pedido[]>('http://localhost:3000/api/usuarios/pedidos', {
+      headers: this.usuarios.getAuthHeaders(),
+    });
+  }
+
+  cancelarMiPedido(id: string): Observable<{ msg: string }> {
+    return this.http.patch<{ msg: string }>(
+      `http://localhost:3000/api/usuarios/pedidos/${id}/cancelar`,
+      {},
+      { headers: this.usuarios.getAuthHeaders() },
+    );
+  }
+
   getPedidos(): Observable<Pedido[]> {
     return this.http.get<Pedido[]>(this.api, {
       headers: this.auth.getAuthHeaders(),
@@ -80,5 +110,90 @@ export class Pedidos {
     return this.http.get<DashboardAdmin>(this.adminApi, {
       headers: this.auth.getAuthHeaders(),
     });
+  }
+
+  setPedidoPendiente(payload: {
+    cliente: string;
+    telefono: string;
+    notas: string;
+    hora_entrega?: string;
+    items: Array<{ producto_id: string; nombre: string; precio: number; cantidad: number; imagen_url: string }>;
+  }): void {
+    if (typeof sessionStorage === 'undefined') {
+      return;
+    }
+
+    const total = payload.items.reduce((acc, item) => acc + item.precio * item.cantidad, 0);
+    const ahora = new Date();
+    const preview: PedidoPendiente = {
+      _id: 'pendiente-local',
+      cliente: payload.cliente,
+      telefono: payload.telefono,
+      notas: payload.notas,
+      hora_entrega: payload.hora_entrega,
+      fecha_pedido_local: ahora.toISOString().slice(0, 10),
+      estado: 'pendiente',
+      items: payload.items.map((item) => ({
+        producto_id: item.producto_id,
+        nombre: item.nombre,
+        precio: item.precio,
+        cantidad: item.cantidad,
+        imagen_url: item.imagen_url,
+      })),
+      total,
+      creado_en: ahora.toISOString(),
+      pendiente_local: true,
+    };
+
+    sessionStorage.setItem(this.getPendingOrderKey(), JSON.stringify(preview));
+  }
+
+  getPedidoPendiente(): PedidoPendiente | null {
+    if (typeof sessionStorage === 'undefined') {
+      return null;
+    }
+
+    const raw = sessionStorage.getItem(this.getPendingOrderKey());
+    if (!raw) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(raw) as PedidoPendiente;
+    } catch {
+      return null;
+    }
+  }
+
+  clearPedidoPendiente(): void {
+    if (typeof sessionStorage === 'undefined') {
+      return;
+    }
+    sessionStorage.removeItem(this.getPendingOrderKey());
+  }
+
+  coincideConPendiente(pedido: Pedido, pendiente: PedidoPendiente): boolean {
+    if ((pedido.items || []).length !== (pendiente.items || []).length) {
+      return false;
+    }
+
+    if ((pedido.hora_entrega || '') !== (pendiente.hora_entrega || '')) {
+      return false;
+    }
+
+    return pendiente.items.every((item) =>
+      pedido.items.some(
+        (pedidoItem) =>
+          pedidoItem.producto_id === item.producto_id &&
+          pedidoItem.cantidad === item.cantidad,
+      ),
+    );
+  }
+
+  private getPendingOrderKey(): string {
+    const usuario = this.usuarios.getUsuarioActual();
+    const base = usuario?.telefono?.trim() || this.usuarios.getToken() || 'anon';
+    const safeBase = base.replace(/[^a-zA-Z0-9_-]/g, '_');
+    return `kjhuf_pending_order_${safeBase}`;
   }
 }

@@ -13,7 +13,7 @@
   <!-- Campo Nombre (solo en registro) -->
   <label *ngIf="modoUsuario === 'registro'">
     <span>Nombre</span>
-    <input [ngModel]="authNombre" (ngModelChange)="onAuthNombreChange($event)" name="sidebarAuthNombre" maxlength="40"
+    <input [ngModel]="authNombre" (ngModelChange)="onAuthNombreChange($event)" name="sidebarAuthNombre" maxlength="25"
       type="text" class="form-control" name="nombre" ngModel required minlength="3" pattern="^[A-Za-zÁÉÍÓÚáéíóúñÑ ]+$"
       (keypress)="soloLetras($event)" #nombre="ngModel" />
     <small class="sidebar__field-error" *ngIf="authNombreError">{{ authNombreError }}</small>
@@ -34,7 +34,7 @@
   <label>
     <span>Contrasena</span>
     <input [ngModel]="authPassword" (ngModelChange)="onAuthPasswordChange($event)" name="sidebarAuthPassword"
-      type="password" maxlength="32" />
+      type="password" maxlength="25" />
     <small class="sidebar__field-error" *ngIf="authPasswordError">{{ authPasswordError }}</small>
   </label>
 
@@ -42,7 +42,7 @@
   <label *ngIf="modoUsuario === 'registro'">
     <span>Confirmar contrasena</span>
     <input [ngModel]="authConfirm" (ngModelChange)="onAuthConfirmChange($event)" name="sidebarAuthConfirm"
-      type="password" maxlength="32" />
+      type="password" maxlength="25" />
     <small class="sidebar__field-error" *ngIf="authConfirmError">{{ authConfirmError }}</small>
   </label>
 
@@ -112,6 +112,10 @@
       (click)="cerrarMenu()">
       {{ enlace.label }}
     </a>
+    <a *ngIf="usuario" class="sidebar__link" routerLink="/mis-pedidos" routerLinkActive="sidebar__link--active"
+      (click)="cerrarMenu()">
+      Mis pedidos
+    </a>
   </nav>
 
   <button class="sidebar__cart" type="button" (click)="abrirCarrito()">
@@ -123,8 +127,8 @@
     Cerrar sesion
   </button>
 
-  <a class="sidebar__admin" routerLink="/admin" routerLinkActive="sidebar__admin--active" (click)="cerrarMenu()">
+  <button class="sidebar__admin" type="button" (click)="abrirAdmin()">
     <span class="sidebar__dot sidebar__dot--admin"></span>
     Admin
-  </a>
+  </button>
 </aside>

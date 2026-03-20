@@ -16,7 +16,7 @@ export class Contacto {
   readonly datos = [
     { titulo: 'Direccion', valor: this.direccion },
     { titulo: 'Telefono', valor: '7822174525' },
-    { titulo: 'Horario', valor: 'Lunes a domingo, 12:00 - 21:00' },
+    { titulo: 'Horario', valor: 'Lunes a domingo, 5:00 p. m. - 11:00 p. m.' },
   ];
 
   constructor(private readonly sanitizer: DomSanitizer) {

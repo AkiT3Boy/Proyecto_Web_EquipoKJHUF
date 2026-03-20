@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, shareReplay, tap } from 'rxjs';
 import { Auth } from './auth';
 
 export type HomeConfig = {
@@ -14,14 +14,19 @@ export class HomeConfigService {
   private readonly publicApi = 'http://localhost:3000/api/home-config';
   private readonly adminApi = 'http://localhost:3000/api/admin/home-config';
   private readonly imageProxyApi = 'http://localhost:3000/api/imagen-proxy';
+  private config$?: Observable<HomeConfig>;
 
   constructor(
     private readonly http: HttpClient,
     private readonly auth: Auth,
   ) {}
 
-  getConfig(): Observable<HomeConfig> {
-    return this.http.get<HomeConfig>(this.publicApi);
+  getConfig(forceRefresh = false): Observable<HomeConfig> {
+    if (forceRefresh || !this.config$) {
+      this.config$ = this.http.get<HomeConfig>(this.publicApi).pipe(shareReplay(1));
+    }
+
+    return this.config$;
   }
 
   updateBannerUrl(home_banner_url: string): Observable<HomeConfig & { msg: string }> {
@@ -29,7 +34,7 @@ export class HomeConfigService {
       this.adminApi,
       { home_banner_url },
       { headers: this.auth.getAuthHeaders() },
-    );
+    ).pipe(tap(() => this.invalidateCache()));
   }
 
   normalizarImagenBanner(valor: string): string {
@@ -56,5 +61,9 @@ export class HomeConfigService {
 
   private toProxyUrl(url: string): string {
     return `${this.imageProxyApi}?url=${encodeURIComponent(url)}`;
+  }
+
+  private invalidateCache(): void {
+    this.config$ = undefined;
   }
 }
