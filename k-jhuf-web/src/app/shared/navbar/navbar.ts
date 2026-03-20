@@ -274,4 +274,13 @@ export class Navbar {
       event.preventDefault();
     }
   }
+
+  soloNumeros(event: KeyboardEvent) {
+    const char = event.key;
+    const regex = /^[0-9]+$/;
+
+    if (!regex.test(char)) {
+      event.preventDefault();
+    }
+  }
 }

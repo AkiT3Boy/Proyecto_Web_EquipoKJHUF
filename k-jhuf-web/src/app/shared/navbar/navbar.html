@@ -24,9 +24,10 @@
   <!-- Campo Teléfono -->
   <label>
     <span>Telefono</span>
-    <input [ngModel]="authTelefono" (ngModelChange)="onAuthTelefonoChange($event)" name="sidebarAuthTelefono"
-      type="number" class="form-control" maxlength="10" />
+    <input [ngModel]="authTelefono" (ngModelChange)="onAuthTelefonoChange($event)" name="sidebarAuthTelefono" type="tel"
+      class="form-control" maxlength="10" (keypress)="soloNumeros($event)" />
     <small class="sidebar__field-error" *ngIf="authTelefonoError">{{ authTelefonoError }}</small>
+    <small class="sidebar__field-warning" *ngIf="!authTelefonoError && authTelefono.length === 10"></small>
   </label>
 
   <!-- Campo Contraseña -->
