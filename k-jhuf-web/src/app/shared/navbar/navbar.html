@@ -1,6 +1,7 @@
 <div class="sidebar__modal-backdrop" *ngIf="modalUsuarioAbierto" (click)="cerrarModalUsuarioDesdeEvento($event)"></div>
 
 <div class="sidebar__auth-modal" *ngIf="modalUsuarioAbierto">
+  <div class="sidebar__auth-dialog">
   <div class="sidebar__auth-head">
     <p class="sidebar__auth-label">Cuenta de cliente</p>
     <button
@@ -116,9 +117,11 @@
   >
     Ya tengo cuenta, quiero iniciar sesion
   </button>
+  </div>
 </div>
 
 <div class="sidebar__auth-modal" *ngIf="modalUsuarioExitoAbierto">
+  <div class="sidebar__auth-dialog">
   <div class="sidebar__auth-head">
     <p class="sidebar__auth-label">Cuenta lista</p>
     <button
@@ -140,6 +143,7 @@
     >
       Aceptar
     </button>
+  </div>
   </div>
 </div>
 
