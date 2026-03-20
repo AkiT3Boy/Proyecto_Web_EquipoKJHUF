@@ -5,6 +5,10 @@
   z-index: 5;
 }
 
+button, a {
+  cursor: pointer;
+}
+
 .sidebar {
   display: flex;
   flex-direction: column;
@@ -29,22 +33,22 @@
   position: fixed;
   inset: 0;
   z-index: 40;
-  display: grid;
-  align-content: center;
-  justify-items: center;
+  display: flex;
+  flex-direction: column;
   padding: 1.5rem;
   background: rgba(255, 250, 247, 0.96);
   overflow-y: auto;
 }
 
-.sidebar__auth-modal::before {
-  content: '';
+.sidebar__auth-dialog {
   width: min(100%, 460px);
-  grid-area: 1 / 1;
+  margin: auto;
   border: 1px solid var(--border-soft);
   border-radius: 28px;
   background: rgba(255, 250, 247, 0.98);
   box-shadow: var(--shadow-soft);
+  display: flex;
+  flex-direction: column;
 }
 
 .sidebar__auth-head,
@@ -434,11 +438,11 @@
 
   .sidebar__auth-modal {
     padding: 1rem;
-    align-content: start;
   }
 
-  .sidebar__auth-modal::before {
+  .sidebar__auth-dialog {
     width: min(100%, 540px);
+    margin: 0 auto auto auto;
     min-height: calc(100vh - 2rem);
   }
 
@@ -501,7 +505,7 @@
     padding: 0.75rem;
   }
 
-  .sidebar__auth-modal::before {
+  .sidebar__auth-dialog {
     width: 100%;
     min-height: calc(100vh - 1.5rem);
     border-radius: 22px;
@@ -515,10 +519,9 @@
 
   .sidebar__auth-modal {
     padding: 0.75rem;
-    align-content: stretch;
   }
 
-  .sidebar__auth-modal::before {
+  .sidebar__auth-dialog {
     border-radius: 22px;
   }
 
