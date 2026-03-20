@@ -357,3 +357,106 @@ h1 {
     font-size: 1.55rem;
   }
 }
+@media (max-width: 520px) {
+  h1 {
+    font-size: clamp(2rem, 10vw, 2.8rem);
+  }
+
+  .copy {
+    margin-top: 0.6rem;
+    font-size: 0.96rem;
+  }
+
+  .producto-card__media {
+    height: 190px;
+  }
+
+  .producto-card__tag {
+    top: 0.75rem;
+    left: 0.75rem;
+  }
+
+  .producto-card__price strong {
+    font-size: 1.55rem;
+  }
+
+  /* 🔥 LIMPIEZA DE INFORMACIÓN (CLAVE) */
+  .copy,                        /* texto largo del header */
+  .producto-card__text,         /* descripción del producto */
+  .producto-card__lists,        /* listas de ingredientes/detalles */
+  .producto-card ul,            /* listas internas */
+  .producto-card__footer small  /* texto secundario */
+  {
+    display: none;
+  }
+
+  /* 🔥 OPCIONAL (más minimalista aún) */
+  /* descomenta si lo quieres más limpio */
+  /*
+  .producto-card__promos {
+    display: none;
+  }
+  */
+
+  /* 🔥 MEJORAR ENFOQUE EN COMPRA */
+  .producto-card__footer {
+    width: 100%;
+  }
+
+  .producto-card__footer button {
+    width: 100%;
+  }
+}
+@media (max-width: 520px) {
+
+  /* 🔥 2 COLUMNAS (CATÁLOGO REAL) */
+  .catalogo-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.8rem;
+  }
+
+  /* 🔻 CARD MÁS COMPACTA */
+  .producto-card {
+    border-radius: 18px;
+  }
+
+  /* 🔻 IMAGEN MÁS PEQUEÑA */
+  .producto-card__media {
+    height: 140px;
+  }
+
+  /* 🔻 MENOS ESPACIO INTERNO */
+  .producto-card__body {
+    padding: 0.8rem;
+    gap: 0.5rem;
+  }
+
+  /* 🔻 TÍTULO MÁS PEQUEÑO */
+  .producto-card__head h3 {
+    font-size: 0.95rem;
+    line-height: 1.2;
+  }
+
+  /* 🔻 PRECIO MÁS COMPACTO */
+  .producto-card__price strong {
+    font-size: 1.2rem;
+  }
+
+  .producto-card__price span {
+    font-size: 0.7rem;
+  }
+
+  /* 🔥 BOTÓN MÁS PEQUEÑO */
+  .producto-card__footer button {
+    font-size: 0.8rem;
+    padding: 0.5rem;
+    min-height: auto;
+  }
+
+  /* 🔥 OPCIONAL: ocultar etiqueta */
+  /*
+  .producto-card__tag {
+    display: none;
+  }
+  */
+}
