@@ -15,6 +15,18 @@
   <p class="page-success" *ngIf="autenticado && pageSuccess">{{ pageSuccess }}</p>
   <p class="page-notice" *ngIf="autenticado && notificacionPedido">{{ notificacionPedido }}</p>
 
+  <div class="mobile-sections" *ngIf="autenticado">
+    <button
+      *ngFor="let seccion of seccionesMoviles"
+      type="button"
+      class="mobile-sections__button"
+      [class.mobile-sections__button--active]="seccionMovilActiva === seccion.id"
+      (click)="toggleSeccionMovil(seccion.id)"
+    >
+      {{ seccion.label }}
+    </button>
+  </div>
+
   <div class="admin-overlay" *ngIf="adminListo && !autenticado">
     <div class="auth-modal">
       <div class="auth-modal__head">
@@ -78,7 +90,7 @@
   </div>
 
   <div class="admin-grid" [class.admin-grid--locked]="!autenticado">
-    <section class="panel panel--full" *ngIf="dashboard as stats">
+    <section class="panel panel--full" *ngIf="dashboard as stats" [class.panel--mobile-hidden]="seccionMovilActiva !== 'dashboard'">
       <div class="panel__head">
         <div>
           <p class="label">Dashboard</p>
@@ -147,7 +159,7 @@
       </div>
     </section>
 
-    <section class="panel">
+    <section class="panel" [class.panel--mobile-hidden]="seccionMovilActiva !== 'productos'">
       <div class="panel__head">
         <div>
           <p class="label">Productos</p>
@@ -265,7 +277,7 @@
         <button type="submit">{{ editandoProductoId ? 'Guardar cambios' : 'Agregar producto' }}</button>
       </form>
 
-      <div class="items-list" *ngIf="lista.length; else sinProductosTpl">
+      <div class="items-list items-list--productos" *ngIf="lista.length; else sinProductosTpl">
         <article class="item-card" *ngFor="let producto of lista">
           <div class="item-card__main">
             <img *ngIf="producto.imagen_url || producto.imagen" [src]="producto.imagen_url || producto.imagen" [alt]="producto.nombre" />
@@ -287,7 +299,7 @@
       </div>
     </section>
 
-    <section class="panel">
+    <section class="panel" [class.panel--mobile-hidden]="seccionMovilActiva !== 'promociones'">
       <div class="panel__head">
         <div>
           <p class="label">Promociones</p>
@@ -373,7 +385,7 @@
         <button type="submit">{{ editandoPromocionId ? 'Guardar promocion' : 'Agregar promocion' }}</button>
       </form>
 
-      <div class="items-list" *ngIf="promociones.length; else sinPromosTpl">
+      <div class="items-list items-list--promociones" *ngIf="promociones.length; else sinPromosTpl">
         <article class="item-card" *ngFor="let promo of promociones">
           <div>
             <p class="item-card__tag item-card__tag--promo">{{ promo.tipo }}</p>
@@ -391,7 +403,7 @@
       </div>
     </section>
 
-    <section class="panel panel--full">
+    <section class="panel panel--full" [class.panel--mobile-hidden]="seccionMovilActiva !== 'pedidos'">
       <div class="panel__head">
         <div>
           <p class="label">Pedidos</p>

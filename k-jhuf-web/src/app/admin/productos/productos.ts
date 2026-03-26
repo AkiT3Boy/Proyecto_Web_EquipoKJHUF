@@ -29,6 +29,8 @@ type PromocionForm = {
   producto_ids: string[];
 };
 
+type MobileSection = 'dashboard' | 'productos' | 'promociones' | 'pedidos' | null;
+
 @Component({
   selector: 'app-admin-productos',
   standalone: true,
@@ -87,6 +89,13 @@ export class AdminProductos implements OnInit, OnDestroy {
   };
   readonly categoriasDisponibles = ['raspados', 'elotes', 'snacks', 'carnes frias y quesos'];
   readonly tiposPromocion: PromocionForm['tipo'][] = ['porcentaje', 'precio', '2x1', 'combo'];
+  readonly seccionesMoviles: Array<{ id: Exclude<MobileSection, null>; label: string }> = [
+    { id: 'dashboard', label: 'Dashboard' },
+    { id: 'productos', label: 'Productos' },
+    { id: 'promociones', label: 'Promociones' },
+    { id: 'pedidos', label: 'Pedidos' },
+  ];
+  seccionMovilActiva: MobileSection = 'dashboard';
 
   private readonly destroyRef = inject(DestroyRef);
   private pendingSnapshot = 0;
@@ -572,6 +581,10 @@ export class AdminProductos implements OnInit, OnDestroy {
       return 'terminado';
     }
     return estado;
+  }
+
+  toggleSeccionMovil(seccion: Exclude<MobileSection, null>): void {
+    this.seccionMovilActiva = this.seccionMovilActiva === seccion ? null : seccion;
   }
 
   actualizarEstadoPedido(id: string | undefined, estado: Pedido['estado']): void {
