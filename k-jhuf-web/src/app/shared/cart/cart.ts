@@ -367,7 +367,7 @@ export class Cart {
   }
 
   onClienteChange(valor: string): void {
-    this.cliente = valor;
+    this.cliente = valor.replace(/[^A-Za-zÁÉÍÓÚáéíóúñÑ ]/g, '').slice(0, 25);
     this.pedidoTouched.cliente = true;
   }
 
@@ -382,7 +382,7 @@ export class Cart {
   }
 
   onAuthNombreChange(valor: string): void {
-    this.authNombre = valor;
+    this.authNombre = valor.replace(/[^A-Za-zÁÉÍÓÚáéíóúñÑ ]/g, '').slice(0, 25);
     this.authTouched.nombre = true;
   }
 
@@ -412,7 +412,7 @@ export class Cart {
     if (!this.authTouched.telefono) {
       return '';
     }
-    return this.telefonoValido(this.authTelefono) ? '' : 'Ingresa un numero de 10 digitos.';
+    return this.telefonoValido(this.authTelefono) ? '' : 'Ingresa un numero valido de 10 digitos.';
   }
 
   get authPasswordError(): string {
@@ -440,7 +440,7 @@ export class Cart {
     if (!this.pedidoTouched.telefono) {
       return '';
     }
-    return this.telefonoValido(this.telefono) ? '' : 'El telefono debe tener 10 digitos.';
+    return this.telefonoValido(this.telefono) ? '' : 'El telefono debe tener 10 digitos validos.';
   }
 
   get horaEntregaError(): string {
@@ -469,7 +469,7 @@ export class Cart {
 
   private telefonoValido(telefono: string): boolean {
     const limpio = this.sanitizePhone(telefono);
-    return limpio.length === 10;
+    return /^[2-9]\d{9}$/.test(limpio) && new Set(limpio.split('')).size > 1;
   }
 
   private sanitizePhone(telefono: string): string {

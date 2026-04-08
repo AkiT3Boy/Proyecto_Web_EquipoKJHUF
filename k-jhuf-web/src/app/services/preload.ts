@@ -31,7 +31,17 @@ export class PreloadService {
     forkJoin({
       productos: this.productos.getProductos().pipe(catchError(() => of([]))),
       promociones: this.promociones.getPromociones().pipe(catchError(() => of([]))),
-      home: this.homeConfig.getConfig().pipe(catchError(() => of({ home_banner_url: '' }))),
+      home: this.homeConfig.getConfig().pipe(
+        catchError(() =>
+          of({
+            home_banner_url: '',
+            store_address: '',
+            store_phone: '',
+            store_hours: '',
+            store_maps_url: '',
+          }),
+        ),
+      ),
     }).subscribe();
   }
 

@@ -156,6 +156,62 @@
           </label>
           <button type="button" class="ghost-button" (click)="guardarBannerHome()">Guardar banner</button>
         </article>
+
+        <article class="subpanel subpanel--store">
+          <p class="label">Ubicacion de la tienda</p>
+          <div class="store-grid">
+            <label class="store-grid__full">
+              <span>Direccion</span>
+              <input
+                [ngModel]="storeAddress"
+                (ngModelChange)="onStoreAddressChange($event)"
+                (blur)="marcarTiendaTouchedField('address')"
+                name="storeAddress"
+                maxlength="120"
+              />
+              <small class="field-error" *ngIf="tiendaDireccionError">{{ tiendaDireccionError }}</small>
+            </label>
+
+            <label>
+              <span>Telefono</span>
+              <input
+                [ngModel]="storePhone"
+                (ngModelChange)="onStorePhoneChange($event)"
+                (blur)="marcarTiendaTouchedField('phone')"
+                name="storePhone"
+                maxlength="10"
+                inputmode="numeric"
+              />
+              <small class="field-error" *ngIf="tiendaTelefonoError">{{ tiendaTelefonoError }}</small>
+            </label>
+
+            <label>
+              <span>Horario</span>
+              <input
+                [ngModel]="storeHours"
+                (ngModelChange)="onStoreHoursChange($event)"
+                (blur)="marcarTiendaTouchedField('hours')"
+                name="storeHours"
+                maxlength="60"
+              />
+              <small class="field-error" *ngIf="tiendaHorarioError">{{ tiendaHorarioError }}</small>
+            </label>
+
+            <label class="store-grid__full">
+              <span>URL del mapa</span>
+              <input
+                [ngModel]="storeMapsUrl"
+                (ngModelChange)="onStoreMapsUrlChange($event)"
+                (blur)="marcarTiendaTouchedField('maps')"
+                name="storeMapsUrl"
+                maxlength="400"
+              />
+              <small class="field-error" *ngIf="tiendaMapaError">{{ tiendaMapaError }}</small>
+            </label>
+          </div>
+
+          <button type="button" class="ghost-button" (click)="guardarDatosTienda()">Guardar tienda</button>
+        </article>
       </div>
     </section>
 

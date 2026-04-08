@@ -10,25 +10,59 @@
 
   <label *ngIf="modoUsuario === 'registro'">
     <span>Nombre</span>
-    <input [ngModel]="authNombre" (ngModelChange)="onAuthNombreChange($event)" name="authNombre" maxlength="25" />
+    <input
+      [ngModel]="authNombre"
+      (ngModelChange)="onAuthNombreChange($event)"
+      (blur)="authTouched.nombre = true"
+      name="authNombre"
+      maxlength="25"
+      minlength="3"
+      autocomplete="name"
+    />
     <small class="cart-field-error" *ngIf="authNombreError">{{ authNombreError }}</small>
   </label>
 
   <label>
     <span>Telefono</span>
-    <input [ngModel]="authTelefono" (ngModelChange)="onAuthTelefonoChange($event)" name="authTelefono" maxlength="10" inputmode="numeric" />
+    <input
+      [ngModel]="authTelefono"
+      (ngModelChange)="onAuthTelefonoChange($event)"
+      (blur)="authTouched.telefono = true"
+      name="authTelefono"
+      maxlength="10"
+      inputmode="numeric"
+      autocomplete="tel"
+    />
     <small class="cart-field-error" *ngIf="authTelefonoError">{{ authTelefonoError }}</small>
   </label>
 
   <label>
     <span>Contrasena</span>
-    <input [ngModel]="authPassword" (ngModelChange)="onAuthPasswordChange($event)" name="authPassword" type="password" maxlength="25" />
+    <input
+      [ngModel]="authPassword"
+      (ngModelChange)="onAuthPasswordChange($event)"
+      (blur)="authTouched.password = true"
+      name="authPassword"
+      type="password"
+      maxlength="25"
+      minlength="4"
+      autocomplete="current-password"
+    />
     <small class="cart-field-error" *ngIf="authPasswordError">{{ authPasswordError }}</small>
   </label>
 
   <label *ngIf="modoUsuario === 'registro'">
     <span>Confirmar contrasena</span>
-    <input [ngModel]="authConfirm" (ngModelChange)="onAuthConfirmChange($event)" name="authConfirm" type="password" maxlength="25" />
+    <input
+      [ngModel]="authConfirm"
+      (ngModelChange)="onAuthConfirmChange($event)"
+      (blur)="authTouched.confirm = true"
+      name="authConfirm"
+      type="password"
+      maxlength="25"
+      minlength="4"
+      autocomplete="new-password"
+    />
     <small class="cart-field-error" *ngIf="authConfirmError">{{ authConfirmError }}</small>
   </label>
 
@@ -69,9 +103,7 @@
 <div class="cart-confirm-modal" *ngIf="modalConfirmacionAbierto">
   <p class="cart-panel__label">Confirmar pedido</p>
   <h3>¿Quieres enviar este pedido?</h3>
-  <p>
-    Se va a registrar a nombre de <strong>{{ cliente }}</strong> con telefono <strong>{{ telefono }}</strong>.
-  </p>
+  <p>Se va a registrar a nombre de <strong>{{ cliente }}</strong> con telefono <strong>{{ telefono }}</strong>.</p>
   <p>Hora de entrega: <strong>{{ horaEntrega }}</strong></p>
   <p>Total: <strong>${{ total | number: '1.0-0' }}</strong></p>
   <p class="cart-confirm-modal__message" *ngIf="mensaje">{{ mensaje }}</p>
@@ -114,13 +146,7 @@
         <strong>{{ item.nombre }}</strong>
         <small>{{ item.promoResumen }}</small>
         <div class="cart-item__controls">
-          <input
-            type="number"
-            min="1"
-            max="50"
-            [ngModel]="item.cantidad"
-            (ngModelChange)="cambiarCantidad(item.producto_id, $event)"
-          />
+          <input type="number" min="1" max="50" [ngModel]="item.cantidad" (ngModelChange)="cambiarCantidad(item.producto_id, $event)" />
           <span>${{ item.precio | number: '1.0-0' }}</span>
           <button type="button" (click)="eliminar(item.producto_id)">Quitar</button>
         </div>
@@ -130,7 +156,15 @@
     <div class="cart-form">
       <label>
         <span>Nombre</span>
-        <input [ngModel]="cliente" (ngModelChange)="onClienteChange($event)" name="cliente" maxlength="25" [readonly]="!!usuario" />
+        <input
+          [ngModel]="cliente"
+          (ngModelChange)="onClienteChange($event)"
+          (blur)="pedidoTouched.cliente = true"
+          name="cliente"
+          maxlength="25"
+          [readonly]="!!usuario"
+          autocomplete="name"
+        />
         <small class="cart-field-error" *ngIf="clienteError">{{ clienteError }}</small>
       </label>
 
@@ -139,8 +173,11 @@
         <input
           [ngModel]="telefono"
           (ngModelChange)="onTelefonoChange($event)"
+          (blur)="pedidoTouched.telefono = true"
           name="telefono"
           maxlength="10"
+          inputmode="numeric"
+          autocomplete="tel"
           [readonly]="!!usuario"
         />
         <small class="cart-field-error" *ngIf="telefonoError">{{ telefonoError }}</small>
@@ -153,7 +190,15 @@
 
       <label>
         <span>Hora de entrega</span>
-        <input [ngModel]="horaEntrega" (ngModelChange)="onHoraEntregaChange($event)" name="horaEntrega" type="time" min="18:00" max="23:00" />
+        <input
+          [ngModel]="horaEntrega"
+          (ngModelChange)="onHoraEntregaChange($event)"
+          (blur)="pedidoTouched.horaEntrega = true"
+          name="horaEntrega"
+          type="time"
+          min="18:00"
+          max="23:00"
+        />
         <small class="cart-field-error" *ngIf="horaEntregaError">{{ horaEntregaError }}</small>
       </label>
     </div>

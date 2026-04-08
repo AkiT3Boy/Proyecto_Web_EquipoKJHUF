@@ -48,6 +48,7 @@ export class Navbar {
         <path d="M20 80c4-15 15-23 28-23s24 8 28 23" fill="#fff3ec"/>
       </svg>`,
     );
+  readonly NOMBRE_MAX_LENGTH = 25;
   private readonly destroyRef = inject(DestroyRef);
 
   readonly enlaces = [
@@ -56,10 +57,6 @@ export class Navbar {
     { label: 'Promociones', ruta: '/promociones' },
     { label: 'Contacto', ruta: '/contacto' },
   ];
-
-  // Límite máximo para el nombre
-  readonly NOMBRE_MAX_LENGTH = 25;
-
 
   constructor(
     private readonly carrito: Carrito,
@@ -95,14 +92,10 @@ export class Navbar {
     this.cerrarMenu();
   }
 
-
-
   abrirAdmin(): void {
     this.cerrarMenu();
     void this.router.navigateByUrl('/admin');
   }
-
-
 
   cerrarSesionUsuario(): void {
     this.usuarios.logout().subscribe({
@@ -118,8 +111,6 @@ export class Navbar {
     });
   }
 
-
-
   abrirRegistro(): void {
     this.modalUsuarioAbierto = true;
     this.modoUsuario = 'registro';
@@ -132,21 +123,15 @@ export class Navbar {
     this.resetAuthState();
   }
 
-
-
   cerrarModalUsuario(): void {
     this.modalUsuarioAbierto = false;
     this.resetAuthState();
   }
 
-
-
   cerrarModalExitoUsuario(): void {
     this.modalUsuarioExitoAbierto = false;
     this.authExito = '';
   }
-
-
 
   enviarAuthUsuario(): void {
     this.authError = '';
@@ -197,13 +182,8 @@ export class Navbar {
       });
   }
 
-
-
-  // --- MÉTODO PARA NOMBRE: filtra números y limita longitud ---
   onAuthNombreChange(valor: string): void {
-    // Eliminar números
-    let valorFiltrado = valor.replace(/\d/g, '');
-    // Limitar a NOMBRE_MAX_LENGTH caracteres
+    let valorFiltrado = valor.replace(/[^A-Za-zÁÉÍÓÚáéíóúñÑ ]/g, '');
     if (valorFiltrado.length > this.NOMBRE_MAX_LENGTH) {
       valorFiltrado = valorFiltrado.slice(0, this.NOMBRE_MAX_LENGTH);
     }
@@ -211,7 +191,6 @@ export class Navbar {
     this.authTouched.nombre = true;
   }
 
-  // --- MÉTODO PARA TELÉFONO: usa sanitizePhone (ya filtra no dígitos y limita a 10) ---
   onAuthTelefonoChange(valor: string): void {
     this.authTelefono = this.sanitizePhone(valor);
     this.authTouched.telefono = true;
@@ -231,7 +210,6 @@ export class Navbar {
     this.authTouched[field] = true;
   }
 
-  // --- Getters de error (sin cambios) ---
   get authNombreError(): string {
     if (this.modoUsuario !== 'registro' || !this.authTouched.nombre) {
       return '';
@@ -243,7 +221,7 @@ export class Navbar {
     if (!this.authTouched.telefono) {
       return '';
     }
-    return this.telefonoValido(this.authTelefono) ? '' : 'Ingresa un numero de 10 digitos.';
+    return this.telefonoValido(this.authTelefono) ? '' : 'Ingresa un numero valido de 10 digitos.';
   }
 
   get authPasswordError(): string {
@@ -260,15 +238,14 @@ export class Navbar {
     return this.authPassword === this.authConfirm ? '' : 'Las contrasenas no coinciden.';
   }
 
-  // --- Validaciones privadas ---
   private nombreValido(nombre: string): boolean {
     const valor = (nombre || '').trim();
-    return valor.length >= 3 && /[A-Za-zÁÉÍÓÚáéíóúÑñ]/.test(valor);
+    return valor.length >= 3 && /^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$/.test(valor);
   }
 
   private telefonoValido(telefono: string): boolean {
     const limpio = this.sanitizePhone(telefono);
-    return limpio.length === 10;
+    return /^[2-9]\d{9}$/.test(limpio) && new Set(limpio.split('')).size > 1;
   }
 
   private sanitizePhone(telefono: string): string {
@@ -298,9 +275,7 @@ export class Navbar {
     };
   }
 
-
-
-    soloLetras(event: KeyboardEvent) {
+  soloLetras(event: KeyboardEvent): void {
     const char = event.key;
     const regex = /^[A-Za-zÁÉÍÓÚáéíóúñÑ ]+$/;
 
@@ -309,7 +284,7 @@ export class Navbar {
     }
   }
 
-  soloNumeros(event: KeyboardEvent) {
+  soloNumeros(event: KeyboardEvent): void {
     const char = event.key;
     const regex = /^[0-9]+$/;
 
