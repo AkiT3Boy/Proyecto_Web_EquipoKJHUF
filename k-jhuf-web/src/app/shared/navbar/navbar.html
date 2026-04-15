@@ -7,9 +7,9 @@
       <button type="button" class="sidebar__auth-close" (click)="cerrarModalUsuario()">X</button>
     </div>
 
-    <h3>{{ modoUsuario === 'registro' ? 'Registrate' : 'Inicia sesion' }}</h3>
+    <h3>{{ modoUsuario === 'registro' ? 'Regístrate' : 'Inicia sesión' }}</h3>
     <p *ngIf="modoUsuario === 'registro'">Crea tu cuenta para pedir y darle seguimiento a tus compras.</p>
-    <p *ngIf="modoUsuario === 'login'">Entra con tu telefono y contrasena para seguir usando tu cuenta.</p>
+    <p *ngIf="modoUsuario === 'login'">Entra con tu teléfono y contraseña para seguir usando tu cuenta.</p>
 
     <label *ngIf="modoUsuario === 'registro'">
       <span>Nombre</span>
@@ -28,12 +28,12 @@
       />
       <small class="sidebar__field-error" *ngIf="authNombreError">{{ authNombreError }}</small>
       <small class="sidebar__field-warning" *ngIf="!authNombreError && authNombre.length === 25">
-        Se alcanzo el limite de 25 caracteres.
+        Se alcanzó el límite de 25 caracteres.
       </small>
     </label>
 
     <label>
-      <span>Telefono</span>
+      <span>Teléfono</span>
       <input
         [ngModel]="authTelefono"
         (ngModelChange)="onAuthTelefonoChange($event)"
@@ -50,7 +50,7 @@
     </label>
 
     <label>
-      <span>Contrasena</span>
+      <span>Contraseña</span>
       <input
         [ngModel]="authPassword"
         (ngModelChange)="onAuthPasswordChange($event)"
@@ -65,7 +65,7 @@
     </label>
 
     <label *ngIf="modoUsuario === 'registro'">
-      <span>Confirmar contrasena</span>
+      <span>Confirmar contraseña</span>
       <input
         [ngModel]="authConfirm"
         (ngModelChange)="onAuthConfirmChange($event)"
@@ -84,7 +84,7 @@
     <div class="sidebar__auth-actions">
       <button type="button" class="sidebar__auth-secondary" (click)="cerrarModalUsuario()">Cancelar</button>
       <button type="button" (click)="enviarAuthUsuario()">
-        {{ modoUsuario === 'registro' ? 'Crear cuenta' : 'Iniciar sesion' }}
+        {{ modoUsuario === 'registro' ? 'Crear cuenta' : 'Iniciar sesión' }}
       </button>
     </div>
 
@@ -92,7 +92,7 @@
       No tengo cuenta, quiero registrarme
     </button>
     <button *ngIf="modoUsuario === 'registro'" type="button" class="sidebar__auth-switch" (click)="abrirLogin()">
-      Ya tengo cuenta, quiero iniciar sesion
+      Ya tengo cuenta, quiero iniciar sesión
     </button>
   </div>
 </div>
@@ -112,7 +112,7 @@
 </div>
 
 <aside class="sidebar" [class.sidebar--open]="menuAbierto">
-  <button class="sidebar__toggle" type="button" (click)="toggleMenu()" aria-label="Abrir menu">
+  <button class="sidebar__toggle" type="button" (click)="toggleMenu()" aria-label="Abrir menú">
     <span></span>
     <span></span>
     <span></span>
@@ -135,7 +135,7 @@
   </div>
 
   <div class="sidebar__auth-buttons" *ngIf="!usuario">
-    <button type="button" class="sidebar__auth-button" (click)="abrirLogin()">Iniciar sesion</button>
+    <button type="button" class="sidebar__auth-button" (click)="abrirLogin()">Iniciar sesión</button>
     <button type="button" class="sidebar__auth-button sidebar__auth-button--ghost" (click)="abrirRegistro()">
       Registrarse
     </button>
@@ -169,7 +169,7 @@
   </button>
 
   <button *ngIf="usuario" class="sidebar__user-action" type="button" (click)="cerrarSesionUsuario()">
-    Cerrar sesion
+    Cerrar sesión
   </button>
 
   <button class="sidebar__admin" type="button" (click)="abrirAdmin()">

@@ -1,15 +1,15 @@
 <section class="catalogo-header">
   <div>
-    <p class="label">Nuestro menu</p>
+    <p class="label">Nuestro menú</p>
     <h1>Productos K-JHUF</h1>
     <p class="copy">
-      Aqui tienes el menu acomodado por categoria para que encuentres rapido lo que se te antoja,
-      con su foto, descripcion, ingredientes y detalles.
+      Aquí tienes el menú acomodado por categoría para que encuentres rápido lo que se te antoja,
+      con su foto, descripción, ingredientes y detalles.
     </p>
   </div>
   <div class="catalogo-header__badge">
     <strong>{{ categorias.length || 1 }}</strong>
-    <span>categorias</span>
+    <span>categorías</span>
   </div>
 </section>
 
@@ -27,7 +27,7 @@
 <section *ngIf="!cargando; else cargandoTpl" class="category-sections">
   <article class="category-block" *ngFor="let categoria of categorias" [attr.id]="categoryId(categoria.nombre)">
     <div class="category-block__head">
-      <p class="label">Categoria</p>
+      <p class="label">Categoría</p>
       <h2>{{ categoria.nombre }}</h2>
     </div>
 
@@ -62,7 +62,7 @@
 
           <div class="producto-card__lists">
             <div>
-              <p class="producto-card__label">Lleva</p>
+              <p class="producto-card__label">Ingredientes</p>
               <ul>
                 <li *ngFor="let ingrediente of producto.ingredientes">{{ ingrediente }}</li>
               </ul>
