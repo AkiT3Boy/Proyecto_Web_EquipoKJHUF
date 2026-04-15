@@ -27,6 +27,12 @@ except ZoneInfoNotFoundError:
     LOCAL_TZ = timezone(timedelta(hours=-6))
 BUSINESS_OPEN_MINUTES = 18 * 60
 BUSINESS_CLOSE_MINUTES = 23 * 60
+DEFAULT_STORE_ADDRESS = "616 Adolfo Lopez Mateos, Poza Rica, Veracruz"
+DEFAULT_STORE_PHONE = "7822174525"
+DEFAULT_STORE_HOURS = "Lunes a domingo, 5:00 p. m. - 11:00 p. m."
+DEFAULT_STORE_MAPS_URL = (
+    "https://www.google.com/maps?q=616+Adolfo+Lopez+Mateos+Poza+Rica,+Veracruz&z=16&output=embed"
+)
 
 
 def parse_object_id(value):
@@ -60,7 +66,12 @@ def valid_name(value):
 
 def valid_phone(value):
     telefono = normalize_phone(value)
-    return len(telefono) == 10
+    return len(telefono) == 10 and telefono[0] in "23456789" and len(set(telefono)) > 1
+
+
+def valid_url(value):
+    texto = sanitize_text(value)
+    return not texto or texto.lower().startswith(("http://", "https://"))
 
 
 def sanitize_list(value):
@@ -244,6 +255,16 @@ def token_valido_usuario(token):
 def get_home_banner_url():
     config = get_admin_config() or {}
     return sanitize_text(config.get("home_banner_url"))
+
+
+def get_store_config():
+    config = get_admin_config() or {}
+    return {
+        "store_address": sanitize_text(config.get("store_address")) or DEFAULT_STORE_ADDRESS,
+        "store_phone": normalize_phone(config.get("store_phone")) or DEFAULT_STORE_PHONE,
+        "store_hours": sanitize_text(config.get("store_hours")) or DEFAULT_STORE_HOURS,
+        "store_maps_url": sanitize_text(config.get("store_maps_url")) or DEFAULT_STORE_MAPS_URL,
+    }
 
 
 def get_local_now():
@@ -709,7 +730,7 @@ def user_register():
     if not valid_phone(telefono):
         return jsonify({"msg": "Ingresa un numero de 10 digitos"}), 400
 
-    if len(password) < 4:
+    if len(password) < 4 or len(password) > 25:
         return jsonify({"msg": "La contrasena debe tener al menos 4 caracteres"}), 400
 
     if mongo.db.usuarios.find_one({"telefono": telefono}):
@@ -742,7 +763,10 @@ def user_login():
     password = sanitize_text(data.get("password"))
 
     if not valid_phone(telefono):
-        return jsonify({"msg": "Ingresa un numero de 10 digitos"}), 400
+        return jsonify({"msg": "Ingresa un numero valido de 10 digitos"}), 400
+
+    if len(password) < 4 or len(password) > 25:
+        return jsonify({"msg": "La contrasena debe tener entre 4 y 25 caracteres"}), 400
 
     usuario = mongo.db.usuarios.find_one({"telefono": telefono})
     if not usuario or not check_password_hash(usuario.get("password_hash", ""), password):
@@ -809,7 +833,12 @@ def user_cancel_order(id):
 
 @app.route("/api/home-config", methods=["GET"])
 def home_config():
-    return jsonify({"home_banner_url": get_home_banner_url()})
+    return jsonify(
+        {
+            "home_banner_url": get_home_banner_url(),
+            **get_store_config(),
+        }
+    )
 
 
 @app.route("/api/admin/setup", methods=["POST"])
@@ -872,13 +901,51 @@ def admin_logout():
 @app.route("/api/admin/home-config", methods=["PATCH"])
 @require_admin
 def update_home_config():
-    banner_url = sanitize_text((request.json or {}).get("home_banner_url"))
+    data = request.json or {}
+    banner_url = sanitize_text(data.get("home_banner_url"))
+    store_address = sanitize_text(data.get("store_address"))
+    store_phone = normalize_phone(data.get("store_phone"))
+    store_hours = sanitize_text(data.get("store_hours"))
+    store_maps_url = sanitize_text(data.get("store_maps_url"))
+
+    if banner_url and not valid_url(banner_url):
+        return jsonify({"msg": "La imagen del banner debe ser una URL valida"}), 400
+
+    if store_address and len(store_address) < 8:
+        return jsonify({"msg": "La direccion debe tener al menos 8 caracteres"}), 400
+
+    if store_phone and not valid_phone(store_phone):
+        return jsonify({"msg": "El telefono de la tienda debe tener 10 digitos validos"}), 400
+
+    if store_hours and len(store_hours) < 5:
+        return jsonify({"msg": "El horario debe tener al menos 5 caracteres"}), 400
+
+    if store_maps_url and not valid_url(store_maps_url):
+        return jsonify({"msg": "El enlace del mapa debe ser una URL valida"}), 400
+
     mongo.db.admin.update_one(
         {"tipo": "config"},
-        {"$set": {"home_banner_url": banner_url}},
+        {
+            "$set": {
+                "home_banner_url": banner_url,
+                "store_address": store_address,
+                "store_phone": store_phone,
+                "store_hours": store_hours,
+                "store_maps_url": store_maps_url,
+            }
+        },
         upsert=True,
     )
-    return jsonify({"msg": "Imagen de banner actualizada", "home_banner_url": banner_url})
+    return jsonify(
+        {
+            "msg": "Configuracion de la tienda actualizada",
+            "home_banner_url": banner_url,
+            "store_address": store_address or DEFAULT_STORE_ADDRESS,
+            "store_phone": store_phone or DEFAULT_STORE_PHONE,
+            "store_hours": store_hours or DEFAULT_STORE_HOURS,
+            "store_maps_url": store_maps_url or DEFAULT_STORE_MAPS_URL,
+        }
+    )
 
 
 @app.route("/api/productos", methods=["GET"])

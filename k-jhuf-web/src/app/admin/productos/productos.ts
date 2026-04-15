@@ -52,6 +52,10 @@ export class AdminProductos implements OnInit, OnDestroy {
   authConfirm = '';
   notificacionPedido = '';
   homeBannerUrl = '';
+  storeAddress = '';
+  storePhone = '';
+  storeHours = '';
+  storeMapsUrl = '';
   confirmacionAbierta = false;
   confirmacionProcesando = false;
   confirmacionTitulo = '';
@@ -71,6 +75,12 @@ export class AdminProductos implements OnInit, OnDestroy {
     confirm: false,
   };
   bannerTouched = false;
+  tiendaTouched = {
+    address: false,
+    phone: false,
+    hours: false,
+    maps: false,
+  };
   productoTouched = {
     nombre: false,
     descripcion: false,
@@ -189,6 +199,34 @@ export class AdminProductos implements OnInit, OnDestroy {
     return !this.homeBannerUrl || this.urlValida(this.homeBannerUrl)
       ? ''
       : 'Ingresa una URL valida que empiece con http o https.';
+  }
+
+  get tiendaDireccionError(): string {
+    if (!this.tiendaTouched.address) {
+      return '';
+    }
+    return this.textoMinimo(this.storeAddress, 8) ? '' : 'La direccion debe tener al menos 8 caracteres.';
+  }
+
+  get tiendaTelefonoError(): string {
+    if (!this.tiendaTouched.phone) {
+      return '';
+    }
+    return this.telefonoValido(this.storePhone) ? '' : 'Ingresa un telefono valido de 10 digitos.';
+  }
+
+  get tiendaHorarioError(): string {
+    if (!this.tiendaTouched.hours) {
+      return '';
+    }
+    return this.textoMinimo(this.storeHours, 5) ? '' : 'El horario debe tener al menos 5 caracteres.';
+  }
+
+  get tiendaMapaError(): string {
+    if (!this.tiendaTouched.maps) {
+      return '';
+    }
+    return this.urlValida(this.storeMapsUrl) ? '' : 'El enlace del mapa debe ser una URL valida.';
   }
 
   get productoNombreError(): string {
@@ -420,10 +458,45 @@ export class AdminProductos implements OnInit, OnDestroy {
         this.homeConfigService.updateBannerUrl(this.homeBannerUrl).subscribe({
           next: ({ home_banner_url }) => {
             this.homeBannerUrl = home_banner_url;
+            this.bannerTouched = false;
             this.pageSuccess = 'Banner del home actualizado.';
           },
           error: (error) => this.manejarErrorAdmin(error),
         });
+      },
+    );
+  }
+
+  guardarDatosTienda(): void {
+    this.authError = '';
+    this.pageSuccess = '';
+    this.marcarTiendaTouched();
+    if (this.tiendaDireccionError || this.tiendaTelefonoError || this.tiendaHorarioError || this.tiendaMapaError) {
+      return;
+    }
+
+    this.abrirConfirmacion(
+      'Guardar datos de la tienda',
+      'Se actualizaran direccion, telefono, horario y enlace del mapa.',
+      () => {
+        this.homeConfigService
+          .updateConfig({
+            store_address: this.storeAddress.trim(),
+            store_phone: this.sanitizarTelefono(this.storePhone),
+            store_hours: this.storeHours.trim(),
+            store_maps_url: this.storeMapsUrl.trim(),
+          })
+          .subscribe({
+            next: ({ store_address, store_phone, store_hours, store_maps_url }) => {
+              this.storeAddress = store_address;
+              this.storePhone = store_phone;
+              this.storeHours = store_hours;
+              this.storeMapsUrl = store_maps_url;
+              this.tiendaTouched = { address: false, phone: false, hours: false, maps: false };
+              this.pageSuccess = 'Datos de la tienda actualizados.';
+            },
+            error: (error) => this.manejarErrorAdmin(error),
+          });
       },
     );
   }
@@ -650,6 +723,30 @@ export class AdminProductos implements OnInit, OnDestroy {
     this.bannerTouched = true;
   }
 
+  onStoreAddressChange(valor: string): void {
+    this.storeAddress = valor;
+    this.tiendaTouched.address = true;
+  }
+
+  onStorePhoneChange(valor: string): void {
+    this.storePhone = this.sanitizarTelefono(valor);
+    this.tiendaTouched.phone = true;
+  }
+
+  onStoreHoursChange(valor: string): void {
+    this.storeHours = valor;
+    this.tiendaTouched.hours = true;
+  }
+
+  onStoreMapsUrlChange(valor: string): void {
+    this.storeMapsUrl = valor;
+    this.tiendaTouched.maps = true;
+  }
+
+  marcarTiendaTouchedField(field: keyof typeof this.tiendaTouched): void {
+    this.tiendaTouched[field] = true;
+  }
+
   onProductoFieldChange(field: keyof ProductoForm, valor: string | number | boolean): void {
     this.productoForm = {
       ...this.productoForm,
@@ -729,7 +826,15 @@ export class AdminProductos implements OnInit, OnDestroy {
             dashboard: this.pedidosService.getDashboard().pipe(this.adminFallback<DashboardAdmin | undefined>(undefined)),
             homeConfig: this.homeConfigService
               .getConfig()
-              .pipe(this.adminFallback<{ home_banner_url: string }>({ home_banner_url: '' })),
+              .pipe(
+                this.adminFallback({
+                  home_banner_url: '',
+                  store_address: '',
+                  store_phone: '',
+                  store_hours: '',
+                  store_maps_url: '',
+                }),
+              ),
           }),
         ),
         takeUntilDestroyed(this.destroyRef),
@@ -743,7 +848,7 @@ export class AdminProductos implements OnInit, OnDestroy {
         this.promociones = promociones;
         this.pedidos = pedidos;
         this.dashboard = dashboard;
-        this.homeBannerUrl = homeConfig.home_banner_url || '';
+        this.aplicarHomeConfig(homeConfig);
         this.actualizarNotificacionPedidos(pedidos);
       });
   }
@@ -756,13 +861,21 @@ export class AdminProductos implements OnInit, OnDestroy {
       dashboard: this.pedidosService.getDashboard().pipe(this.adminFallback<DashboardAdmin | undefined>(undefined)),
       homeConfig: this.homeConfigService
         .getConfig()
-        .pipe(this.adminFallback<{ home_banner_url: string }>({ home_banner_url: '' })),
+        .pipe(
+          this.adminFallback({
+            home_banner_url: '',
+            store_address: '',
+            store_phone: '',
+            store_hours: '',
+            store_maps_url: '',
+          }),
+        ),
     }).subscribe(({ productos, promociones, pedidos, dashboard, homeConfig }) => {
       this.lista = productos;
       this.promociones = promociones;
       this.pedidos = pedidos;
       this.dashboard = dashboard;
-      this.homeBannerUrl = homeConfig.home_banner_url || '';
+      this.aplicarHomeConfig(homeConfig);
       this.actualizarNotificacionPedidos(pedidos);
     });
   }
@@ -874,6 +987,39 @@ export class AdminProductos implements OnInit, OnDestroy {
     };
   }
 
+  private aplicarHomeConfig(homeConfig: {
+    home_banner_url: string;
+    store_address: string;
+    store_phone: string;
+    store_hours: string;
+    store_maps_url: string;
+  }): void {
+    if (!this.bannerTouched) {
+      this.homeBannerUrl = homeConfig.home_banner_url || '';
+    }
+    if (!this.tiendaTouched.address) {
+      this.storeAddress = homeConfig.store_address || '';
+    }
+    if (!this.tiendaTouched.phone) {
+      this.storePhone = homeConfig.store_phone || '';
+    }
+    if (!this.tiendaTouched.hours) {
+      this.storeHours = homeConfig.store_hours || '';
+    }
+    if (!this.tiendaTouched.maps) {
+      this.storeMapsUrl = homeConfig.store_maps_url || '';
+    }
+  }
+
+  private marcarTiendaTouched(): void {
+    this.tiendaTouched = {
+      address: true,
+      phone: true,
+      hours: true,
+      maps: true,
+    };
+  }
+
   private productoInvalido(): boolean {
     return !!(
       this.productoNombreError ||
@@ -958,6 +1104,14 @@ export class AdminProductos implements OnInit, OnDestroy {
 
   private textoMinimo(valor: string, minimo: number): boolean {
     return (valor || '').trim().length >= minimo;
+  }
+
+  private telefonoValido(valor: string): boolean {
+    return /^[2-9]\d{9}$/.test(this.sanitizarTelefono(valor));
+  }
+
+  private sanitizarTelefono(valor: string): string {
+    return (valor || '').replace(/\D/g, '').slice(0, 10);
   }
 
   private listaTextoValida(valor: string): boolean {

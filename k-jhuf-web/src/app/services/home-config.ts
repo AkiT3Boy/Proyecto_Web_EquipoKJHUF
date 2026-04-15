@@ -5,6 +5,10 @@ import { Auth } from './auth';
 
 export type HomeConfig = {
   home_banner_url: string;
+  store_address: string;
+  store_phone: string;
+  store_hours: string;
+  store_maps_url: string;
 };
 
 @Injectable({
@@ -29,12 +33,16 @@ export class HomeConfigService {
     return this.config$;
   }
 
-  updateBannerUrl(home_banner_url: string): Observable<HomeConfig & { msg: string }> {
+  updateConfig(payload: Partial<HomeConfig>): Observable<HomeConfig & { msg: string }> {
     return this.http.patch<HomeConfig & { msg: string }>(
       this.adminApi,
-      { home_banner_url },
+      payload,
       { headers: this.auth.getAuthHeaders() },
     ).pipe(tap(() => this.invalidateCache()));
+  }
+
+  updateBannerUrl(home_banner_url: string): Observable<HomeConfig & { msg: string }> {
+    return this.updateConfig({ home_banner_url });
   }
 
   normalizarImagenBanner(valor: string): string {

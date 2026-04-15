@@ -57,7 +57,17 @@ export class Home implements OnInit {
     forkJoin({
       productos: this.productosService.getProductos().pipe(catchError(() => of([]))),
       promociones: this.promocionesService.getPromociones().pipe(catchError(() => of([]))),
-      homeConfig: this.homeConfig.getConfig().pipe(catchError(() => of({ home_banner_url: '' }))),
+      homeConfig: this.homeConfig.getConfig().pipe(
+        catchError(() =>
+          of({
+            home_banner_url: '',
+            store_address: '',
+            store_phone: '',
+            store_hours: '',
+            store_maps_url: '',
+          }),
+        ),
+      ),
     }).subscribe(({ productos, promociones, homeConfig }) => {
       this.imagenBanner =
         this.homeConfig.normalizarImagenBanner(homeConfig.home_banner_url) || this.imagenBannerDefault;

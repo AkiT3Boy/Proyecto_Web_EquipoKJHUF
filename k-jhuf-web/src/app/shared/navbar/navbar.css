@@ -472,6 +472,10 @@
     font-size: 0.88rem;
   }
 
+  .sidebar__nav {
+    gap: 0.55rem;
+  }
+
   .sidebar--open .sidebar__auth-buttons {
     grid-template-columns: 1fr 1fr;
     gap: 0.5rem;
@@ -511,6 +515,8 @@
 @media (max-width: 420px) {
   .sidebar {
     grid-template-columns: 1fr;
+    gap: 0.55rem;
+    padding: 0.6rem 0.65rem;
   }
 
   .sidebar__brand {
@@ -533,6 +539,16 @@
   .sidebar--open .sidebar__nav,
   .sidebar--open .sidebar__auth-buttons {
     grid-template-columns: 1fr;
+  }
+
+  .sidebar__link,
+  .sidebar__auth-button,
+  .sidebar__cart,
+  .sidebar__admin,
+  .sidebar__user-action {
+    min-height: 2.6rem;
+    padding: 0.58rem 0.75rem;
+    font-size: 0.84rem;
   }
 
   .sidebar__auth-modal {
