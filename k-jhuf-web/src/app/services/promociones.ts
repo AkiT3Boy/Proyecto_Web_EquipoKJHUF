@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, shareReplay, tap } from 'rxjs';
+import { environment } from '../../environment';
 import { Auth } from './auth';
 
 export type Promocion = {
@@ -17,7 +18,7 @@ export type Promocion = {
   providedIn: 'root',
 })
 export class Promociones {
-  private readonly api = 'http://localhost:3000/api/promociones';
+  private readonly api = `${environment.apiUrl}/api/promociones`;
   private promociones$?: Observable<Promocion[]>;
 
   constructor(

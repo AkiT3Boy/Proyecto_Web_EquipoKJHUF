@@ -1,6 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { environment } from '../../environment';
 
 export type UsuarioSesion = {
   _id?: string;
@@ -19,7 +20,7 @@ type UsuarioAuthResponse = {
   providedIn: 'root',
 })
 export class UsuariosService {
-  private readonly api = 'http://localhost:3000/api/usuarios';
+  private readonly api = `${environment.apiUrl}/api/usuarios`;
   private readonly tokenKey = 'kjhuf_user_token';
   private readonly usuarioSubject = new BehaviorSubject<UsuarioSesion | null>(this.readStoredUser());
 

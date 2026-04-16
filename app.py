@@ -1,3 +1,4 @@
+import os
 from functools import wraps
 import json
 from secrets import token_hex
@@ -16,7 +17,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 app = Flask(__name__)
 CORS(app)
 
-app.config["MONGO_URI"] = "mongodb://localhost:27017/Kjhuf"
+app.config["MONGO_URI"] = os.getenv("MONGO_URI", "mongodb://localhost:27017/Kjhuf")
 mongo = PyMongo(app)
 
 ADMIN_TOKENS = set()

@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { map, Observable, shareReplay, tap } from 'rxjs';
+import { environment } from '../../environment';
 import { Auth } from './auth';
 
 export type Producto = {
@@ -21,8 +22,8 @@ export type Producto = {
   providedIn: 'root',
 })
 export class ProductosService {
-  private readonly api = 'http://localhost:3000/api/productos';
-  private readonly imagenProxyApi = 'http://localhost:3000/api/imagen-proxy';
+  private readonly api = `${environment.apiUrl}/api/productos`;
+  private readonly imagenProxyApi = `${environment.apiUrl}/api/imagen-proxy`;
   private productos$?: Observable<Producto[]>;
 
   constructor(

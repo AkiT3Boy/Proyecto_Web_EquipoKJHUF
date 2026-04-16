@@ -8,6 +8,7 @@ import { Pedidos, Pedido } from '../../services/pedidos';
 import { PreloadService } from '../../services/preload';
 import { UsuarioSesion, UsuariosService } from '../../services/usuarios';
 import { firstValueFrom } from 'rxjs';
+import { environment } from '../../../environment';
 
 @Component({
   selector: 'app-cart',
@@ -237,7 +238,7 @@ export class Cart {
     });
 
     try {
-      const response = await fetch('http://localhost:3000/api/pedidos', {
+      const response = await fetch(`${environment.apiUrl}/api/pedidos`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

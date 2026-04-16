@@ -1,6 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, tap } from 'rxjs';
+import { environment } from '../../environment';
 
 type AuthResponse = {
   msg: string;
@@ -15,7 +16,7 @@ type AdminStatusResponse = {
   providedIn: 'root',
 })
 export class Auth {
-  private readonly api = 'http://localhost:3000/api/admin';
+  private readonly api = `${environment.apiUrl}/api/admin`;
   private readonly tokenKey = 'kjhuf_admin_token';
 
   constructor(private readonly http: HttpClient) {}

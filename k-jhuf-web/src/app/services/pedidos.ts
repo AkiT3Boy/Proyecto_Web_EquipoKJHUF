@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, timeout } from 'rxjs';
+import { environment } from '../../environment';
 import { Auth } from './auth';
 import { UsuariosService } from './usuarios';
 
@@ -59,8 +60,8 @@ export type DashboardAdmin = {
   providedIn: 'root',
 })
 export class Pedidos {
-  private readonly api = 'http://localhost:3000/api/pedidos';
-  private readonly adminApi = 'http://localhost:3000/api/admin/dashboard';
+  private readonly api = `${environment.apiUrl}/api/pedidos`;
+  private readonly adminApi = `${environment.apiUrl}/api/admin/dashboard`;
 
   constructor(
     private readonly http: HttpClient,
@@ -79,14 +80,14 @@ export class Pedidos {
   }
 
   getMisPedidos(): Observable<Pedido[]> {
-    return this.http.get<Pedido[]>('http://localhost:3000/api/usuarios/pedidos', {
+    return this.http.get<Pedido[]>(`${environment.apiUrl}/api/usuarios/pedidos`, {
       headers: this.usuarios.getAuthHeaders(),
     });
   }
 
   cancelarMiPedido(id: string): Observable<{ msg: string }> {
     return this.http.patch<{ msg: string }>(
-      `http://localhost:3000/api/usuarios/pedidos/${id}/cancelar`,
+      `${environment.apiUrl}/api/usuarios/pedidos/${id}/cancelar`,
       {},
       { headers: this.usuarios.getAuthHeaders() },
     );

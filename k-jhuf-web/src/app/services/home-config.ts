@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, shareReplay, tap } from 'rxjs';
+import { environment } from '../../environment';
 import { Auth } from './auth';
 
 export type HomeConfig = {
@@ -15,9 +16,9 @@ export type HomeConfig = {
   providedIn: 'root',
 })
 export class HomeConfigService {
-  private readonly publicApi = 'http://localhost:3000/api/home-config';
-  private readonly adminApi = 'http://localhost:3000/api/admin/home-config';
-  private readonly imageProxyApi = 'http://localhost:3000/api/imagen-proxy';
+  private readonly publicApi = `${environment.apiUrl}/api/home-config`;
+  private readonly adminApi = `${environment.apiUrl}/api/admin/home-config`;
+  private readonly imageProxyApi = `${environment.apiUrl}/api/imagen-proxy`;
   private config$?: Observable<HomeConfig>;
 
   constructor(
