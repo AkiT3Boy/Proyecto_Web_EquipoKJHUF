@@ -12,6 +12,7 @@ from bson.errors import InvalidId
 from flask import Flask, Response, jsonify, request, g
 from flask_cors import CORS
 from flask_pymongo import PyMongo
+from pymongo.errors import DuplicateKeyError, PyMongoError
 from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
@@ -203,6 +204,17 @@ def normalize_promocion(data):
 
 def get_admin_config():
     return mongo.db.admin.find_one({"tipo": "config"})
+
+
+def ensure_indexes():
+    try:
+        mongo.db.usuarios.create_index("telefono", unique=True, name="uniq_usuarios_telefono")
+    except PyMongoError as error:
+        app.logger.warning("No se pudo crear el indice unico de usuarios.telefono: %s", error)
+
+
+with app.app_context():
+    ensure_indexes()
 
 
 def serialize_usuario_public(document):
@@ -745,7 +757,11 @@ def user_register():
         "creado_en": datetime.now(timezone.utc).isoformat(),
     }
 
-    resultado = mongo.db.usuarios.insert_one(payload)
+    try:
+        resultado = mongo.db.usuarios.insert_one(payload)
+    except DuplicateKeyError:
+        return jsonify({"msg": "Ese numero ya esta registrado"}), 409
+
     token = token_hex(24)
     USER_TOKENS.add(token)
     mongo.db.usuarios.update_one(
