@@ -9,8 +9,9 @@ services:
       - key: MONGO_URI
         sync: false
 
-  - type: static
+  - type: web
     name: k-jhuf-frontend
+    runtime: static
     rootDir: k-jhuf-web
     buildCommand: npm install && npm run build:render
     staticPublishPath: dist/k-jhuf-web
