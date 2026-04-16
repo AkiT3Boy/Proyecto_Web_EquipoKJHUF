@@ -486,9 +486,6 @@ export class Cart {
     const hora = Number(horaTexto);
     const minuto = Number(minutoTexto);
     const totalMinutos = hora * 60 + minuto;
-    const ahora = new Date();
-    const minutosActuales = ahora.getHours() * 60 + ahora.getMinutes();
-
     if (Number.isNaN(totalMinutos)) {
       return 'La hora del pedido no es valida.';
     }
@@ -497,25 +494,11 @@ export class Cart {
       return 'El horario para pedidos es de 6:00 p. m. a 11:00 p. m.';
     }
 
-    if (totalMinutos < minutosActuales) {
-      return 'La hora del pedido debe ser de hoy y no puede ser anterior a la hora actual.';
-    }
-
     return true;
   }
 
   private horaSugerida(): string {
-    const ahora = new Date();
-    let totalMinutos = ahora.getHours() * 60 + ahora.getMinutes() + 30;
-    if (totalMinutos < 1080) {
-      totalMinutos = 1080;
-    }
-    if (totalMinutos > 1380) {
-      totalMinutos = 1380;
-    }
-    const hora = Math.floor(totalMinutos / 60).toString().padStart(2, '0');
-    const minuto = (totalMinutos % 60).toString().padStart(2, '0');
-    return `${hora}:${minuto}`;
+    return '20:00';
   }
 
   private marcarCamposAuth(): void {

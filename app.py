@@ -314,11 +314,6 @@ def validar_hora_entrega(value):
             "El horario para pedidos es de 18:00 a 23:00. Elige una hora dentro de ese horario",
         )
 
-    ahora = get_local_now()
-    minutos_actuales = ahora.hour * 60 + ahora.minute
-    if total_minutos < minutos_actuales:
-        return "", "La hora del pedido debe ser de hoy y no puede ser anterior a la hora actual"
-
     horas = str(total_minutos // 60).zfill(2)
     minutos = str(total_minutos % 60).zfill(2)
     return f"{horas}:{minutos}", ""
